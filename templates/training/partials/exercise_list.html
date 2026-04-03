@@ -1,0 +1,8 @@
+{% for item in exercise_forms %}
+    {% include "training/partials/exercise_card.html" with exercise=item.exercise form=item.form %}
+{% empty %}
+    <div class="card">
+        <h2>All exercises saved</h2>
+        <p>Everything for this training day has been logged. You can complete the workout below.</p>
+    </div>
+{% endfor %}

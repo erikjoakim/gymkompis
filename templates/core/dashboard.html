@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | GymKompis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Dashboard</h1>
+        <p>Welcome back, {{ request.user.profile.effective_display_name }}.</p>
+    </div>
+    <a class="button-link" href="{% url 'generate_program' %}">Generate new plan</a>
+</div>
+
+<section class="grid-two">
+    <article class="card">
+        <h2>Active program</h2>
+        {% if active_program %}
+            <p><strong>{{ active_program.name }}</strong></p>
+            <p>Version {{ active_program.version_number }}</p>
+            <a href="{% url 'program_detail' active_program.id %}">Open program</a>
+        {% else %}
+            <p>No active program yet.</p>
+            <a href="{% url 'generate_program' %}">Create your first plan</a>
+        {% endif %}
+    </article>
+    <article class="card">
+        <h2>Quick links</h2>
+        <ul>
+            <li><a href="{% url 'train_index' %}">Start a workout</a></li>
+            <li><a href="{% url 'workout_history' %}">Workout history</a></li>
+            <li><a href="{% url 'request_period_evaluation' %}">Request period evaluation</a></li>
+        </ul>
+    </article>
+</section>
+
+<section class="grid-two">
+    <article class="card">
+        <h2>Recent sessions</h2>
+        {% if recent_sessions %}
+            <ul class="plain-list">
+                {% for session in recent_sessions %}
+                    <li><a href="{% url 'workout_detail' session.id %}">{{ session.workout_date }} - {{ session.planned_day_name }}</a></li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No sessions logged yet.</p>
+        {% endif %}
+    </article>
+    <article class="card">
+        <h2>Recent evaluations</h2>
+        {% if recent_evaluations %}
+            <ul class="plain-list">
+                {% for evaluation in recent_evaluations %}
+                    <li><a href="{% url 'evaluation_detail' evaluation.id %}">{{ evaluation.get_evaluation_type_display }} - {{ evaluation.created_at|date:"Y-m-d H:i" }}</a></li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No evaluations yet.</p>
+        {% endif %}
+    </article>
+</section>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Subscription | GymKompis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Subscription</h1>
+        <p>Stripe is planned for a later milestone. Premium gating is already modeled in the app.</p>
+    </div>
+</div>
+<div class="card">
+    <p><strong>Current tier:</strong> {% if has_premium %}Premium{% else %}Free{% endif %}</p>
+    <p>Future billing flow will use Stripe Checkout with webhook-confirmed activation.</p>
+</div>
+{% endblock %}

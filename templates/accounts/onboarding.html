@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Onboarding | GymKompis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Tell GymKompis about your training</h1>
+        <p>This helps the program generator produce safer and more useful plans.</p>
+    </div>
+</div>
+<div class="card narrow">
+    <form method="post" class="stack">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save onboarding</button>
+    </form>
+</div>
+{% endblock %}

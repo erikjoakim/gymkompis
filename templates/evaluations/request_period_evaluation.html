@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Period Evaluation | GymKompis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Request period evaluation</h1>
+        <p>Choose a date range to evaluate multiple training sessions together.</p>
+    </div>
+</div>
+<div class="card narrow">
+    <form method="post" class="stack">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Generate period evaluation</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Recent evaluations</h2>
+    <ul class="plain-list">
+        {% for evaluation in recent_evaluations %}
+            <li><a href="{% url 'evaluation_detail' evaluation.id %}">{{ evaluation.get_evaluation_type_display }} - {{ evaluation.created_at|date:"Y-m-d H:i" }}</a></li>
+        {% empty %}
+            <li>No evaluations yet.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

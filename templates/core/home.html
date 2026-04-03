@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}GymKompis{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div>
+        <p class="eyebrow">Django + Render + Supabase</p>
+        <h1>GymKompis helps you generate, follow, and evaluate training programs.</h1>
+        <p class="lede">Create a plan in plain English, log each exercise as you train, and request AI feedback for a session or an entire period.</p>
+        <div class="actions">
+            <a class="button-link" href="{% url 'signup' %}">Create account</a>
+            <a class="ghost-link" href="{% url 'login' %}">Log in</a>
+        </div>
+    </div>
+    <div class="card accent-card">
+        <h2>Included in this foundation</h2>
+        <ul>
+            <li>Custom user model and onboarding</li>
+            <li>AI-backed program generation with JSON validation</li>
+            <li>Exercise-by-exercise workout logging</li>
+            <li>Single-session and period evaluations</li>
+        </ul>
+    </div>
+</section>
+{% endblock %}

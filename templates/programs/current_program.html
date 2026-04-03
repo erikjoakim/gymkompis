@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Current Program | GymKompis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Current program</h1>
+    </div>
+    <a class="button-link" href="{% url 'generate_program' %}">Generate new plan</a>
+</div>
+{% if program %}
+    <div class="card">
+        <h2>{{ program.name }}</h2>
+        <p>Version {{ program.version_number }}</p>
+        <a href="{% url 'program_detail' program.id %}">Open details</a>
+    </div>
+{% else %}
+    <div class="card">
+        <p>No active program found.</p>
+        <a href="{% url 'generate_program' %}">Create one now</a>
+    </div>
+{% endif %}
+{% endblock %}

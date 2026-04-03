@@ -1,0 +1,46 @@
+<article class="card">
+    <h2>{{ exercise.order }}. {{ exercise.name }}</h2>
+    <p><strong>Instructions:</strong> {{ exercise.instructions }}</p>
+    {% if exercise.video_url %}
+        <p><a href="{{ exercise.video_url }}" target="_blank" rel="noopener">Open demo video</a></p>
+    {% endif %}
+    <form
+        method="post"
+        action="{% url 'submit_exercise' session.id exercise.exercise_key %}"
+        hx-post="{% url 'submit_exercise' session.id exercise.exercise_key %}"
+        hx-target="#exercise-list"
+        hx-swap="innerHTML"
+        class="stack"
+    >
+        {% csrf_token %}
+        <table class="set-table">
+            <thead>
+                <tr>
+                    <th>Set</th>
+                    <th>Planned reps</th>
+                    <th>Load guidance</th>
+                    <th>Actual reps</th>
+                    <th>Actual weight</th>
+                    <th>Effort/RPE</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in form.set_rows %}
+                    <tr>
+                        <td>{{ row.planned.set_number }}</td>
+                        <td>{{ row.planned.target_reps }}</td>
+                        <td>{{ row.planned.load_guidance|default:"-" }}</td>
+                        <td>{{ row.reps }}</td>
+                        <td>{{ row.weight }}</td>
+                        <td>{{ row.rpe }}</td>
+                        <td>{{ row.notes }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ form.exercise_notes.label_tag }}
+        {{ form.exercise_notes }}
+        <button type="submit">Save {{ exercise.name }}</button>
+    </form>
+</article>

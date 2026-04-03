@@ -1,0 +1,10 @@
+Django==6.0.3
+django-allauth==65.15.1
+django-htmx==1.27.0
+dj-database-url==3.1.2
+psycopg[binary]==3.3.3
+whitenoise==6.12.0
+python-dotenv==1.2.2
+openai==2.30.0
+jsonschema==4.26.0
+gunicorn==25.3.0

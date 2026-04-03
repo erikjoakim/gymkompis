@@ -1,0 +1,187 @@
+import json
+import logging
+
+from django.conf import settings
+from django.db import transaction
+from openai import OpenAI
+
+from training.models import WorkoutSession
+
+from .models import ProgramGenerationRequest, TrainingProgram
+from .schemas import clone_sample_program, validate_current_program, validate_history_summary
+
+
+logger = logging.getLogger(__name__)
+
+
+def build_history_summary(user) -> dict | None:
+    profile = user.profile
+    limit = profile.plan_history_window_sessions or settings.DEFAULT_PLAN_HISTORY_WINDOW_SESSIONS
+    sessions = list(
+        WorkoutSession.objects.filter(user=user, status=WorkoutSession.Status.COMPLETED)
+        .order_by("-workout_date", "-completed_at")[:limit]
+    )
+    if not sessions:
+        return None
+
+    sessions = list(reversed(sessions))
+    effort_values = []
+    exercise_trends = {}
+    skipped_sessions = 0
+    reported_issues = []
+
+    for session in sessions:
+        data = session.session_json or {}
+        for exercise in data.get("exercises", []):
+            name = exercise.get("name", "")
+            key = exercise.get("exercise_key", "")
+            trend = exercise_trends.setdefault(
+                key,
+                {
+                    "exercise_key": key,
+                    "name": name,
+                    "best_recent_weight": None,
+                    "best_recent_reps": None,
+                    "trend_note": "Completed recently.",
+                },
+            )
+            for actual_set in exercise.get("actual_sets", []):
+                if not actual_set.get("completed"):
+                    continue
+                reps = actual_set.get("reps")
+                weight = actual_set.get("weight")
+                effort = actual_set.get("effort_rpe")
+                if reps is not None:
+                    trend["best_recent_reps"] = max(trend["best_recent_reps"] or 0, reps)
+                if weight is not None:
+                    trend["best_recent_weight"] = max(trend["best_recent_weight"] or 0, weight)
+                if effort is not None:
+                    effort_values.append(float(effort))
+                note = actual_set.get("notes")
+                if note:
+                    reported_issues.append(note)
+            if exercise.get("status") == "skipped":
+                skipped_sessions += 1
+            if exercise.get("exercise_notes"):
+                reported_issues.append(exercise["exercise_notes"])
+
+    summary = {
+        "version": 1,
+        "session_count": len(sessions),
+        "date_range": {
+            "start_date": sessions[0].workout_date.isoformat(),
+            "end_date": sessions[-1].workout_date.isoformat(),
+        },
+        "adherence_summary": {
+            "completed_sessions": len(sessions),
+            "skipped_sessions": skipped_sessions,
+            "average_effort_rpe": round(sum(effort_values) / len(effort_values), 2) if effort_values else None,
+        },
+        "exercise_trends": list(exercise_trends.values()),
+        "reported_issues": reported_issues[:10],
+    }
+    validate_history_summary(summary)
+    return summary
+
+
+def _generate_mock_program(user, prompt_text: str) -> dict:
+    program = clone_sample_program(user.profile.preferred_weight_unit)
+    program["goal_summary"] = prompt_text[:500]
+    program["program_name"] = f"GymKompis Plan for {user.profile.effective_display_name}"
+    return program
+
+
+def _extract_token_usage(response):
+    usage = getattr(response, "usage", None)
+    if not usage:
+        return None, None
+    return getattr(usage, "input_tokens", None), getattr(usage, "output_tokens", None)
+
+
+def _generate_llm_program(user, prompt_text: str, history_summary: dict | None):
+    client = OpenAI(api_key=settings.OPENAI_API_KEY)
+    profile = user.profile
+    instructions = (
+        "You generate gym programs as strict JSON only. "
+        "Return valid JSON matching the requested GymKompis structure. "
+        "For every exercise include video_url if available, otherwise null. "
+        "Use day types training/rest/cardio/mobility/rehab."
+    )
+    user_context = {
+        "prompt_text": prompt_text,
+        "profile": {
+            "training_experience": profile.training_experience,
+            "injuries_limitations": profile.injuries_limitations,
+            "equipment_access": profile.equipment_access,
+            "preferred_weight_unit": profile.preferred_weight_unit,
+            "preferred_language": profile.preferred_language,
+        },
+        "history_summary": history_summary,
+    }
+    response = client.responses.create(
+        model=settings.OPENAI_MODEL,
+        instructions=instructions,
+        input=json.dumps(user_context),
+        temperature=0.4,
+    )
+    text = getattr(response, "output_text", "")
+    data = json.loads(text)
+    validate_current_program(data)
+    return data, text, _extract_token_usage(response)
+
+
+def generate_program_for_user(user, prompt_text: str):
+    history_summary = build_history_summary(user)
+    request_record = ProgramGenerationRequest.objects.create(
+        user=user,
+        prompt_text=prompt_text,
+        attached_history_summary=history_summary,
+        llm_model=settings.OPENAI_MODEL,
+        prompt_version=settings.OPENAI_PROGRAM_PROMPT_VERSION,
+    )
+    try:
+        if settings.OPENAI_API_KEY and not settings.OPENAI_MOCK_RESPONSES:
+            program_json, raw_response, token_usage = _generate_llm_program(user, prompt_text, history_summary)
+        else:
+            program_json = _generate_mock_program(user, prompt_text)
+            validate_current_program(program_json)
+            raw_response = json.dumps(program_json, indent=2)
+            token_usage = (None, None)
+
+        with transaction.atomic():
+            TrainingProgram.objects.filter(user=user, status=TrainingProgram.Status.ACTIVE).update(
+                status=TrainingProgram.Status.ARCHIVED
+            )
+            latest_program = TrainingProgram.objects.filter(user=user).order_by("-version_number").first()
+            version_number = 1 if latest_program is None else latest_program.version_number + 1
+            program = TrainingProgram.objects.create(
+                user=user,
+                name=program_json["program_name"],
+                status=TrainingProgram.Status.ACTIVE,
+                request_prompt=prompt_text,
+                current_program=program_json,
+                version_number=version_number,
+                source=TrainingProgram.Source.AI_GENERATED,
+            )
+
+            request_record.validated_program_json = program_json
+            request_record.raw_llm_response = raw_response
+            request_record.token_usage_input = token_usage[0]
+            request_record.token_usage_output = token_usage[1]
+            request_record.status = ProgramGenerationRequest.Status.SUCCEEDED
+            request_record.save(
+                update_fields=[
+                    "validated_program_json",
+                    "raw_llm_response",
+                    "token_usage_input",
+                    "token_usage_output",
+                    "status",
+                ]
+            )
+            return program
+    except Exception as exc:
+        logger.exception("Program generation failed for user=%s", user.pk)
+        request_record.status = ProgramGenerationRequest.Status.FAILED
+        request_record.error_message = str(exc)
+        request_record.save(update_fields=["status", "error_message"])
+        raise

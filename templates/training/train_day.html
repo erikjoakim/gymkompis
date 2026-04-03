@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ day.name }} | GymKompis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{{ day.day_label }} - {{ day.name }}</h1>
+        <p>Type: {{ day.type }}</p>
+        {% if day.notes %}<p>{{ day.notes }}</p>{% endif %}
+    </div>
+</div>
+
+{% if day.type != "training" %}
+    <div class="card">
+        <p>This is a {{ day.type }} day, so there is no exercise logging form.</p>
+    </div>
+{% else %}
+    <div class="stack" id="exercise-list">
+        {% include "training/partials/exercise_list.html" %}
+    </div>
+
+    <div class="card">
+        <h2>Finish workout</h2>
+        <form method="post" action="{% url 'complete_session' session.id %}" class="stack">
+            {% csrf_token %}
+            <label for="session_notes">Session notes</label>
+            <textarea name="session_notes" id="session_notes" rows="3"></textarea>
+            <button type="submit">Complete workout</button>
+        </form>
+    </div>
+{% endif %}
+{% endblock %}

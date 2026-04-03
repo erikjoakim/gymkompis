@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load gymkompis_extras %}
+
+{% block title %}Workout Detail | GymKompis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{{ session.workout_date }} - {{ session.planned_day_name }}</h1>
+        <p>Status: {{ session.get_status_display }}</p>
+    </div>
+    <div class="actions">
+        <a class="button-link" href="{% url 'request_session_evaluation' session.id %}">Evaluate this session</a>
+    </div>
+</div>
+
+<section class="card">
+    <h2>Logged exercises</h2>
+    {% for exercise in session_json.exercises %}
+        <article class="exercise-card">
+            <h3>{{ exercise.name }}</h3>
+            <p>Status: {{ exercise.status }}</p>
+            {% if exercise.actual_sets %}
+                <ul class="plain-list">
+                    {% for set in exercise.actual_sets %}
+                        <li>Set {{ set.set_number }}: reps {{ set.reps|default:"-" }}, weight {{ set.weight|default:"-" }}, RPE {{ set.effort_rpe|default:"-" }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            {% if exercise.exercise_notes %}<p>{{ exercise.exercise_notes }}</p>{% endif %}
+        </article>
+    {% endfor %}
+</section>
+
+<section class="card">
+    <h2>Raw session JSON</h2>
+    <pre>{{ session_json|pretty_json }}</pre>
+</section>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Sign up | GymKompis{% endblock %}
+
+{% block content %}
+<div class="narrow card">
+    <h1>Create account</h1>
+    <form method="post" class="stack">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Create account</button>
+    </form>
+    <p>Already registered? <a href="{% url 'login' %}">Log in</a>.</p>
+</div>
+{% endblock %}

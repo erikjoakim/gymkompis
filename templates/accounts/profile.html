@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Profile | GymKompis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Profile</h1>
+        <p>Update your training preferences and defaults.</p>
+    </div>
+</div>
+<div class="card narrow">
+    <form method="post" class="stack">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save profile</button>
+    </form>
+</div>
+{% endblock %}

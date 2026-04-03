@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load gymkompis_extras %}
+
+{% block title %}Evaluation | GymKompis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{{ evaluation.get_evaluation_type_display }} evaluation</h1>
+        <p>{{ evaluation.summary_text }}</p>
+    </div>
+</div>
+<section class="card">
+    <h2>Evaluation JSON</h2>
+    <pre>{{ evaluation.evaluation_json|pretty_json }}</pre>
+</section>
+{% endblock %}

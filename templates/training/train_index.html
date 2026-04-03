@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Train | GymKompis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Train</h1>
+        <p>Select a day from your current program.</p>
+    </div>
+</div>
+{% if program %}
+    <div class="grid-two">
+        {% for day in days %}
+            <article class="card">
+                <h2>{{ day.day_label }}</h2>
+                <p><strong>{{ day.name }}</strong></p>
+                <p>Type: {{ day.type }}</p>
+                {% if day.notes %}<p>{{ day.notes }}</p>{% endif %}
+                <a href="{% url 'train_day' day.day_key %}">Open day</a>
+            </article>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="card">
+        <p>You need an active program before you can train.</p>
+        <a href="{% url 'generate_program' %}">Generate a program</a>
+    </div>
+{% endif %}
+{% endblock %}

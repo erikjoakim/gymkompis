@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}{{ program.name }} | GymKompis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{{ program.name }}</h1>
+        <p>{{ program_json.goal_summary }}</p>
+    </div>
+    <a class="button-link" href="{% url 'train_index' %}">Go to train</a>
+</div>
+
+<div class="card">
+    <p><strong>Duration:</strong> {{ program_json.duration_weeks }} weeks</p>
+    <p><strong>Frequency:</strong> {{ program_json.days_per_week }} days/week</p>
+    <p><strong>Weight unit:</strong> {{ program_json.weight_unit }}</p>
+</div>
+
+{% for day in program_json.days %}
+    <section class="card">
+        <h2>{{ day.day_label }} - {{ day.name }}</h2>
+        <p><strong>Type:</strong> {{ day.type }}</p>
+        {% if day.notes %}<p>{{ day.notes }}</p>{% endif %}
+        {% if day.exercises %}
+            <div class="stack">
+                {% for exercise in day.exercises %}
+                    <article class="exercise-card">
+                        <h3>{{ exercise.order }}. {{ exercise.name }}</h3>
+                        <p><strong>Modality:</strong> {{ exercise.modality }}</p>
+                        <p><strong>Instructions:</strong> {{ exercise.instructions }}</p>
+                        <p><strong>Rest:</strong> {{ exercise.rest_seconds }} sec</p>
+                        {% if exercise.video_url %}
+                            <p><a href="{{ exercise.video_url }}" target="_blank" rel="noopener">Open demo video</a></p>
+                        {% endif %}
+                        <ul class="plain-list">
+                            {% for set in exercise.set_plan %}
+                                <li>Set {{ set.set_number }}: {{ set.target_reps }} reps, {{ set.load_guidance|default:"no load guidance" }}, target RPE {{ set.target_effort_rpe|default:"-" }}</li>
+                            {% endfor %}
+                        </ul>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No exercises for this day.</p>
+        {% endif %}
+    </section>
+{% endfor %}
+{% endblock %}

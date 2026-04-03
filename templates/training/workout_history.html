@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Workout History | GymKompis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Workout history</h1>
+    </div>
+</div>
+<div class="stack">
+    {% for session in sessions %}
+        <article class="card">
+            <h2><a href="{% url 'workout_detail' session.id %}">{{ session.workout_date }} - {{ session.planned_day_name }}</a></h2>
+            <p>Status: {{ session.get_status_display }}</p>
+        </article>
+    {% empty %}
+        <div class="card">
+            <p>No workouts logged yet.</p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

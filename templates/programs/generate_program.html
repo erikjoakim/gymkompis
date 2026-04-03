@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Generate Program | GymKompis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Generate a new program</h1>
+        <p>Describe your goals, constraints, and preferences in plain English.</p>
+    </div>
+</div>
+<div class="card narrow">
+    <form method="post" class="stack">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Generate plan</button>
+    </form>
+    <p class="help-text">If no OpenAI key is configured, the app uses a validated mock response in development.</p>
+</div>
+{% endblock %}
