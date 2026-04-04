@@ -67,7 +67,7 @@
                 <article class="set-entry-card set-timer-row" data-set-number="{{ row.set_number }}">
                     <div class="set-entry-header">
                         <div>
-                            <strong>Set {{ row.planned.set_number }}</strong>
+                            <strong>Set {{ row.planned.set_number }} · {{ exercise.name }}</strong>
                             <div class="help-text">{{ row.planned|set_target_display }}</div>
                         </div>
                         <div class="set-entry-guidance">
@@ -99,12 +99,12 @@
 
                     <div class="set-entry-grid">
                         <div class="set-field">
-                            <label>Actual result</label>
+                            <label>{% if row.show_weight or row.planned.prescription_type == "reps" %}Reps{% else %}Seconds{% endif %}</label>
                             {{ row.actual_value }}
                         </div>
                         {% if row.show_weight %}
                             <div class="set-field">
-                                <label>Actual weight</label>
+                                <label>Weight</label>
                                 {{ row.weight }}
                             </div>
                         {% endif %}

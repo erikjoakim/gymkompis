@@ -486,13 +486,15 @@ pre {
 
 .set-control-buttons {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 0.4rem;
     min-width: 110px;
 }
 
 .set-edge-controls {
     align-items: stretch;
+    justify-content: flex-end;
+    flex-wrap: wrap;
 }
 
 .set-entry-grid {
@@ -533,17 +535,19 @@ pre {
 }
 
 .set-start-button {
-    background: #6c7a72;
+    background: #1ca44c;
+    color: #fff;
 }
 
 .set-start-button.is-active {
-    background: #1ca44c;
+    background: #7f8b85;
     color: #fff;
-    box-shadow: 0 0 0 3px rgba(28, 164, 76, 0.18);
+    box-shadow: 0 0 0 3px rgba(127, 139, 133, 0.18);
 }
 
 .set-stop-button {
     background: #9baba2;
+    color: #fff;
 }
 
 .set-stop-button.is-active {
@@ -732,6 +736,10 @@ pre {
     .set-entry-header,
     .set-entry-meta {
         flex-direction: column;
+    }
+
+    .set-edge-controls {
+        justify-content: flex-start;
     }
 
     .set-entry-guidance,
