@@ -434,43 +434,21 @@ pre {
     margin-top: 1rem;
 }
 
-.set-entry-stack {
-    display: grid;
-    gap: 0.9rem;
+.set-table {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-.set-entry-card {
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    background: #fcfaf5;
-    padding: 0.95rem 1rem;
+.set-table th,
+.set-table td {
+    border-bottom: 1px solid var(--border);
+    padding: 0.5rem;
+    text-align: left;
+    vertical-align: top;
 }
 
-.set-entry-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: start;
-    gap: 1rem;
-    margin-bottom: 0.8rem;
-}
-
-.set-entry-guidance {
-    text-align: right;
-    min-width: 120px;
-}
-
-.set-entry-guidance strong,
-.set-entry-meta strong {
-    display: block;
-    font-size: 0.9rem;
-}
-
-.set-entry-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: start;
-    gap: 1rem;
-    margin-bottom: 0.9rem;
+.mobile-inline-detail {
+    display: none;
 }
 
 .set-timer-stack {
@@ -495,32 +473,6 @@ pre {
     align-items: stretch;
     justify-content: flex-end;
     flex-wrap: wrap;
-}
-
-.set-entry-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.75rem;
-    align-items: end;
-}
-
-.set-field {
-    min-width: 0;
-}
-
-.set-field label {
-    font-size: 0.88rem;
-    margin-bottom: 0.25rem;
-}
-
-.set-field input,
-.set-field textarea,
-.set-field select {
-    margin-bottom: 0;
-}
-
-.set-field-notes {
-    grid-column: span 2;
 }
 
 .set-control-buttons button {
@@ -561,11 +513,20 @@ pre {
     opacity: 0.75;
 }
 
-.set-entry-save {
+.set-timer-row td {
+    border-bottom: 0;
+}
+
+.set-save-row td {
+    border-bottom: 1px solid var(--border);
+    border-top: 0;
+    padding-top: 0;
+    padding-bottom: 0.8rem;
+}
+
+.set-save-cell {
     text-align: right;
-    padding-top: 0.85rem;
-    margin-top: 0.85rem;
-    border-top: 1px solid var(--border);
+    padding-right: 1.75rem;
 }
 
 .set-save-button {
@@ -733,26 +694,93 @@ pre {
         flex-direction: column;
     }
 
-    .set-entry-header,
-    .set-entry-meta {
-        flex-direction: column;
+    .set-table thead {
+        display: none;
+    }
+
+    .set-table,
+    .set-table tbody,
+    .set-table tr,
+    .set-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .set-timer-row,
+    .set-save-row {
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: #fcfaf5;
+        margin-bottom: 0.75rem;
+        overflow: hidden;
+    }
+
+    .set-save-row {
+        margin-top: -0.5rem;
+        border-top: 0;
+        border-radius: 0 0 16px 16px;
+    }
+
+    .set-timer-row td,
+    .set-save-row td {
+        border-bottom: 0;
+        padding: 0.45rem 0.85rem;
+    }
+
+    .set-timer-row td::before {
+        content: attr(data-label);
+        display: inline-block;
+        min-width: 8rem;
+        margin-right: 0.5rem;
+        color: var(--muted);
+        font-weight: 700;
+    }
+
+    .set-timer-row td:first-child::before,
+    .set-save-row td::before {
+        content: none;
+    }
+
+    .set-timer-row td:first-child,
+    .set-timer-row td:nth-child(2),
+    .set-timer-row td:nth-child(3),
+    .set-timer-row td:nth-child(4) {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+    }
+
+    .set-timer-row td:first-child {
+        padding-top: 0.85rem;
+    }
+
+    .set-timer-row td:first-child .mobile-inline-detail {
+        display: inline;
+    }
+
+    .set-timer-row td:nth-child(2)::before,
+    .set-timer-row td:nth-child(3)::before,
+    .set-timer-row td:nth-child(4)::before {
+        min-width: auto;
     }
 
     .set-edge-controls {
         justify-content: flex-start;
     }
 
-    .set-entry-guidance,
-    .set-entry-save {
+    .set-save-row td {
+        padding-top: 0.15rem;
+        padding-bottom: 0.85rem;
+    }
+
+    .set-save-row td[colspan="4"],
+    .set-save-row td:last-child {
+        display: none;
+    }
+
+    .set-save-cell {
         text-align: left;
-    }
-
-    .set-entry-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .set-field-notes {
-        grid-column: auto;
+        padding-right: 0.85rem;
     }
 
     .swap-option-row {

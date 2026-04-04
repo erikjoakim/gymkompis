@@ -62,70 +62,67 @@
         class="stack"
     >
         {% csrf_token %}
-        <div class="set-entry-stack">
-            {% for row in form.set_rows %}
-                <article class="set-entry-card set-timer-row" data-set-number="{{ row.set_number }}">
-                    <div class="set-entry-header">
-                        <div>
-                            <strong>Set {{ row.planned.set_number }} · {{ exercise.name }}</strong>
-                            <div class="help-text">{{ row.planned|set_target_display }}</div>
-                        </div>
-                        <div class="set-entry-guidance">
-                            <strong>Load guidance</strong>
-                            <div>{{ row.guidance_display }}</div>
-                        </div>
-                    </div>
-
-                    <div class="set-entry-meta">
-                        <div class="set-timer-stack">
-                            <strong>Timer</strong>
-                            <span class="set-timer-display" data-default-label="{% if row.saved_duration_seconds %}{{ row.saved_duration_seconds }} sec{% else %}Not timed{% endif %}">
-                                {% if row.saved_duration_seconds %}{{ row.saved_duration_seconds }} sec{% else %}Not timed{% endif %}
-                            </span>
-                            {% if row.saved_rest_before_seconds %}
-                                <span class="help-text">Rest before: {{ row.saved_rest_before_seconds }} sec</span>
-                            {% endif %}
-                        </div>
-                        <div class="set-control-buttons set-edge-controls">
-                            <button type="button" class="set-start-button" data-set-number="{{ row.set_number }}">
-                                {% if row.saved %}Restart{% else %}Start set{% endif %}
-                            </button>
-                            <button type="button" class="set-stop-button" data-set-number="{{ row.set_number }}">Stop set</button>
-                        </div>
-                        {{ row.started_at }}
-                        {{ row.ended_at }}
-                        {{ row.duration_seconds }}
-                    </div>
-
-                    <div class="set-entry-grid">
-                        <div class="set-field">
-                            <label>{% if row.show_weight or row.planned.prescription_type == "reps" %}Reps{% else %}Seconds{% endif %}</label>
-                            {{ row.actual_value }}
-                        </div>
-                        {% if row.show_weight %}
-                            <div class="set-field">
-                                <label>Weight</label>
-                                {{ row.weight }}
+        <table class="set-table">
+            <thead>
+                <tr>
+                    <th>Set</th>
+                    <th>Target</th>
+                    <th>Load guidance</th>
+                    <th>Timer</th>
+                    <th>Actual result</th>
+                    <th>Weight</th>
+                    <th>Effort / RPE</th>
+                    <th>Notes</th>
+                    <th>Controls</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in form.set_rows %}
+                    <tr class="set-timer-row" data-set-number="{{ row.set_number }}">
+                        <td data-label="Set">
+                            <strong>Set {{ row.planned.set_number }}</strong>
+                            <div class="help-text mobile-inline-detail">{{ exercise.name }}</div>
+                        </td>
+                        <td data-label="Target">{{ row.planned|set_target_display }}</td>
+                        <td data-label="Load guidance">{{ row.guidance_display }}</td>
+                        <td data-label="Timer">
+                            <div class="set-timer-stack">
+                                <span class="set-timer-display" data-default-label="{% if row.saved_duration_seconds %}{{ row.saved_duration_seconds }} sec{% else %}Not timed{% endif %}">
+                                    {% if row.saved_duration_seconds %}{{ row.saved_duration_seconds }} sec{% else %}Not timed{% endif %}
+                                </span>
+                                {% if row.saved_rest_before_seconds %}
+                                    <span class="help-text">Rest before: {{ row.saved_rest_before_seconds }} sec</span>
+                                {% endif %}
                             </div>
-                        {% endif %}
-                        <div class="set-field">
-                            <label>Effort / RPE</label>
-                            {{ row.rpe }}
-                        </div>
-                        <div class="set-field set-field-notes">
-                            <label>Notes</label>
-                            {{ row.notes }}
-                        </div>
-                    </div>
-
-                    <div class="set-entry-save">
-                        <button type="submit" name="save_set_number" value="{{ row.set_number }}" class="set-save-button" data-set-number="{{ row.set_number }}">
-                            {% if row.saved %}Update set{% else %}Save set{% endif %}
-                        </button>
-                    </div>
-                </article>
-            {% endfor %}
-        </div>
+                            {{ row.started_at }}
+                            {{ row.ended_at }}
+                            {{ row.duration_seconds }}
+                        </td>
+                        <td data-label="{% if row.show_weight or row.planned.prescription_type == 'reps' %}Reps{% else %}Seconds{% endif %}">{{ row.actual_value }}</td>
+                        <td data-label="Weight">{% if row.show_weight %}{{ row.weight }}{% else %}-{% endif %}</td>
+                        <td data-label="Effort / RPE">{{ row.rpe }}</td>
+                        <td data-label="Notes">{{ row.notes }}</td>
+                        <td data-label="Controls">
+                            <div class="set-control-buttons set-edge-controls">
+                                <button type="button" class="set-start-button" data-set-number="{{ row.set_number }}">
+                                    {% if row.saved %}Restart{% else %}Start set{% endif %}
+                                </button>
+                                <button type="button" class="set-stop-button" data-set-number="{{ row.set_number }}">Stop set</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="set-save-row">
+                        <td colspan="4"></td>
+                        <td colspan="4" class="set-save-cell">
+                            <button type="submit" name="save_set_number" value="{{ row.set_number }}" class="set-save-button" data-set-number="{{ row.set_number }}">
+                                {% if row.saved %}Update set{% else %}Save set{% endif %}
+                            </button>
+                        </td>
+                        <td></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
         <p class="help-text">Each set is saved individually. The card disappears when all planned sets are saved.</p>
         <p class="help-text">You can override the suggested load before saving.</p>
         {{ form.exercise_notes.label_tag }}
