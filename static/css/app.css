@@ -700,7 +700,6 @@ pre {
 
     .set-table,
     .set-table tbody,
-    .set-table tr,
     .set-table td {
         display: block;
         width: 100%;
@@ -708,6 +707,8 @@ pre {
 
     .set-timer-row,
     .set-save-row {
+        display: flex;
+        flex-direction: column;
         border: 1px solid var(--border);
         border-radius: 16px;
         background: #fcfaf5;
@@ -764,6 +765,16 @@ pre {
         min-width: auto;
     }
 
+    .set-timer-row td:nth-child(1) { order: 1; }
+    .set-timer-row td:nth-child(2) { order: 2; }
+    .set-timer-row td:nth-child(3) { order: 3; }
+    .set-timer-row td:nth-child(4) { order: 4; }
+    .set-timer-row td:nth-child(9) { order: 5; }
+    .set-timer-row td:nth-child(5) { order: 6; }
+    .set-timer-row td:nth-child(6) { order: 7; }
+    .set-timer-row td:nth-child(7) { order: 8; }
+    .set-timer-row td:nth-child(8) { order: 9; }
+
     .set-edge-controls {
         justify-content: flex-start;
     }
@@ -773,7 +784,7 @@ pre {
         padding-bottom: 0.85rem;
     }
 
-    .set-save-row td[colspan="4"],
+    .set-save-row td:first-child,
     .set-save-row td:last-child {
         display: none;
     }
@@ -781,6 +792,7 @@ pre {
     .set-save-cell {
         text-align: left;
         padding-right: 0.85rem;
+        display: block;
     }
 
     .swap-option-row {
