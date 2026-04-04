@@ -2,24 +2,39 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
-from programs.structure import get_day_all_exercises
+from evaluations.models import WorkoutEvaluation
 
 from .forms import ExerciseSubmissionForm
 from .models import WorkoutSession
 from .progression import build_progression_recommendations
-from .services import complete_session, get_active_program, get_or_create_session, get_program_day, get_program_days, submit_exercise
+from .services import (
+    complete_session,
+    get_active_program,
+    get_or_create_session,
+    get_program_day,
+    get_program_days,
+    session_display_exercise,
+    submit_exercise_set,
+    swap_session_exercise,
+)
+from .substitutions import suggest_substitutions
 
 
-def _build_pending_exercise_forms(day: dict, session: WorkoutSession, user, bound_form=None, bound_exercise_key=None):
-    status_by_key = {
-        exercise["exercise_key"]: exercise.get("status", "pending")
+def _session_exercise_map(session: WorkoutSession):
+    return {
+        exercise["exercise_key"]: exercise
         for exercise in session.session_json.get("exercises", [])
     }
+
+
+def _build_pending_exercise_forms(session: WorkoutSession, user, bound_form=None, bound_exercise_key=None):
+    session_exercises = _session_exercise_map(session)
     pending_exercises = [
-        exercise
-        for exercise in get_day_all_exercises(day)
-        if status_by_key.get(exercise["exercise_key"]) != "completed"
+        session_display_exercise(exercise)
+        for exercise in session.session_json.get("exercises", [])
+        if exercise.get("status", "pending") != "completed"
     ]
+    active_keys = {exercise.get("exercise_key") for exercise in session.session_json.get("exercises", []) if exercise.get("exercise_key")}
     progression_map = build_progression_recommendations(
         user,
         pending_exercises,
@@ -27,12 +42,23 @@ def _build_pending_exercise_forms(day: dict, session: WorkoutSession, user, boun
         current_session_id=session.id,
     )
     exercise_forms = []
+    completed_exercises = []
     for exercise in pending_exercises:
         progression = progression_map.get(exercise["exercise_key"], {})
+        substitutions = suggest_substitutions(
+            user,
+            exercise,
+            excluded_keys=active_keys - {exercise.get("exercise_key")},
+        )
         form = (
             bound_form
             if bound_exercise_key == exercise["exercise_key"]
-            else ExerciseSubmissionForm(exercise=exercise, progression=progression)
+            else ExerciseSubmissionForm(
+                exercise=exercise,
+                progression=progression,
+                saved_actual_sets=session_exercises.get(exercise["exercise_key"], {}).get("actual_sets", []),
+                initial_exercise_notes=session_exercises.get(exercise["exercise_key"], {}).get("exercise_notes", ""),
+            )
         )
         if bound_exercise_key == exercise["exercise_key"] and hasattr(form, "progression"):
             form.progression = progression
@@ -43,9 +69,28 @@ def _build_pending_exercise_forms(day: dict, session: WorkoutSession, user, boun
                 "progression": progression,
                 "exercise_group": exercise.get("exercise_group", "main"),
                 "group_label": "Warmup" if exercise.get("exercise_group") == "warmup" else "Main Work",
+                "substitutions": substitutions,
             }
         )
-    return exercise_forms
+
+    for exercise in session.session_json.get("exercises", []):
+        if exercise.get("status") != "completed":
+            continue
+        display_exercise = session_display_exercise(exercise)
+        completed_exercises.append(
+            {
+                "exercise": display_exercise,
+                "exercise_group": display_exercise.get("exercise_group", "main"),
+                "group_label": "Warmup" if display_exercise.get("exercise_group") == "warmup" else "Main Work",
+                "completed_label": "Done",
+                "is_substituted": display_exercise.get("is_substituted"),
+                "original_name": display_exercise.get("original_name"),
+            }
+        )
+    return {
+        "pending": exercise_forms,
+        "completed": completed_exercises,
+    }
 
 
 @login_required
@@ -74,10 +119,10 @@ def train_day_view(request, day_key):
         return redirect("train_index")
 
     session = None
-    exercise_forms = []
+    exercise_state = {"pending": [], "completed": []}
     if day.get("type") == "training":
         session = get_or_create_session(request.user, program, day)
-        exercise_forms = _build_pending_exercise_forms(day, session, request.user)
+        exercise_state = _build_pending_exercise_forms(session, request.user)
 
     return render(
         request,
@@ -86,7 +131,8 @@ def train_day_view(request, day_key):
             "program": program,
             "day": day,
             "session": session,
-            "exercise_forms": exercise_forms,
+            "exercise_forms": exercise_state["pending"],
+            "completed_exercises": exercise_state["completed"],
         },
     )
 
@@ -94,11 +140,11 @@ def train_day_view(request, day_key):
 @login_required
 def submit_exercise_view(request, session_id, exercise_key):
     session = get_object_or_404(WorkoutSession, pk=session_id, user=request.user)
-    day = get_program_day(session.program, session.planned_day_key)
-    exercise = next((item for item in get_day_all_exercises(day) if item.get("exercise_key") == exercise_key), None)
-    if exercise is None:
+    session_exercise = _session_exercise_map(session).get(exercise_key)
+    if session_exercise is None:
         messages.error(request, "Exercise not found.")
         return redirect("train_day", day_key=session.planned_day_key)
+    exercise = session_display_exercise(session_exercise)
 
     progression = build_progression_recommendations(
         request.user,
@@ -106,31 +152,39 @@ def submit_exercise_view(request, session_id, exercise_key):
         weight_unit=session.session_json.get("weight_unit", "kg"),
         current_session_id=session.id,
     ).get(exercise_key, {})
-    form = ExerciseSubmissionForm(request.POST or None, exercise=exercise, progression=progression)
+    target_set_number = request.POST.get("save_set_number")
+    form = ExerciseSubmissionForm(
+        request.POST or None,
+        exercise=exercise,
+        progression=progression,
+        saved_actual_sets=session_exercise.get("actual_sets", []),
+        target_set_number=target_set_number,
+        initial_exercise_notes=session_exercise.get("exercise_notes", ""),
+    )
     if request.method == "POST" and form.is_valid():
-        session = submit_exercise(
+        session = submit_exercise_set(
             session_id=session.id,
             user=request.user,
             exercise_key=exercise_key,
-            actual_sets=form.actual_sets(),
+            actual_set=form.actual_set_for_target(),
             exercise_notes=form.cleaned_data["exercise_notes"],
         )
         if getattr(request, "htmx", False):
-            exercise_forms = _build_pending_exercise_forms(day, session, request.user)
+            exercise_state = _build_pending_exercise_forms(session, request.user)
             return render(
                 request,
                 "training/partials/exercise_list.html",
                 {
-                    "exercise_forms": exercise_forms,
+                    "exercise_forms": exercise_state["pending"],
+                    "completed_exercises": exercise_state["completed"],
                     "session": session,
                 },
             )
-        messages.success(request, f"{exercise['name']} saved.")
+        messages.success(request, f"{exercise['name']} set {target_set_number} saved.")
     else:
         if getattr(request, "htmx", False):
             form.progression = progression
-            exercise_forms = _build_pending_exercise_forms(
-                day,
+            exercise_state = _build_pending_exercise_forms(
                 session,
                 request.user,
                 bound_form=form,
@@ -140,7 +194,8 @@ def submit_exercise_view(request, session_id, exercise_key):
                 request,
                 "training/partials/exercise_list.html",
                 {
-                    "exercise_forms": exercise_forms,
+                    "exercise_forms": exercise_state["pending"],
+                    "completed_exercises": exercise_state["completed"],
                     "session": session,
                 },
                 status=400,
@@ -151,10 +206,44 @@ def submit_exercise_view(request, session_id, exercise_key):
 
 
 @login_required
+def swap_exercise_view(request, session_id, exercise_key):
+    session = get_object_or_404(WorkoutSession, pk=session_id, user=request.user)
+    replacement_external_id = request.POST.get("replacement_external_id", "")
+    try:
+        session = swap_session_exercise(
+            session_id=session.id,
+            user=request.user,
+            current_exercise_key=exercise_key,
+            replacement_external_id=replacement_external_id,
+        )
+        messages.success(request, "Exercise swapped for today's workout.")
+    except ValueError as exc:
+        messages.error(request, str(exc))
+
+    if getattr(request, "htmx", False):
+        exercise_state = _build_pending_exercise_forms(session, request.user)
+        return render(
+            request,
+            "training/partials/exercise_list.html",
+            {
+                "exercise_forms": exercise_state["pending"],
+                "completed_exercises": exercise_state["completed"],
+                "session": session,
+            },
+        )
+    return redirect("train_day", day_key=session.planned_day_key)
+
+
+@login_required
 def complete_session_view(request, session_id):
     session = get_object_or_404(WorkoutSession, pk=session_id, user=request.user)
     if request.method == "POST":
-        complete_session(session.id, request.user, request.POST.get("session_notes", ""))
+        complete_session(
+            session.id,
+            request.user,
+            request.POST.get("session_notes", ""),
+            request.POST.get("overall_effort_rpe"),
+        )
         messages.success(request, "Workout session completed.")
         return redirect("workout_detail", session_id=session.id)
     return redirect("train_day", day_key=session.planned_day_key)
@@ -169,4 +258,21 @@ def workout_history_view(request):
 @login_required
 def workout_detail_view(request, session_id):
     session = get_object_or_404(WorkoutSession.objects.select_related("program"), pk=session_id, user=request.user)
-    return render(request, "training/workout_detail.html", {"session": session, "session_json": session.session_json})
+    existing_evaluation = (
+        WorkoutEvaluation.objects.filter(
+            user=request.user,
+            evaluation_type=WorkoutEvaluation.EvaluationType.SESSION,
+            workout_session=session,
+        )
+        .order_by("-created_at")
+        .first()
+    )
+    return render(
+        request,
+        "training/workout_detail.html",
+        {
+            "session": session,
+            "session_json": session.session_json,
+            "existing_evaluation": existing_evaluation,
+        },
+    )

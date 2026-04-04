@@ -8,9 +8,15 @@
     <div>
         <h1>{{ session.workout_date }} - {{ session.planned_day_name }}</h1>
         <p>Status: {{ session.get_status_display }}</p>
+        {% if session_json.overall_effort_rpe %}<p><strong>Overall effort:</strong> {{ session_json.overall_effort_rpe }}/10</p>{% endif %}
+        {% if session_json.session_notes %}<p><strong>Session notes:</strong> {{ session_json.session_notes }}</p>{% endif %}
     </div>
     <div class="actions">
-        <a class="button-link" href="{% url 'request_session_evaluation' session.id %}">Evaluate this session</a>
+        {% if existing_evaluation %}
+            <a class="button-link" href="{% url 'evaluation_detail' existing_evaluation.id %}">Open evaluation</a>
+        {% else %}
+            <a class="button-link" href="{% url 'request_session_evaluation' session.id %}">Evaluate this session</a>
+        {% endif %}
     </div>
 </div>
 
@@ -19,6 +25,9 @@
     {% for exercise in session_json.exercises %}
         <article class="exercise-card">
             <h3>{{ exercise.name }}</h3>
+            {% if exercise.is_substituted and exercise.original_name %}
+                <p class="help-text"><strong>Swapped for today.</strong> Originally planned: {{ exercise.original_name }}</p>
+            {% endif %}
             {% if exercise.image_url %}
                 <p><img src="{{ exercise.image_url }}" alt="{{ exercise.name }}" class="exercise-thumb"></p>
             {% endif %}
@@ -27,7 +36,11 @@
             {% if exercise.actual_sets %}
                 <ul class="plain-list">
                     {% for set in exercise.actual_sets %}
-                        <li>Set {{ set.set_number }}: {{ set|actual_set_display }}, weight {{ set.weight|default:"-" }}, RPE {{ set.effort_rpe|default:"-" }}</li>
+                        <li>
+                            Set {{ set.set_number }}: {{ set|actual_set_display }}, weight {{ set.weight|default:"-" }}, RPE {{ set.effort_rpe|default:"-" }}
+                            {% if set.duration_seconds %}, time under load {{ set.duration_seconds }} sec{% endif %}
+                            {% if set.rest_before_seconds %}, rest before {{ set.rest_before_seconds }} sec{% endif %}
+                        </li>
                     {% endfor %}
                 </ul>
             {% endif %}
@@ -36,8 +49,4 @@
     {% endfor %}
 </section>
 
-<section class="card">
-    <h2>Raw session JSON</h2>
-    <pre>{{ session_json|pretty_json }}</pre>
-</section>
 {% endblock %}

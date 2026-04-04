@@ -5,6 +5,7 @@
 <div class="page-header">
     <div>
         <h1>{{ day.day_label }} - {{ day.name }}</h1>
+        {% if session %}<p><strong>Date:</strong> {{ session.workout_date|date:"F j, Y" }}</p>{% endif %}
         <p>Type: {{ day.type }}</p>
         {% if day.notes %}<p>{{ day.notes }}</p>{% endif %}
     </div>
@@ -23,6 +24,16 @@
         <h2>Finish workout</h2>
         <form method="post" action="{% url 'complete_session' session.id %}" class="stack">
             {% csrf_token %}
+            <label for="overall_effort_rpe">Overall workout effort (RPE 1-10)</label>
+            <input
+                type="number"
+                name="overall_effort_rpe"
+                id="overall_effort_rpe"
+                min="1"
+                max="10"
+                step="0.5"
+                placeholder="Example: 7.5"
+            >
             <label for="session_notes">Session notes</label>
             <textarea name="session_notes" id="session_notes" rows="3"></textarea>
             <button type="submit">Complete workout</button>

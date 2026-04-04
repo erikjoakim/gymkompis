@@ -1,5 +1,6 @@
 import json
 import logging
+from copy import deepcopy
 
 from django.conf import settings
 from django.db import transaction
@@ -199,3 +200,27 @@ def generate_program_for_user(user, prompt_text: str):
         request_record.error_message = str(exc)
         request_record.save(update_fields=["status", "error_message"])
         raise
+
+
+@transaction.atomic
+def restore_program_for_user(user, archived_program: TrainingProgram) -> TrainingProgram:
+    if archived_program.user_id != user.id:
+        raise ValueError("You can only restore your own programs.")
+    if archived_program.status != TrainingProgram.Status.ARCHIVED:
+        raise ValueError("Only archived programs can be restored.")
+
+    TrainingProgram.objects.filter(user=user, status=TrainingProgram.Status.ACTIVE).update(
+        status=TrainingProgram.Status.ARCHIVED
+    )
+    latest_program = TrainingProgram.objects.filter(user=user).order_by("-version_number").first()
+    version_number = 1 if latest_program is None else latest_program.version_number + 1
+    restored_program = TrainingProgram.objects.create(
+        user=user,
+        name=archived_program.name,
+        status=TrainingProgram.Status.ACTIVE,
+        request_prompt=archived_program.request_prompt,
+        current_program=deepcopy(archived_program.current_program),
+        version_number=version_number,
+        source=archived_program.source,
+    )
+    return restored_program

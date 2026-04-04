@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% load gymkompis_extras %}
 
 {% block title %}Evaluation | GymKompis{% endblock %}
 
@@ -8,10 +7,118 @@
     <div>
         <h1>{{ evaluation.get_evaluation_type_display }} evaluation</h1>
         <p>{{ evaluation.summary_text }}</p>
+        <p><strong>Created:</strong> {{ evaluation.created_at|date:"F j, Y, H:i" }}</p>
+        {% if evaluation.evaluation_type == "session" and evaluation.workout_session %}
+            <p><strong>Workout:</strong> {{ evaluation.workout_session.workout_date }} - {{ evaluation.workout_session.planned_day_name }}</p>
+        {% endif %}
+        {% if evaluation.evaluation_type == "period" and evaluation.evaluation_start_date and evaluation.evaluation_end_date %}
+            <p><strong>Period:</strong> {{ evaluation.evaluation_start_date }} to {{ evaluation.evaluation_end_date }}</p>
+        {% endif %}
     </div>
 </div>
+
 <section class="card">
-    <h2>Evaluation JSON</h2>
-    <pre>{{ evaluation.evaluation_json|pretty_json }}</pre>
+    {% if evaluation.evaluation_type == "session" %}
+        <h2>Session overview</h2>
+        <p><strong>Overall summary:</strong> {{ evaluation.evaluation_json.overall_summary }}</p>
+        <div class="grid-two">
+            <div class="card">
+                <h3>Adherence</h3>
+                <p>{{ evaluation.evaluation_json.adherence_score }}/100</p>
+            </div>
+            <div class="card">
+                <h3>Recovery flag</h3>
+                <p>{{ evaluation.evaluation_json.recovery_flag|title }}</p>
+            </div>
+        </div>
+        {% if evaluation.evaluation_json.effort_summary %}
+            <p><strong>Effort:</strong> {{ evaluation.evaluation_json.effort_summary }}</p>
+        {% endif %}
+        {% if evaluation.evaluation_json.progression_signals %}
+            <h3>Progression signals</h3>
+            <ul class="plain-list">
+                {% for item in evaluation.evaluation_json.progression_signals %}
+                    <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% if evaluation.evaluation_json.exercise_feedback %}
+            <h3>Exercise feedback</h3>
+            <div class="stack">
+                {% for item in evaluation.evaluation_json.exercise_feedback %}
+                    <article class="card">
+                        <p><strong>{{ item.exercise_key }}</strong></p>
+                        <p>{{ item.comment }}</p>
+                        {% if item.suggested_next_step %}
+                            <p><strong>Next step:</strong> {{ item.suggested_next_step }}</p>
+                        {% endif %}
+                    </article>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% if evaluation.evaluation_json.recommendations %}
+            <h3>Recommendations</h3>
+            <ul class="plain-list">
+                {% for item in evaluation.evaluation_json.recommendations %}
+                    <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% else %}
+        <h2>Period overview</h2>
+        <div class="grid-four">
+            <div class="card">
+                <h3>Adherence</h3>
+                <p>{{ evaluation.evaluation_json.summary.overall_adherence_score }}/100</p>
+            </div>
+            <div class="card">
+                <h3>Consistency</h3>
+                <p>{{ evaluation.evaluation_json.summary.consistency_score }}/100</p>
+            </div>
+            <div class="card">
+                <h3>Progression</h3>
+                <p>{{ evaluation.evaluation_json.summary.progression_score }}/100</p>
+            </div>
+            <div class="card">
+                <h3>Recovery risk</h3>
+                <p>{{ evaluation.evaluation_json.summary.recovery_risk|title }}</p>
+            </div>
+        </div>
+        {% if evaluation.evaluation_json.highlights %}
+            <h3>Highlights</h3>
+            <ul class="plain-list">
+                {% for item in evaluation.evaluation_json.highlights %}
+                    <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% if evaluation.evaluation_json.exercise_trends %}
+            <h3>Exercise trends</h3>
+            <div class="stack">
+                {% for item in evaluation.evaluation_json.exercise_trends %}
+                    <article class="card">
+                        <p><strong>{{ item.name }}</strong> ({{ item.trend|title }})</p>
+                        <p>{{ item.note }}</p>
+                    </article>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% if evaluation.evaluation_json.issues %}
+            <h3>Issues to watch</h3>
+            <ul class="plain-list">
+                {% for item in evaluation.evaluation_json.issues %}
+                    <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% if evaluation.evaluation_json.recommendations %}
+            <h3>Recommendations</h3>
+            <ul class="plain-list">
+                {% for item in evaluation.evaluation_json.recommendations %}
+                    <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endif %}
 </section>
 {% endblock %}

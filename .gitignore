@@ -1,8 +1,28 @@
+# Local environment
 .env
 .env.local
+.env.*.local
+!.env.example
+
+# Virtual environments
 .venv/
+venv/
+
+# Python cache / tooling
 __pycache__/
 *.py[cod]
-db.sqlite3
-staticfiles/
 *.log
+.pytest_cache/
+.mypy_cache/
+
+# Local databases
+db.sqlite3
+test_*.sqlite3
+
+# Collected / generated assets
+staticfiles/
+media/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db

@@ -269,6 +269,73 @@ select {
     margin: 0.25rem 0 0;
 }
 
+.exercise-swap-panel {
+    margin: 1rem 0;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: #faf7f0;
+}
+
+.exercise-swap-panel summary {
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.exercise-swap-panel[open] summary {
+    margin-bottom: 0.75rem;
+}
+
+.swap-option-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 1rem;
+    padding: 0.8rem 0;
+    border-top: 1px solid var(--border);
+}
+
+.swap-option-row:first-child {
+    border-top: 0;
+    padding-top: 0;
+}
+
+.swap-option-row p {
+    margin: 0.25rem 0 0;
+}
+
+.completed-exercise-stack {
+    gap: 0.5rem;
+}
+
+.completed-exercise-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.65rem 0.9rem;
+    border-radius: 14px;
+    border: 1px solid #b9d3c2;
+    background: #eef6f1;
+}
+
+.completed-exercise-row strong {
+    display: inline-block;
+    margin-right: 0.35rem;
+}
+
+.completed-badge {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 0.28rem 0.7rem;
+    background: #2e6b56;
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
 .prompt-example-list {
     display: grid;
     gap: 0.75rem;
@@ -377,6 +444,85 @@ pre {
     border-bottom: 1px solid var(--border);
     padding: 0.5rem;
     text-align: left;
+    vertical-align: top;
+}
+
+.set-timer-row td {
+    border-bottom: 0;
+}
+
+.set-timer-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.set-timer-display {
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.set-control-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-width: 110px;
+}
+
+.set-edge-controls {
+    align-items: stretch;
+}
+
+.set-control-buttons button {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.92rem;
+}
+
+.set-start-button,
+.set-stop-button,
+.set-save-button {
+    transition: background-color 0.18s ease, opacity 0.18s ease, transform 0.18s ease;
+}
+
+.set-start-button {
+    background: #6c7a72;
+}
+
+.set-start-button.is-active {
+    background: #1ca44c;
+    color: #fff;
+    box-shadow: 0 0 0 3px rgba(28, 164, 76, 0.18);
+}
+
+.set-stop-button {
+    background: #9baba2;
+}
+
+.set-stop-button.is-active {
+    background: #c73a32;
+    color: #fff;
+    box-shadow: 0 0 0 3px rgba(199, 58, 50, 0.16);
+}
+
+.set-start-button[disabled],
+.set-stop-button[disabled] {
+    opacity: 0.75;
+}
+
+.set-save-row td {
+    border-bottom: 1px solid var(--border);
+    border-top: 0;
+    padding-top: 0;
+    padding-bottom: 0.8rem;
+}
+
+.set-save-cell {
+    text-align: right;
+    padding-right: 1.75rem;
+}
+
+.set-save-button {
+    min-width: 140px;
 }
 
 .manual-day-layout {
@@ -537,6 +683,10 @@ pre {
 
     .builder-result-row,
     .builder-selected-summary {
+        flex-direction: column;
+    }
+
+    .swap-option-row {
         flex-direction: column;
     }
 

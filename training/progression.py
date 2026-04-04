@@ -329,6 +329,7 @@ def _recommend_time_progression(current_exercise: dict, match: dict | None) -> d
                 default=None,
             ),
             "guidance_text": "Use the planned time target and adjust by feel.",
+            "short_guidance": "No match",
             "reason": "No comparable completed sessions were found in the current rolling window.",
         }
 
@@ -356,6 +357,7 @@ def _recommend_time_progression(current_exercise: dict, match: dict | None) -> d
             default=None,
         ),
         "guidance_text": f"{action_text} Suggested time: {suggested_seconds} sec.",
+        "short_guidance": f"{suggested_seconds} sec" if suggested_seconds else "-",
         "reason": f"Recent {match['match_type']} match on {match['record']['session_date'].isoformat()} reached about {latest_seconds} sec.",
     }
 
@@ -378,6 +380,7 @@ def _recommend_reps_progression(current_exercise: dict, match: dict | None, weig
             "suggested_seconds": None,
             "suggested_target_rpe": target_rpe,
             "guidance_text": "No recent match yet. Start conservatively and work around the target RPE.",
+            "short_guidance": "No match",
             "reason": "No comparable completed sessions were found in the current rolling window.",
         }
 
@@ -426,6 +429,7 @@ def _recommend_reps_progression(current_exercise: dict, match: dict | None, weig
         "suggested_seconds": None,
         "suggested_target_rpe": target_rpe,
         "guidance_text": guidance_text,
+        "short_guidance": f"{suggested_weight:g} {weight_unit}" if suggested_weight is not None else "-",
         "reason": ", ".join(reason_bits) + ".",
     }
 

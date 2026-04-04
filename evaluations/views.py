@@ -12,6 +12,18 @@ from .services import evaluate_period_for_user, evaluate_session_for_user
 @login_required
 def request_session_evaluation_view(request, session_id):
     session = get_object_or_404(WorkoutSession, pk=session_id, user=request.user)
+    existing_evaluation = (
+        WorkoutEvaluation.objects.filter(
+            user=request.user,
+            evaluation_type=WorkoutEvaluation.EvaluationType.SESSION,
+            workout_session=session,
+        )
+        .order_by("-created_at")
+        .first()
+    )
+    if existing_evaluation:
+        messages.info(request, "This session has already been evaluated.")
+        return redirect("evaluation_detail", evaluation_id=existing_evaluation.id)
     try:
         evaluation, _token_usage = evaluate_session_for_user(request.user, session)
     except Exception as exc:

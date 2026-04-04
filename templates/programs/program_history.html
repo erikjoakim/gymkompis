@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Program History | GymKompis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Program history</h1>
+        <p>Review your active and archived programs, then restore an older plan when needed.</p>
+    </div>
+    <div class="actions">
+        <a class="button-link" href="{% url 'current_program' %}">Current program</a>
+        <a class="button-link" href="{% url 'generate_program' %}">Generate with AI</a>
+    </div>
+</div>
+
+{% if programs %}
+    <div class="stack">
+        {% for program in programs %}
+            <article class="card">
+                <div class="page-header compact-header">
+                    <div>
+                        <h2>{{ program.name }}</h2>
+                        <p>
+                            Version {{ program.version_number }} |
+                            {{ program.get_status_display }} |
+                            {{ program.get_source_display }} |
+                            {{ program.created_at|date:"Y-m-d H:i" }}
+                        </p>
+                    </div>
+                    <div class="actions">
+                        <a href="{% url 'program_detail' program.id %}">View</a>
+                        {% if program.status == "archived" %}
+                            <form method="post" action="{% url 'restore_program' program.id %}" class="inline-form">
+                                {% csrf_token %}
+                                <button type="submit">Restore</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if program.request_prompt %}
+                    <p><strong>Original prompt:</strong> {{ program.request_prompt|truncatechars:180 }}</p>
+                {% endif %}
+                {% if program.current_program.goal_summary %}
+                    <p>{{ program.current_program.goal_summary }}</p>
+                {% endif %}
+            </article>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="card">
+        <p>No programs have been saved yet.</p>
+    </div>
+{% endif %}
+{% endblock %}

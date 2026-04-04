@@ -8,8 +8,19 @@
     <div>
         <h1>{{ program.name }}</h1>
         <p>{{ program_json.goal_summary }}</p>
+        <p><strong>Status:</strong> {{ program.get_status_display }} | <strong>Version:</strong> {{ program.version_number }}</p>
     </div>
-    <a class="button-link" href="{% url 'train_index' %}">Go to train</a>
+    <div class="actions">
+        <a class="button-link" href="{% url 'program_history' %}">Program history</a>
+        {% if program.status == "active" %}
+            <a class="button-link" href="{% url 'train_index' %}">Go to train</a>
+        {% else %}
+            <form method="post" action="{% url 'restore_program' program.id %}" class="inline-form">
+                {% csrf_token %}
+                <button type="submit">Restore this program</button>
+            </form>
+        {% endif %}
+    </div>
 </div>
 
 <div class="card">

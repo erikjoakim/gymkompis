@@ -9,7 +9,7 @@ from .image_generation import build_exercise_image_prompt, generate_and_attach_e
 from .library import import_exercise_library
 from .manual_services import create_manual_exercise_for_day, publish_manual_program
 from .models import Exercise, ManualProgramDay, ManualProgramDraft, TrainingProgram
-from .services import generate_program_for_user
+from .services import generate_program_for_user, restore_program_for_user
 
 
 @override_settings(OPENAI_MOCK_RESPONSES=True, OPENAI_API_KEY="")
@@ -32,6 +32,23 @@ class ProgramGenerationTests(TestCase):
         first.refresh_from_db()
         self.assertEqual(first.status, TrainingProgram.Status.ARCHIVED)
         self.assertEqual(second.status, TrainingProgram.Status.ACTIVE)
+
+    def test_restore_program_creates_new_active_copy(self):
+        first = generate_program_for_user(self.user, "First")
+        second = generate_program_for_user(self.user, "Second")
+        first.refresh_from_db()
+        self.assertEqual(first.status, TrainingProgram.Status.ARCHIVED)
+
+        restored = restore_program_for_user(self.user, first)
+
+        second.refresh_from_db()
+        first.refresh_from_db()
+        self.assertEqual(second.status, TrainingProgram.Status.ARCHIVED)
+        self.assertEqual(first.status, TrainingProgram.Status.ARCHIVED)
+        self.assertEqual(restored.status, TrainingProgram.Status.ACTIVE)
+        self.assertEqual(restored.version_number, second.version_number + 1)
+        self.assertEqual(restored.name, first.name)
+        self.assertEqual(restored.current_program, first.current_program)
 
 
 class ManualProgramBuilderTests(TestCase):

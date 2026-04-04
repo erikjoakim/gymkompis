@@ -16,7 +16,7 @@ from .forms import (
 from .manual_services import DAY_ORDER, create_manual_exercise_for_day, publish_manual_program
 from .models import Exercise, ManualProgramDay, ManualProgramDraft, ManualProgramExercise, TrainingProgram
 from .prompt_examples import load_program_prompt_examples
-from .services import build_program_profile_context, generate_program_for_user
+from .services import build_program_profile_context, generate_program_for_user, restore_program_for_user
 from .structure import get_day_blocks
 
 
@@ -145,6 +145,12 @@ def current_program_view(request):
 
 
 @login_required
+def program_history_view(request):
+    programs = TrainingProgram.objects.filter(user=request.user).order_by("-created_at")
+    return render(request, "programs/program_history.html", {"programs": programs})
+
+
+@login_required
 def generate_program_view(request):
     form = ProgramGenerateForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
@@ -191,6 +197,23 @@ def program_detail_view(request, program_id):
         "programs/program_detail.html",
         {"program": program, "program_json": program_json, "program_days": program_days},
     )
+
+
+@login_required
+def restore_program_view(request, program_id):
+    program = get_object_or_404(TrainingProgram, pk=program_id, user=request.user)
+    if request.method != "POST":
+        return redirect("program_detail", program_id=program.id)
+    try:
+        restored_program = restore_program_for_user(request.user, program)
+    except Exception as exc:
+        messages.error(request, f"Could not restore program: {exc}")
+        return redirect("program_history")
+    messages.success(
+        request,
+        f"{program.name} was restored as version {restored_program.version_number} and set as your active program.",
+    )
+    return redirect("program_detail", program_id=restored_program.id)
 
 
 @login_required
