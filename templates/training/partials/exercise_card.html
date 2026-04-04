@@ -67,7 +67,7 @@
                 <tr>
                     <th>Set</th>
                     <th>Target</th>
-                    <th>Load guidance</th>
+                    <th>Load</th>
                     <th>Timer</th>
                     <th>Actual result</th>
                     <th>Weight</th>
@@ -84,7 +84,7 @@
                             <div class="help-text mobile-inline-detail">{{ exercise.name }}</div>
                         </td>
                         <td data-label="Target">{{ row.planned|set_target_display }}</td>
-                        <td data-label="Load guidance">{{ row.guidance_display }}</td>
+                        <td data-label="Load">{{ row.guidance_display }}</td>
                         <td data-label="Timer">
                             <div class="set-timer-stack">
                                 <span class="set-timer-display" data-default-label="{% if row.saved_duration_seconds %}{{ row.saved_duration_seconds }} sec{% else %}Not timed{% endif %}">
@@ -102,7 +102,7 @@
                         <td data-label="Weight">{% if row.show_weight %}{{ row.weight }}{% else %}-{% endif %}</td>
                         <td data-label="Effort / RPE">{{ row.rpe }}</td>
                         <td data-label="Notes">{{ row.notes }}</td>
-                        <td data-label="Controls">
+                        <td>
                             <div class="set-control-buttons set-edge-controls">
                                 <button type="button" class="set-start-button" data-set-number="{{ row.set_number }}">
                                     {% if row.saved %}Restart{% else %}Start set{% endif %}
