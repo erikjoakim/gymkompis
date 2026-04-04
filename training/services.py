@@ -5,6 +5,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from programs.models import TrainingProgram
+from programs.structure import get_day_all_exercises
 
 from .models import WorkoutSession
 
@@ -36,13 +37,15 @@ def user_local_date(user):
 
 def build_session_json(program: TrainingProgram, day: dict, workout_date):
     exercises = []
-    for exercise in day.get("exercises", []):
+    for exercise in get_day_all_exercises(day):
         exercises.append(
             {
                 "exercise_key": exercise["exercise_key"],
                 "name": exercise["name"],
                 "order": exercise["order"],
                 "modality": exercise["modality"],
+                "image_url": exercise.get("image_url"),
+                "exercise_group": exercise.get("exercise_group", "main"),
                 "status": "pending",
                 "planned": {"set_plan": deepcopy(exercise["set_plan"])},
                 "actual_sets": [],

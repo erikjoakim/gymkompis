@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}{{ draft.name }} | Manual Builder{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{{ draft.name }}</h1>
+        <p>Build the structure of your plan, then open each day to add warmups and exercises.</p>
+    </div>
+    <div class="actions">
+        <a class="button-link" href="{% url 'manual_program_list' %}">All drafts</a>
+        <form method="post" class="inline-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="publish">
+            <button type="submit">Publish plan</button>
+        </form>
+    </div>
+</div>
+
+<div class="grid-two">
+    <section class="card">
+        <h2>Plan details</h2>
+        <form method="post" class="stack">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="save_draft">
+            {{ form.as_p }}
+            <button type="submit">Save draft details</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2>Add a day</h2>
+        <form method="post" class="stack">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add_day">
+            {{ day_form.as_p }}
+            <button type="submit">Add day</button>
+        </form>
+    </section>
+</div>
+
+<section class="card">
+    <h2>Days in this plan</h2>
+    {% if days %}
+        <div class="stack">
+            {% for day in days %}
+                <article class="exercise-card">
+                    <div class="page-header compact-header">
+                        <div>
+                            <h3>{{ day.day_label }} - {{ day.name }}</h3>
+                            <p><strong>Type:</strong> {{ day.get_day_type_display }}</p>
+                            {% if day.notes %}<p>{{ day.notes }}</p>{% endif %}
+                        </div>
+                        <div class="actions">
+                            <a class="button-link" href="{% url 'manual_program_day_detail' draft.id day.id %}">Edit exercises</a>
+                            <form method="post" class="inline-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete_day">
+                                <input type="hidden" name="day_id" value="{{ day.id }}">
+                                <button type="submit" class="ghost-link">Delete day</button>
+                            </form>
+                        </div>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No days added yet.</p>
+    {% endif %}
+</section>
+{% endblock %}

@@ -21,20 +21,21 @@ Core goals:
 
 - Backend: Django
 - API/UI: Django templates first, with optional HTMX for smoother interaction
-- Database: Supabase PostgreSQL
-- Hosting: Render web service
+- Database: Neon PostgreSQL
+- Hosting: Railway web service
 - Auth: Django auth initially, `django-allauth` for Google in v2
 - Payments/subscriptions: Stripe after MVP, with premium feature gating modeled from day one
 - OpenAI integration: server-side service layer
-- Background jobs: recommended for LLM tasks using Celery/RQ or Render background worker
+- Background jobs: recommended for LLM tasks using Celery/RQ or a Railway worker/service later if needed
 
 ### High-level design
 
 - Django remains the source of truth for users, plans, workout logs, evaluations, and subscription state.
-- Supabase is used as managed PostgreSQL, not as the primary auth provider.
+- Neon is used as managed PostgreSQL and accessed through Django via `DATABASE_URL`.
 - OpenAI calls are encapsulated in service modules so prompts, schemas, retries, and logging stay isolated from views.
 - JSON is stored where the product explicitly needs flexible AI output and workout snapshots.
 - Relational models should still be used around the JSON to support querying, permissions, analytics, and future growth.
+- Neon is a good fit for early releases because its free/usage-based model is friendlier for low-traffic hobby projects than Supabase Pro.
 
 ## 3. Main User Flows
 
@@ -711,7 +712,7 @@ Premium tier suggestion:
 ## 11. Security and Reliability
 
 - Use a custom user model from the start
-- Store secrets in Render environment variables
+- Store secrets in Railway environment variables
 - Never expose OpenAI keys in frontend code
 - Enforce per-user access control on all plans and sessions
 - Add rate limiting for generation and evaluation endpoints
@@ -727,18 +728,19 @@ Premium tier suggestion:
 - Add Django admin support for users, programs, workout sessions, evaluations, and subscriptions
 - Log prompt version and model name for every LLM-backed generation/evaluation request
 - Add structured application logging for generation failures and webhook processing
-- Add basic healthcheck endpoint for Render
+- Add basic healthcheck endpoint for Railway
 - Add error monitoring later, for example Sentry
 - Add a management command or admin action to re-run failed program generation/evaluation jobs safely
 
 ## 13. Deployment Plan
 
-### Render
+### Railway
 
-- Create Render web service for Django app
+- Create Railway web service for Django app
 - Use Gunicorn
 - Run migrations during deploy
 - Configure static files with WhiteNoise or external storage later
+- Disable serverless/sleeping behavior if you want to avoid cold starts after inactivity
 - Set environment variables:
   - `DJANGO_SECRET_KEY`
   - `DEBUG`
@@ -749,11 +751,13 @@ Premium tier suggestion:
   - Google OAuth credentials in v2
   - Stripe keys when subscriptions are added
 
-### Supabase
+### Neon
 
-- Create PostgreSQL database in Supabase
-- Use Supabase connection string as Django `DATABASE_URL`
-- Enable backups and connection pooling if needed
+- Create a Neon PostgreSQL project
+- Use the Neon pooled Postgres connection string as Django `DATABASE_URL`
+- Keep `sslmode=require` in the connection string
+- Expect possible scale-to-zero cold starts on low-traffic environments
+- Upgrade to a paid Neon plan later if always-on behavior or larger compute/storage is needed
 - Keep Django migrations as the schema source of truth
 
 ## 14. Recommended Milestones
@@ -761,8 +765,8 @@ Premium tier suggestion:
 ### Milestone 1: Foundation
 
 - Create Django project and apps
-- Configure Supabase PostgreSQL
-- Configure Render deployment
+- Configure Neon PostgreSQL
+- Configure Railway deployment
 - Create custom user model
 - Build registration, login, logout, profile
 - Add base templates, navigation, and HTMX integration
@@ -845,7 +849,7 @@ Premium tier suggestion:
 - partial workout save/resume
 - single-session vs period evaluation behavior
 - premium vs free restrictions
-- deployment env var issues on Render
+- deployment env var issues on Railway
 - timezone-sensitive date boundaries
 - broken or missing external video links
 
@@ -1301,7 +1305,7 @@ Implementation tasks:
    - static files
    - template dirs
    - login/logout redirects
-   - Render-ready settings
+   - Railway-ready settings
 3. Add local `.env` support and production env-var documentation
 4. Add baseline logging configuration and healthcheck route
 
@@ -1455,12 +1459,12 @@ Implementation tasks:
 3. Add management commands for:
    - seed demo data
    - replay or retry failed generations/evaluations
-4. Validate Render deployment:
+4. Validate Railway deployment:
    - migrations
    - static files
    - env vars
    - healthcheck
-5. Validate Supabase connection pooling and backups
+5. Validate Neon pooled connection settings and basic backup/restore expectations
 
 ### Phase 8: Stripe integration
 
@@ -1502,7 +1506,7 @@ The MVP should be considered complete when all of the following are true:
 - a user can request both single-session and period evaluations
 - a user can generate a new plan that includes recent training history
 - free vs premium rules are enforced in code
-- the app deploys successfully on Render with Supabase
+- the app deploys successfully on Railway with Neon
 - core tests pass and key manual QA scenarios are verified
 
 ## 23. Final Recommendation

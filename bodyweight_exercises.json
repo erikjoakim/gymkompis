@@ -1,0 +1,1513 @@
+[
+  {
+    "exercise_id": "bw_001",
+    "name": "Push-Up",
+    "equipment": "Body Weight",
+    "category": "Upper Body Push",
+    "movement_pattern": "Horizontal press",
+    "primary_muscles": [
+      "Pectoralis Major"
+    ],
+    "secondary_muscles": [
+      "Anterior Deltoid",
+      "Triceps"
+    ],
+    "stabilizers": [
+      "Core",
+      "Serratus Anterior"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_002",
+    "name": "Incline Push-Up",
+    "equipment": "Body Weight",
+    "category": "Upper Body Push",
+    "movement_pattern": "Horizontal press",
+    "primary_muscles": [
+      "Pectoralis Major"
+    ],
+    "secondary_muscles": [
+      "Anterior Deltoid",
+      "Triceps"
+    ],
+    "stabilizers": [
+      "Core",
+      "Serratus Anterior"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_003",
+    "name": "Decline Push-Up",
+    "equipment": "Body Weight",
+    "category": "Upper Body Push",
+    "movement_pattern": "Horizontal press",
+    "primary_muscles": [
+      "Upper Pectoralis Major",
+      "Anterior Deltoid"
+    ],
+    "secondary_muscles": [
+      "Triceps"
+    ],
+    "stabilizers": [
+      "Core",
+      "Serratus Anterior"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_004",
+    "name": "Wide Push-Up",
+    "equipment": "Body Weight",
+    "category": "Upper Body Push",
+    "movement_pattern": "Horizontal press",
+    "primary_muscles": [
+      "Pectoralis Major"
+    ],
+    "secondary_muscles": [
+      "Anterior Deltoid",
+      "Triceps"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_005",
+    "name": "Diamond Push-Up",
+    "equipment": "Body Weight",
+    "category": "Upper Body Push",
+    "movement_pattern": "Horizontal press",
+    "primary_muscles": [
+      "Triceps"
+    ],
+    "secondary_muscles": [
+      "Pectoralis Major",
+      "Anterior Deltoid"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_006",
+    "name": "Pseudo Planche Push-Up",
+    "equipment": "Body Weight",
+    "category": "Upper Body Push",
+    "movement_pattern": "Horizontal press",
+    "primary_muscles": [
+      "Anterior Deltoid",
+      "Pectoralis Major"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Serratus Anterior"
+    ],
+    "stabilizers": [
+      "Core",
+      "Wrist Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_007",
+    "name": "Pike Push-Up",
+    "equipment": "Body Weight",
+    "category": "Upper Body Push",
+    "movement_pattern": "Vertical press",
+    "primary_muscles": [
+      "Anterior Deltoid",
+      "Medial Deltoid"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Upper Trapezius"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_008",
+    "name": "Handstand Push-Up",
+    "equipment": "Body Weight",
+    "category": "Upper Body Push",
+    "movement_pattern": "Vertical press",
+    "primary_muscles": [
+      "Anterior Deltoid",
+      "Medial Deltoid"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Upper Trapezius"
+    ],
+    "stabilizers": [
+      "Core",
+      "Rotator Cuff"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_009",
+    "name": "Bench Dip",
+    "equipment": "Body Weight",
+    "category": "Upper Body Push",
+    "movement_pattern": "Dip",
+    "primary_muscles": [
+      "Triceps"
+    ],
+    "secondary_muscles": [
+      "Pectoralis Major",
+      "Anterior Deltoid"
+    ],
+    "stabilizers": [
+      "Scapular Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_010",
+    "name": "Parallel Bar Dip",
+    "equipment": "Body Weight",
+    "category": "Upper Body Push",
+    "movement_pattern": "Dip",
+    "primary_muscles": [
+      "Triceps",
+      "Pectoralis Major"
+    ],
+    "secondary_muscles": [
+      "Anterior Deltoid"
+    ],
+    "stabilizers": [
+      "Core",
+      "Scapular Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_011",
+    "name": "Pull-Up",
+    "equipment": "Body Weight",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Vertical pull",
+    "primary_muscles": [
+      "Latissimus Dorsi"
+    ],
+    "secondary_muscles": [
+      "Biceps",
+      "Rhomboids",
+      "Lower Trapezius",
+      "Teres Major"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_012",
+    "name": "Chin-Up",
+    "equipment": "Body Weight",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Vertical pull",
+    "primary_muscles": [
+      "Latissimus Dorsi",
+      "Biceps"
+    ],
+    "secondary_muscles": [
+      "Rhomboids",
+      "Lower Trapezius",
+      "Teres Major"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_013",
+    "name": "Neutral Grip Pull-Up",
+    "equipment": "Body Weight",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Vertical pull",
+    "primary_muscles": [
+      "Latissimus Dorsi"
+    ],
+    "secondary_muscles": [
+      "Biceps",
+      "Brachialis",
+      "Rhomboids"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_014",
+    "name": "Inverted Row",
+    "equipment": "Body Weight",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Horizontal pull",
+    "primary_muscles": [
+      "Rhomboids",
+      "Middle Trapezius",
+      "Latissimus Dorsi"
+    ],
+    "secondary_muscles": [
+      "Biceps",
+      "Posterior Deltoid"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_015",
+    "name": "Australian Pull-Up",
+    "equipment": "Body Weight",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Horizontal pull",
+    "primary_muscles": [
+      "Rhomboids",
+      "Middle Trapezius",
+      "Latissimus Dorsi"
+    ],
+    "secondary_muscles": [
+      "Biceps",
+      "Posterior Deltoid"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_016",
+    "name": "Towel Row",
+    "equipment": "Body Weight",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Horizontal pull",
+    "primary_muscles": [
+      "Latissimus Dorsi",
+      "Rhomboids"
+    ],
+    "secondary_muscles": [
+      "Biceps",
+      "Posterior Deltoid"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_017",
+    "name": "Scapular Pull-Up",
+    "equipment": "Body Weight",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Scapular depression",
+    "primary_muscles": [
+      "Lower Trapezius",
+      "Latissimus Dorsi"
+    ],
+    "secondary_muscles": [
+      "Rhomboids"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_018",
+    "name": "Bodyweight Rear Delt Row",
+    "equipment": "Body Weight",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Horizontal pull",
+    "primary_muscles": [
+      "Posterior Deltoid"
+    ],
+    "secondary_muscles": [
+      "Rhomboids",
+      "Middle Trapezius",
+      "Biceps"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_019",
+    "name": "Prone Y Raise",
+    "equipment": "Body Weight",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Scapular upward rotation",
+    "primary_muscles": [
+      "Lower Trapezius"
+    ],
+    "secondary_muscles": [
+      "Posterior Deltoid",
+      "Serratus Anterior"
+    ],
+    "stabilizers": [
+      "Rotator Cuff"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_020",
+    "name": "Prone T Raise",
+    "equipment": "Body Weight",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Horizontal abduction",
+    "primary_muscles": [
+      "Posterior Deltoid",
+      "Middle Trapezius"
+    ],
+    "secondary_muscles": [
+      "Rhomboids"
+    ],
+    "stabilizers": [
+      "Rotator Cuff"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_021",
+    "name": "Air Squat",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Squat",
+    "primary_muscles": [
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors",
+      "Calves"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_022",
+    "name": "Tempo Squat",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Squat",
+    "primary_muscles": [
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_023",
+    "name": "Pause Squat",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Squat",
+    "primary_muscles": [
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_024",
+    "name": "Jump Squat",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Squat / jump",
+    "primary_muscles": [
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Calves",
+      "Hamstrings"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_025",
+    "name": "Split Squat",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Lunge",
+    "primary_muscles": [
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors",
+      "Calves"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_026",
+    "name": "Reverse Lunge",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Lunge",
+    "primary_muscles": [
+      "Gluteus Maximus",
+      "Quadriceps"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors",
+      "Calves"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_027",
+    "name": "Forward Lunge",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Lunge",
+    "primary_muscles": [
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors",
+      "Calves"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_028",
+    "name": "Walking Lunge",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Lunge",
+    "primary_muscles": [
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors",
+      "Calves"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_029",
+    "name": "Lateral Lunge",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Lateral lunge",
+    "primary_muscles": [
+      "Adductors",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Quadriceps",
+      "Hamstrings"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_030",
+    "name": "Cossack Squat",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Lateral squat",
+    "primary_muscles": [
+      "Adductors",
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_031",
+    "name": "Bulgarian Split Squat",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Single-leg squat",
+    "primary_muscles": [
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors",
+      "Calves"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_032",
+    "name": "Step-Up",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Step-up",
+    "primary_muscles": [
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Calves"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_033",
+    "name": "Single-Leg Sit-to-Stand",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Single-leg squat",
+    "primary_muscles": [
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_034",
+    "name": "Wall Sit",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Isometric squat",
+    "primary_muscles": [
+      "Quadriceps"
+    ],
+    "secondary_muscles": [
+      "Gluteus Maximus"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_035",
+    "name": "Glute Bridge",
+    "equipment": "Body Weight",
+    "category": "Posterior Chain",
+    "movement_pattern": "Hip extension",
+    "primary_muscles": [
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_036",
+    "name": "Single-Leg Glute Bridge",
+    "equipment": "Body Weight",
+    "category": "Posterior Chain",
+    "movement_pattern": "Hip extension",
+    "primary_muscles": [
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_037",
+    "name": "Hip Thrust",
+    "equipment": "Body Weight",
+    "category": "Posterior Chain",
+    "movement_pattern": "Hip extension",
+    "primary_muscles": [
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_038",
+    "name": "Single-Leg Hip Thrust",
+    "equipment": "Body Weight",
+    "category": "Posterior Chain",
+    "movement_pattern": "Hip extension",
+    "primary_muscles": [
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_039",
+    "name": "Nordic Hamstring Curl",
+    "equipment": "Body Weight",
+    "category": "Posterior Chain",
+    "movement_pattern": "Knee flexion",
+    "primary_muscles": [
+      "Hamstrings"
+    ],
+    "secondary_muscles": [
+      "Gluteus Maximus",
+      "Calves"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_040",
+    "name": "Good Morning",
+    "equipment": "Body Weight",
+    "category": "Posterior Chain",
+    "movement_pattern": "Hip hinge",
+    "primary_muscles": [
+      "Hamstrings",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Erector Spinae"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_041",
+    "name": "Single-Leg Romanian Deadlift",
+    "equipment": "Body Weight",
+    "category": "Posterior Chain",
+    "movement_pattern": "Hip hinge",
+    "primary_muscles": [
+      "Hamstrings",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Erector Spinae"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_042",
+    "name": "Back Extension",
+    "equipment": "Body Weight",
+    "category": "Posterior Chain",
+    "movement_pattern": "Spinal extension / hip extension",
+    "primary_muscles": [
+      "Erector Spinae"
+    ],
+    "secondary_muscles": [
+      "Gluteus Maximus",
+      "Hamstrings"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_043",
+    "name": "Donkey Kick",
+    "equipment": "Body Weight",
+    "category": "Posterior Chain",
+    "movement_pattern": "Hip extension",
+    "primary_muscles": [
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_044",
+    "name": "Fire Hydrant",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Hip abduction",
+    "primary_muscles": [
+      "Gluteus Medius",
+      "Gluteus Minimus"
+    ],
+    "secondary_muscles": [
+      "Tensor Fasciae Latae"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_045",
+    "name": "Side-Lying Leg Raise",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Hip abduction",
+    "primary_muscles": [
+      "Gluteus Medius",
+      "Gluteus Minimus"
+    ],
+    "secondary_muscles": [
+      "Tensor Fasciae Latae"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_046",
+    "name": "Copenhagen Plank",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Hip adduction",
+    "primary_muscles": [
+      "Adductors"
+    ],
+    "secondary_muscles": [
+      "Obliques",
+      "Gluteus Medius"
+    ],
+    "stabilizers": [
+      "Core",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_047",
+    "name": "Standing Calf Raise",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Ankle plantarflexion",
+    "primary_muscles": [
+      "Gastrocnemius"
+    ],
+    "secondary_muscles": [
+      "Soleus"
+    ],
+    "stabilizers": [
+      "Foot Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_048",
+    "name": "Single-Leg Calf Raise",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Ankle plantarflexion",
+    "primary_muscles": [
+      "Gastrocnemius",
+      "Soleus"
+    ],
+    "secondary_muscles": [],
+    "stabilizers": [
+      "Foot Stabilizers",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_049",
+    "name": "Seated Calf Raise",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Ankle plantarflexion",
+    "primary_muscles": [
+      "Soleus"
+    ],
+    "secondary_muscles": [
+      "Gastrocnemius"
+    ],
+    "stabilizers": [
+      "Foot Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_050",
+    "name": "Tibialis Raise",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Ankle dorsiflexion",
+    "primary_muscles": [
+      "Tibialis Anterior"
+    ],
+    "secondary_muscles": [],
+    "stabilizers": [
+      "Foot Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_051",
+    "name": "Plank",
+    "equipment": "Body Weight",
+    "category": "Core",
+    "movement_pattern": "Anti-extension",
+    "primary_muscles": [
+      "Transverse Abdominis",
+      "Rectus Abdominis"
+    ],
+    "secondary_muscles": [
+      "Obliques"
+    ],
+    "stabilizers": [
+      "Gluteus Maximus",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_052",
+    "name": "Side Plank",
+    "equipment": "Body Weight",
+    "category": "Core",
+    "movement_pattern": "Anti-lateral flexion",
+    "primary_muscles": [
+      "Obliques",
+      "Transverse Abdominis"
+    ],
+    "secondary_muscles": [
+      "Quadratus Lumborum"
+    ],
+    "stabilizers": [
+      "Gluteus Medius",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_053",
+    "name": "RKC Plank",
+    "equipment": "Body Weight",
+    "category": "Core",
+    "movement_pattern": "Anti-extension",
+    "primary_muscles": [
+      "Transverse Abdominis",
+      "Rectus Abdominis"
+    ],
+    "secondary_muscles": [
+      "Obliques"
+    ],
+    "stabilizers": [
+      "Gluteus Maximus",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_054",
+    "name": "Dead Bug",
+    "equipment": "Body Weight",
+    "category": "Core",
+    "movement_pattern": "Anti-extension",
+    "primary_muscles": [
+      "Transverse Abdominis"
+    ],
+    "secondary_muscles": [
+      "Rectus Abdominis",
+      "Obliques"
+    ],
+    "stabilizers": [
+      "Hip Flexors",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_055",
+    "name": "Bird Dog",
+    "equipment": "Body Weight",
+    "category": "Core",
+    "movement_pattern": "Anti-rotation",
+    "primary_muscles": [
+      "Erector Spinae",
+      "Transverse Abdominis"
+    ],
+    "secondary_muscles": [
+      "Gluteus Maximus",
+      "Shoulder Stabilizers"
+    ],
+    "stabilizers": [
+      "Obliques",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_056",
+    "name": "Hollow Body Hold",
+    "equipment": "Body Weight",
+    "category": "Core",
+    "movement_pattern": "Anti-extension",
+    "primary_muscles": [
+      "Rectus Abdominis",
+      "Transverse Abdominis"
+    ],
+    "secondary_muscles": [
+      "Hip Flexors"
+    ],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_057",
+    "name": "Reverse Crunch",
+    "equipment": "Body Weight",
+    "category": "Core",
+    "movement_pattern": "Spinal flexion / posterior pelvic tilt",
+    "primary_muscles": [
+      "Rectus Abdominis"
+    ],
+    "secondary_muscles": [
+      "Obliques",
+      "Hip Flexors"
+    ],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_058",
+    "name": "Crunch",
+    "equipment": "Body Weight",
+    "category": "Core",
+    "movement_pattern": "Spinal flexion",
+    "primary_muscles": [
+      "Rectus Abdominis"
+    ],
+    "secondary_muscles": [
+      "Obliques"
+    ],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_059",
+    "name": "Sit-Up",
+    "equipment": "Body Weight",
+    "category": "Core",
+    "movement_pattern": "Trunk flexion",
+    "primary_muscles": [
+      "Rectus Abdominis",
+      "Hip Flexors"
+    ],
+    "secondary_muscles": [
+      "Obliques"
+    ],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_060",
+    "name": "V-Up",
+    "equipment": "Body Weight",
+    "category": "Core",
+    "movement_pattern": "Trunk flexion / hip flexion",
+    "primary_muscles": [
+      "Rectus Abdominis",
+      "Hip Flexors"
+    ],
+    "secondary_muscles": [
+      "Obliques"
+    ],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_061",
+    "name": "Bicycle Crunch",
+    "equipment": "Body Weight",
+    "category": "Core",
+    "movement_pattern": "Trunk rotation",
+    "primary_muscles": [
+      "Obliques"
+    ],
+    "secondary_muscles": [
+      "Rectus Abdominis",
+      "Hip Flexors"
+    ],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_062",
+    "name": "Mountain Climber",
+    "equipment": "Body Weight",
+    "category": "Core",
+    "movement_pattern": "Anti-extension / hip flexion",
+    "primary_muscles": [
+      "Transverse Abdominis",
+      "Rectus Abdominis"
+    ],
+    "secondary_muscles": [
+      "Hip Flexors",
+      "Anterior Deltoid"
+    ],
+    "stabilizers": [
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_063",
+    "name": "Bear Crawl",
+    "equipment": "Body Weight",
+    "category": "Core",
+    "movement_pattern": "Crawl / anti-rotation",
+    "primary_muscles": [
+      "Transverse Abdominis",
+      "Shoulders"
+    ],
+    "secondary_muscles": [
+      "Quadriceps",
+      "Hip Flexors",
+      "Pectoralis Major"
+    ],
+    "stabilizers": [
+      "Obliques",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_064",
+    "name": "Hanging Knee Raise",
+    "equipment": "Body Weight",
+    "category": "Core",
+    "movement_pattern": "Hip flexion",
+    "primary_muscles": [
+      "Rectus Abdominis",
+      "Hip Flexors"
+    ],
+    "secondary_muscles": [
+      "Obliques"
+    ],
+    "stabilizers": [
+      "Shoulder Stabilizers",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_065",
+    "name": "Hanging Leg Raise",
+    "equipment": "Body Weight",
+    "category": "Core",
+    "movement_pattern": "Hip flexion",
+    "primary_muscles": [
+      "Rectus Abdominis",
+      "Hip Flexors"
+    ],
+    "secondary_muscles": [
+      "Obliques"
+    ],
+    "stabilizers": [
+      "Shoulder Stabilizers",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_066",
+    "name": "L-Sit",
+    "equipment": "Body Weight",
+    "category": "Core",
+    "movement_pattern": "Isometric hip flexion",
+    "primary_muscles": [
+      "Hip Flexors",
+      "Rectus Abdominis"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Shoulders"
+    ],
+    "stabilizers": [
+      "Scapular Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_067",
+    "name": "Russian Twist",
+    "equipment": "Body Weight",
+    "category": "Core",
+    "movement_pattern": "Trunk rotation",
+    "primary_muscles": [
+      "Obliques"
+    ],
+    "secondary_muscles": [
+      "Rectus Abdominis",
+      "Hip Flexors"
+    ],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_068",
+    "name": "Superman Hold",
+    "equipment": "Body Weight",
+    "category": "Core",
+    "movement_pattern": "Spinal extension",
+    "primary_muscles": [
+      "Erector Spinae"
+    ],
+    "secondary_muscles": [
+      "Gluteus Maximus",
+      "Posterior Deltoid"
+    ],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_069",
+    "name": "Burpee",
+    "equipment": "Body Weight",
+    "category": "Full Body",
+    "movement_pattern": "Squat / press / jump",
+    "primary_muscles": [
+      "Quadriceps",
+      "Pectoralis Major"
+    ],
+    "secondary_muscles": [
+      "Gluteus Maximus",
+      "Triceps",
+      "Anterior Deltoid",
+      "Core"
+    ],
+    "stabilizers": [
+      "Calves",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_070",
+    "name": "Squat Thrust",
+    "equipment": "Body Weight",
+    "category": "Full Body",
+    "movement_pattern": "Squat / plank transition",
+    "primary_muscles": [
+      "Quadriceps",
+      "Core"
+    ],
+    "secondary_muscles": [
+      "Shoulders",
+      "Gluteus Maximus"
+    ],
+    "stabilizers": [
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_071",
+    "name": "Bear Plank Shoulder Tap",
+    "equipment": "Body Weight",
+    "category": "Core",
+    "movement_pattern": "Anti-rotation",
+    "primary_muscles": [
+      "Transverse Abdominis",
+      "Obliques"
+    ],
+    "secondary_muscles": [
+      "Anterior Deltoid",
+      "Pectoralis Major"
+    ],
+    "stabilizers": [
+      "Shoulder Stabilizers",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_072",
+    "name": "Skater Squat",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Single-leg squat",
+    "primary_muscles": [
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_073",
+    "name": "Pistol Squat",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Single-leg squat",
+    "primary_muscles": [
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors",
+      "Calves"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_074",
+    "name": "Shrimp Squat",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Single-leg squat",
+    "primary_muscles": [
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_075",
+    "name": "Broad Jump",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Horizontal jump",
+    "primary_muscles": [
+      "Gluteus Maximus",
+      "Quadriceps"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Calves"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_076",
+    "name": "Box Jump",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Vertical jump",
+    "primary_muscles": [
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Calves",
+      "Hamstrings"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_077",
+    "name": "Single-Leg Hop",
+    "equipment": "Body Weight",
+    "category": "Lower Body",
+    "movement_pattern": "Single-leg plyometric",
+    "primary_muscles": [
+      "Calves",
+      "Quadriceps"
+    ],
+    "secondary_muscles": [
+      "Gluteus Maximus",
+      "Hamstrings"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers",
+      "Foot Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "bw_078",
+    "name": "Push-Up to Downward Dog",
+    "equipment": "Body Weight",
+    "category": "Upper Body Push",
+    "movement_pattern": "Horizontal press / shoulder flexion",
+    "primary_muscles": [
+      "Pectoralis Major",
+      "Anterior Deltoid"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Serratus Anterior"
+    ],
+    "stabilizers": [
+      "Core",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_079",
+    "name": "Dive Bomber Push-Up",
+    "equipment": "Body Weight",
+    "category": "Upper Body Push",
+    "movement_pattern": "Press transition",
+    "primary_muscles": [
+      "Pectoralis Major",
+      "Anterior Deltoid"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Serratus Anterior"
+    ],
+    "stabilizers": [
+      "Core",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "bw_080",
+    "name": "Crab Walk",
+    "equipment": "Body Weight",
+    "category": "Full Body",
+    "movement_pattern": "Crawl / shoulder extension",
+    "primary_muscles": [
+      "Posterior Deltoid",
+      "Triceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Core"
+    ],
+    "stabilizers": [
+      "Shoulder Stabilizers",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  }
+]

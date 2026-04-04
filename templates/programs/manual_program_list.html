@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Manual Plans | GymKompis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Manual plan builder</h1>
+        <p>Build your own program from the exercise library and publish it as an active plan.</p>
+    </div>
+    <a class="button-link" href="{% url 'manual_program_create' %}">Create manual draft</a>
+</div>
+
+{% if drafts %}
+    <div class="grid-two">
+        {% for draft in drafts %}
+            <article class="card">
+                <h2>{{ draft.name }}</h2>
+                <p>{{ draft.goal_summary|default:"No goal summary yet." }}</p>
+                <p><strong>Updated:</strong> {{ draft.updated_at|date:"Y-m-d H:i" }}</p>
+                {% if draft.published_program %}
+                    <p><strong>Last published:</strong> <a href="{% url 'program_detail' draft.published_program.id %}">{{ draft.published_program.name }}</a></p>
+                {% endif %}
+                <a href="{% url 'manual_program_detail' draft.id %}">Open draft</a>
+            </article>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="card">
+        <p>No manual drafts yet.</p>
+        <a href="{% url 'manual_program_create' %}">Create your first manual plan</a>
+    </div>
+{% endif %}
+{% endblock %}

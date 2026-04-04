@@ -1,0 +1,260 @@
+<section style="display:flex;flex-direction:column;gap:1.5rem;width:100%;">
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.5rem;align-items:start;width:100%;">
+        <section id="manual-day-details-card" class="card manual-day-details" style="max-width:none;">
+            <h2>Day details</h2>
+            <form method="post" class="stack">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="save_day">
+                {{ day_form.as_p }}
+                <button type="submit">Save day</button>
+            </form>
+        </section>
+        <section id="manual-day-setup-card" class="card" style="overflow:auto;min-height:0;max-height:24rem;">
+            <h2>Current day setup</h2>
+
+            <div class="section-label">Warmup</div>
+            {% if warmup_entries %}
+                <div class="stack">
+                    {% for item in warmup_entries %}
+                        <article class="builder-selected-card{% if item.is_expanded %} is-expanded{% endif %}">
+                            <div class="builder-selected-summary">
+                                <div class="builder-row-main">
+                                    <div>
+                                        <h3>{{ item.entry.order }}. {{ item.entry.exercise.name }}</h3>
+                                        <p><strong>Warmup</strong> &middot; {{ item.entry.exercise.category }} &middot; {{ item.summary }}</p>
+                                    </div>
+                                </div>
+                                <div class="builder-row-actions" style="display:flex;gap:0.6rem;flex-wrap:nowrap;align-items:center;">
+                                    {% if not item.is_expanded %}
+                                        <form
+                                            method="get"
+                                            hx-get="{% url 'manual_program_day_detail' draft.id day.id %}"
+                                            hx-target="#manual-day-shell"
+                                            hx-swap="innerHTML"
+                                            hx-push-url="true"
+                                        >
+                                            {% for key, value in active_filter_fields %}
+                                                <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                            {% endfor %}
+                                            <input type="hidden" name="expanded" value="{{ item.entry.id }}">
+                                            <button type="submit" style="padding:0.5rem 0.9rem;">Edit</button>
+                                        </form>
+                                    {% endif %}
+                                    <form
+                                        method="post"
+                                        hx-post="{% url 'manual_program_day_detail' draft.id day.id %}"
+                                        hx-target="#manual-day-shell"
+                                        hx-swap="innerHTML"
+                                    >
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete_entry">
+                                        <input type="hidden" name="entry_id" value="{{ item.entry.id }}">
+                                        {% for key, value in active_filter_fields %}
+                                            <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                        {% endfor %}
+                                        <button type="submit" style="padding:0.5rem 0.9rem;">Remove</button>
+                                    </form>
+                                </div>
+                            </div>
+                            {% if item.is_expanded %}
+                                <div class="builder-selected-form">
+                                    <p>{{ item.entry.exercise.instructions }}</p>
+                                    <form
+                                        method="post"
+                                        class="stack"
+                                        hx-post="{% url 'manual_program_day_detail' draft.id day.id %}"
+                                        hx-target="#manual-day-shell"
+                                        hx-swap="innerHTML"
+                                    >
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="update_entry">
+                                        <input type="hidden" name="entry_id" value="{{ item.entry.id }}">
+                                        {% for key, value in active_filter_fields %}
+                                            <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                        {% endfor %}
+                                        {{ item.form.as_p }}
+                                        <button type="submit">Save exercise</button>
+                                    </form>
+                                </div>
+                            {% endif %}
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="help-text">No warmup items selected yet.</p>
+            {% endif %}
+
+            <div class="section-label">Main work</div>
+            {% if main_entries %}
+                <div class="stack">
+                    {% for item in main_entries %}
+                        <article class="builder-selected-card{% if item.is_expanded %} is-expanded{% endif %}">
+                            <div class="builder-selected-summary">
+                                <div class="builder-row-main">
+                                    <div>
+                                        <h3>{{ item.entry.order }}. {{ item.entry.exercise.name }}</h3>
+                                        <p><strong>Main</strong> &middot; {{ item.entry.exercise.category }} &middot; {{ item.summary }}</p>
+                                    </div>
+                                </div>
+                                <div class="builder-row-actions" style="display:flex;gap:0.6rem;flex-wrap:nowrap;align-items:center;">
+                                    {% if not item.is_expanded %}
+                                        <form
+                                            method="get"
+                                            hx-get="{% url 'manual_program_day_detail' draft.id day.id %}"
+                                            hx-target="#manual-day-shell"
+                                            hx-swap="innerHTML"
+                                            hx-push-url="true"
+                                        >
+                                            {% for key, value in active_filter_fields %}
+                                                <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                            {% endfor %}
+                                            <input type="hidden" name="expanded" value="{{ item.entry.id }}">
+                                            <button type="submit" style="padding:0.5rem 0.9rem;">Edit</button>
+                                        </form>
+                                    {% endif %}
+                                    <form
+                                        method="post"
+                                        hx-post="{% url 'manual_program_day_detail' draft.id day.id %}"
+                                        hx-target="#manual-day-shell"
+                                        hx-swap="innerHTML"
+                                    >
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete_entry">
+                                        <input type="hidden" name="entry_id" value="{{ item.entry.id }}">
+                                        {% for key, value in active_filter_fields %}
+                                            <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                        {% endfor %}
+                                        <button type="submit" style="padding:0.5rem 0.9rem;">Remove</button>
+                                    </form>
+                                </div>
+                            </div>
+                            {% if item.is_expanded %}
+                                <div class="builder-selected-form">
+                                    <p>{{ item.entry.exercise.instructions }}</p>
+                                    <form
+                                        method="post"
+                                        class="stack"
+                                        hx-post="{% url 'manual_program_day_detail' draft.id day.id %}"
+                                        hx-target="#manual-day-shell"
+                                        hx-swap="innerHTML"
+                                    >
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="update_entry">
+                                        <input type="hidden" name="entry_id" value="{{ item.entry.id }}">
+                                        {% for key, value in active_filter_fields %}
+                                            <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                        {% endfor %}
+                                        {{ item.form.as_p }}
+                                        <button type="submit">Save exercise</button>
+                                    </form>
+                                </div>
+                            {% endif %}
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="help-text">No main exercises selected yet.</p>
+            {% endif %}
+        </section>
+    </div>
+
+    <section class="card builder-filter-card">
+        <h2>Search exercise library</h2>
+        <form
+            method="get"
+            class="builder-filter-form"
+            hx-get="{% url 'manual_program_day_detail' draft.id day.id %}"
+            hx-target="#manual-day-shell"
+            hx-swap="innerHTML"
+            hx-push-url="true"
+            hx-trigger="change, keyup changed delay:300ms from:input[name='query']"
+        >
+            <div style="display:flex;flex-wrap:nowrap;gap:0.85rem;align-items:end;width:100%;">
+                <div class="builder-filter-item builder-filter-search" style="min-width:0;flex:2 1 0;">
+                    {{ filter_form.query.label_tag }}
+                    {{ filter_form.query }}
+                </div>
+                <div class="builder-filter-item" style="min-width:0;flex:1 1 0;">
+                    {{ filter_form.modality.label_tag }}
+                    {{ filter_form.modality }}
+                </div>
+                <div class="builder-filter-item" style="min-width:0;flex:1 1 0;">
+                    {{ filter_form.category.label_tag }}
+                    {{ filter_form.category }}
+                </div>
+                <div class="builder-filter-item" style="min-width:0;flex:1 1 0;">
+                    {{ filter_form.library_role.label_tag }}
+                    {{ filter_form.library_role }}
+                </div>
+                <div class="builder-filter-item builder-checkbox" style="display:flex;align-items:center;white-space:nowrap;flex:0 0 auto;">
+                    <label style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0;">{{ filter_form.supports_time }} Time-based</label>
+                </div>
+            </div>
+            {% if expanded_entry_id %}
+                <input type="hidden" name="expanded" value="{{ expanded_entry_id }}">
+            {% endif %}
+        </form>
+    </section>
+
+    <section class="card">
+        <div class="page-header compact-header">
+            <div>
+                <h2>Filtered results</h2>
+                <p class="help-text">Exercises already selected for this day are excluded.</p>
+            </div>
+        </div>
+        {% if exercise_results %}
+            <div class="builder-search-results stack">
+                {% for exercise in exercise_results %}
+                    <article class="builder-result-row">
+                        <div class="builder-row-main">
+                            {% if exercise.display_image_url %}
+                                <img src="{{ exercise.display_image_url }}" alt="{{ exercise.name }}" class="exercise-thumb builder-thumb-small">
+                            {% endif %}
+                            <div>
+                                <h3>{{ exercise.name }}</h3>
+                                <p><strong>{{ exercise.category }}</strong> &middot; {{ exercise.equipment }}</p>
+                                <p>{{ exercise.instructions }}</p>
+                                <p class="help-text">{{ exercise.movement_pattern }}{% if exercise.supports_time %} &middot; supports time{% endif %}{% if exercise.supports_reps %} &middot; supports reps{% endif %}</p>
+                            </div>
+                        </div>
+                        <div class="builder-row-actions builder-row-actions-inline" style="display:flex;gap:0.6rem;flex-wrap:nowrap;align-items:start;">
+                            <form
+                                method="post"
+                                hx-post="{% url 'manual_program_day_detail' draft.id day.id %}"
+                                hx-target="#manual-day-shell"
+                                hx-swap="innerHTML"
+                            >
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="add_exercise">
+                                <input type="hidden" name="add-exercise_id" value="{{ exercise.id }}">
+                                <input type="hidden" name="add-block_type" value="warmup">
+                                {% for key, value in active_filter_fields %}
+                                    <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                {% endfor %}
+                                <button type="submit">Add warmup</button>
+                            </form>
+                            <form
+                                method="post"
+                                hx-post="{% url 'manual_program_day_detail' draft.id day.id %}"
+                                hx-target="#manual-day-shell"
+                                hx-swap="innerHTML"
+                            >
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="add_exercise">
+                                <input type="hidden" name="add-exercise_id" value="{{ exercise.id }}">
+                                <input type="hidden" name="add-block_type" value="main">
+                                {% for key, value in active_filter_fields %}
+                                    <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                {% endfor %}
+                                <button type="submit">Add main</button>
+                            </form>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No exercises match the current filter.</p>
+        {% endif %}
+    </section>
+</section>

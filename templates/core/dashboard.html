@@ -8,7 +8,10 @@
         <h1>Dashboard</h1>
         <p>Welcome back, {{ request.user.profile.effective_display_name }}.</p>
     </div>
-    <a class="button-link" href="{% url 'generate_program' %}">Generate new plan</a>
+    <div class="actions">
+        <a class="button-link" href="{% url 'generate_program' %}">Generate with AI</a>
+        <a class="button-link" href="{% url 'manual_program_list' %}">Build manually</a>
+    </div>
 </div>
 
 <section class="grid-two">
@@ -17,10 +20,14 @@
         {% if active_program %}
             <p><strong>{{ active_program.name }}</strong></p>
             <p>Version {{ active_program.version_number }}</p>
+            <p><strong>Source:</strong> {{ active_program.get_source_display }}</p>
             <a href="{% url 'program_detail' active_program.id %}">Open program</a>
         {% else %}
             <p>No active program yet.</p>
-            <a href="{% url 'generate_program' %}">Create your first plan</a>
+            <div class="actions">
+                <a href="{% url 'generate_program' %}">Generate your first plan</a>
+                <a href="{% url 'manual_program_create' %}">Build one manually</a>
+            </div>
         {% endif %}
     </article>
     <article class="card">
@@ -29,6 +36,7 @@
             <li><a href="{% url 'train_index' %}">Start a workout</a></li>
             <li><a href="{% url 'workout_history' %}">Workout history</a></li>
             <li><a href="{% url 'request_period_evaluation' %}">Request period evaluation</a></li>
+            <li><a href="{% url 'manual_program_list' %}">Manual plan builder</a></li>
         </ul>
     </article>
 </section>

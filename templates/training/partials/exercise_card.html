@@ -1,8 +1,22 @@
+{% load gymkompis_extras %}
 <article class="card">
     <h2>{{ exercise.order }}. {{ exercise.name }}</h2>
+    {% if exercise.image_url %}
+        <p><img src="{{ exercise.image_url }}" alt="{{ exercise.name }}" class="exercise-thumb"></p>
+    {% endif %}
+    {% if exercise.exercise_group == "warmup" %}
+        <p><strong>Section:</strong> Warmup</p>
+    {% endif %}
     <p><strong>Instructions:</strong> {{ exercise.instructions }}</p>
     {% if exercise.video_url %}
         <p><a href="{{ exercise.video_url }}" target="_blank" rel="noopener">Open demo video</a></p>
+    {% endif %}
+    {% if progression %}
+        <div class="exercise-guidance-panel">
+            <strong>Suggested today</strong>
+            <p>{{ progression.guidance_text }}</p>
+            <p class="help-text">Confidence: {{ progression.confidence|title }}. {{ progression.reason }}</p>
+        </div>
     {% endif %}
     <form
         method="post"
@@ -17,9 +31,9 @@
             <thead>
                 <tr>
                     <th>Set</th>
-                    <th>Planned reps</th>
+                    <th>Target</th>
                     <th>Load guidance</th>
-                    <th>Actual reps</th>
+                    <th>Actual result</th>
                     <th>Actual weight</th>
                     <th>Effort/RPE</th>
                     <th>Notes</th>
@@ -29,16 +43,17 @@
                 {% for row in form.set_rows %}
                     <tr>
                         <td>{{ row.planned.set_number }}</td>
-                        <td>{{ row.planned.target_reps }}</td>
-                        <td>{{ row.planned.load_guidance|default:"-" }}</td>
-                        <td>{{ row.reps }}</td>
-                        <td>{{ row.weight }}</td>
+                        <td>{{ row.planned|set_target_display }}</td>
+                        <td>{{ row.guidance_display }}</td>
+                        <td>{{ row.actual_value }}</td>
+                        <td>{% if row.show_weight %}{{ row.weight }}{% else %}-{% endif %}</td>
                         <td>{{ row.rpe }}</td>
                         <td>{{ row.notes }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
+        <p class="help-text">You can override the suggested load before saving.</p>
         {{ form.exercise_notes.label_tag }}
         {{ form.exercise_notes }}
         <button type="submit">Save {{ exercise.name }}</button>

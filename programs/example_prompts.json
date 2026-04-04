@@ -1,0 +1,27 @@
+[
+  {
+    "title": "Beginner 3-day strength",
+    "summary": "Three full-body sessions for a beginner with manageable session length.",
+    "prompt": "Build me a 3-day beginner gym program focused on general strength and muscle gain. Keep each session under 60 minutes, use common machines and free weights, and include a short warmup for each training day."
+  },
+  {
+    "title": "Joint-friendly fat loss",
+    "summary": "Low-impact training with strength work and conditioning support.",
+    "prompt": "I want a gym program for fat loss and general fitness that is gentle on my joints. Include low-impact cardio or mobility where helpful, avoid aggressive plyometrics, and keep the training realistic for someone returning after a break."
+  },
+  {
+    "title": "Home workout",
+    "summary": "Minimal-equipment plan for home training.",
+    "prompt": "Create a home workout program using bodyweight, bands, and dumbbells. I want to improve strength, posture, and consistency with sessions around 35 to 45 minutes."
+  },
+  {
+    "title": "Golf support 60+",
+    "summary": "Strength, mobility, and balance for an older adult who plays golf.",
+    "prompt": "Design a conservative program for an adult over 60 who wants better strength, mobility, and balance to support golf. Use joint-friendly exercises, include mobility warmups, and avoid risky or highly technical lifts."
+  },
+  {
+    "title": "Upper/lower muscle gain",
+    "summary": "Four-day split for hypertrophy with moderate volume.",
+    "prompt": "Build a 4-day upper/lower gym program for muscle gain. Use a mix of machines and free weights, keep overhead work moderate, and include clear exercise variety without making sessions too long."
+  }
+]

@@ -3,15 +3,36 @@ import logging
 
 from django.conf import settings
 from django.db import transaction
+from django.utils import timezone
 from openai import OpenAI
 
+from core.json_utils import extract_json_object, extract_response_text
 from training.models import WorkoutSession
 
 from .models import ProgramGenerationRequest, TrainingProgram
-from .schemas import clone_sample_program, validate_current_program, validate_history_summary
+from .prompts import build_program_generation_input, build_program_generation_instructions
+from .schemas import CURRENT_PROGRAM_SCHEMA, clone_sample_program, validate_current_program, validate_history_summary
 
 
 logger = logging.getLogger(__name__)
+
+
+def build_program_profile_context(user) -> dict:
+    profile = user.profile
+    age = None
+    if profile.birth_year:
+        current_year = timezone.localdate().year
+        age = current_year - profile.birth_year
+
+    return {
+        "age": age,
+        "birth_year": profile.birth_year,
+        "training_experience": profile.training_experience,
+        "injuries_limitations": profile.injuries_limitations,
+        "equipment_access": profile.equipment_access,
+        "preferred_weight_unit": profile.preferred_weight_unit,
+        "preferred_language": profile.preferred_language,
+    }
 
 
 def build_history_summary(user) -> dict | None:
@@ -42,6 +63,7 @@ def build_history_summary(user) -> dict | None:
                     "name": name,
                     "best_recent_weight": None,
                     "best_recent_reps": None,
+                    "best_recent_seconds": None,
                     "trend_note": "Completed recently.",
                 },
             )
@@ -49,10 +71,13 @@ def build_history_summary(user) -> dict | None:
                 if not actual_set.get("completed"):
                     continue
                 reps = actual_set.get("reps")
+                seconds = actual_set.get("seconds")
                 weight = actual_set.get("weight")
                 effort = actual_set.get("effort_rpe")
                 if reps is not None:
                     trend["best_recent_reps"] = max(trend["best_recent_reps"] or 0, reps)
+                if seconds is not None:
+                    trend["best_recent_seconds"] = max(trend["best_recent_seconds"] or 0, seconds)
                 if weight is not None:
                     trend["best_recent_weight"] = max(trend["best_recent_weight"] or 0, weight)
                 if effort is not None:
@@ -100,32 +125,21 @@ def _extract_token_usage(response):
 
 def _generate_llm_program(user, prompt_text: str, history_summary: dict | None):
     client = OpenAI(api_key=settings.OPENAI_API_KEY)
-    profile = user.profile
-    instructions = (
-        "You generate gym programs as strict JSON only. "
-        "Return valid JSON matching the requested GymKompis structure. "
-        "For every exercise include video_url if available, otherwise null. "
-        "Use day types training/rest/cardio/mobility/rehab."
+    instructions = build_program_generation_instructions()
+    user_context = build_program_generation_input(
+        prompt_text=prompt_text,
+        profile_context=build_program_profile_context(user),
+        history_summary=history_summary,
+        schema=CURRENT_PROGRAM_SCHEMA,
     )
-    user_context = {
-        "prompt_text": prompt_text,
-        "profile": {
-            "training_experience": profile.training_experience,
-            "injuries_limitations": profile.injuries_limitations,
-            "equipment_access": profile.equipment_access,
-            "preferred_weight_unit": profile.preferred_weight_unit,
-            "preferred_language": profile.preferred_language,
-        },
-        "history_summary": history_summary,
-    }
     response = client.responses.create(
         model=settings.OPENAI_MODEL,
         instructions=instructions,
-        input=json.dumps(user_context),
+        input=user_context,
         temperature=0.4,
     )
-    text = getattr(response, "output_text", "")
-    data = json.loads(text)
+    text = extract_response_text(response)
+    data = extract_json_object(text)
     validate_current_program(data)
     return data, text, _extract_token_usage(response)
 

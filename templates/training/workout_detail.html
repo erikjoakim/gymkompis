@@ -19,11 +19,15 @@
     {% for exercise in session_json.exercises %}
         <article class="exercise-card">
             <h3>{{ exercise.name }}</h3>
+            {% if exercise.image_url %}
+                <p><img src="{{ exercise.image_url }}" alt="{{ exercise.name }}" class="exercise-thumb"></p>
+            {% endif %}
+            <p>Section: {% if exercise.exercise_group == "warmup" %}Warmup{% else %}Main Work{% endif %}</p>
             <p>Status: {{ exercise.status }}</p>
             {% if exercise.actual_sets %}
                 <ul class="plain-list">
                     {% for set in exercise.actual_sets %}
-                        <li>Set {{ set.set_number }}: reps {{ set.reps|default:"-" }}, weight {{ set.weight|default:"-" }}, RPE {{ set.effort_rpe|default:"-" }}</li>
+                        <li>Set {{ set.set_number }}: {{ set|actual_set_display }}, weight {{ set.weight|default:"-" }}, RPE {{ set.effort_rpe|default:"-" }}</li>
                     {% endfor %}
                 </ul>
             {% endif %}

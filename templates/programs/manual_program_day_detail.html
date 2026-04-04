@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}{{ day.day_label }} | {{ draft.name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{{ day.day_label }} - {{ day.name }}</h1>
+        <p>Build this day by filtering the library on the left and organizing the selected exercises on the right.</p>
+    </div>
+    <a class="button-link" href="{% url 'manual_program_detail' draft.id %}">Back to draft</a>
+</div>
+
+<div
+    id="manual-day-shell"
+    hx-on::after-swap="window.syncManualDaySetupHeight && window.syncManualDaySetupHeight()"
+    hx-on::after-settle="window.syncManualDaySetupHeight && window.syncManualDaySetupHeight()"
+>
+    {% include "programs/partials/manual_day_shell.html" %}
+</div>
+
+<script>
+    window.syncManualDaySetupHeight = function () {
+        const detailsCard = document.getElementById("manual-day-details-card");
+        const setupCard = document.getElementById("manual-day-setup-card");
+        if (!detailsCard || !setupCard) {
+            return;
+        }
+        const detailsHeight = detailsCard.getBoundingClientRect().height;
+        if (detailsHeight > 0) {
+            const targetHeight = `${Math.round(detailsHeight)}px`;
+            setupCard.style.height = targetHeight;
+            setupCard.style.maxHeight = targetHeight;
+        }
+    };
+
+    document.addEventListener("DOMContentLoaded", function () {
+        window.syncManualDaySetupHeight();
+        window.requestAnimationFrame(window.syncManualDaySetupHeight);
+        window.addEventListener("resize", window.syncManualDaySetupHeight);
+
+        if (window.ResizeObserver) {
+            const detailsCard = document.getElementById("manual-day-details-card");
+            if (detailsCard) {
+                const observer = new ResizeObserver(window.syncManualDaySetupHeight);
+                observer.observe(detailsCard);
+            }
+        }
+    });
+</script>
+{% endblock %}

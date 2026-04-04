@@ -1,0 +1,1653 @@
+[
+  {
+    "exercise_id": "machine_001",
+    "name": "Leg Press",
+    "equipment": "Leg Press Machine",
+    "category": "Lower Body",
+    "movement_pattern": "Knee dominant push",
+    "primary_muscles": [
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors",
+      "Calves"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_002",
+    "name": "Hack Squat",
+    "equipment": "Hack Squat Machine",
+    "category": "Lower Body",
+    "movement_pattern": "Squat",
+    "primary_muscles": [
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors",
+      "Calves"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_003",
+    "name": "Smith Machine Squat",
+    "equipment": "Smith Machine",
+    "category": "Lower Body",
+    "movement_pattern": "Squat",
+    "primary_muscles": [
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors",
+      "Core"
+    ],
+    "stabilizers": [
+      "Erector Spinae"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_004",
+    "name": "Smith Machine Front Squat",
+    "equipment": "Smith Machine",
+    "category": "Lower Body",
+    "movement_pattern": "Squat",
+    "primary_muscles": [
+      "Quadriceps"
+    ],
+    "secondary_muscles": [
+      "Gluteus Maximus",
+      "Core",
+      "Upper Back"
+    ],
+    "stabilizers": [
+      "Erector Spinae"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_005",
+    "name": "Smith Machine Split Squat",
+    "equipment": "Smith Machine",
+    "category": "Lower Body",
+    "movement_pattern": "Lunge",
+    "primary_muscles": [
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors",
+      "Calves"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "machine_006",
+    "name": "Smith Machine Reverse Lunge",
+    "equipment": "Smith Machine",
+    "category": "Lower Body",
+    "movement_pattern": "Lunge",
+    "primary_muscles": [
+      "Gluteus Maximus",
+      "Quadriceps"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors",
+      "Calves"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "machine_007",
+    "name": "Leg Extension",
+    "equipment": "Leg Extension Machine",
+    "category": "Lower Body",
+    "movement_pattern": "Knee extension",
+    "primary_muscles": [
+      "Quadriceps"
+    ],
+    "secondary_muscles": [],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_008",
+    "name": "Seated Leg Curl",
+    "equipment": "Seated Leg Curl Machine",
+    "category": "Lower Body",
+    "movement_pattern": "Knee flexion",
+    "primary_muscles": [
+      "Hamstrings"
+    ],
+    "secondary_muscles": [
+      "Calves"
+    ],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_009",
+    "name": "Lying Leg Curl",
+    "equipment": "Lying Leg Curl Machine",
+    "category": "Lower Body",
+    "movement_pattern": "Knee flexion",
+    "primary_muscles": [
+      "Hamstrings"
+    ],
+    "secondary_muscles": [
+      "Calves",
+      "Gluteus Maximus"
+    ],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_010",
+    "name": "Standing Leg Curl",
+    "equipment": "Standing Leg Curl Machine",
+    "category": "Lower Body",
+    "movement_pattern": "Knee flexion",
+    "primary_muscles": [
+      "Hamstrings"
+    ],
+    "secondary_muscles": [
+      "Calves"
+    ],
+    "stabilizers": [
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "machine_011",
+    "name": "Glute Drive",
+    "equipment": "Hip Thrust Machine",
+    "category": "Lower Body",
+    "movement_pattern": "Hip extension",
+    "primary_muscles": [
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_012",
+    "name": "Smith Machine Hip Thrust",
+    "equipment": "Smith Machine",
+    "category": "Lower Body",
+    "movement_pattern": "Hip extension",
+    "primary_muscles": [
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors",
+      "Quadriceps"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_013",
+    "name": "Hip Abduction",
+    "equipment": "Hip Abduction Machine",
+    "category": "Lower Body",
+    "movement_pattern": "Hip abduction",
+    "primary_muscles": [
+      "Gluteus Medius",
+      "Gluteus Minimus"
+    ],
+    "secondary_muscles": [
+      "Tensor Fasciae Latae"
+    ],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_014",
+    "name": "Hip Adduction",
+    "equipment": "Hip Adduction Machine",
+    "category": "Lower Body",
+    "movement_pattern": "Hip adduction",
+    "primary_muscles": [
+      "Adductors"
+    ],
+    "secondary_muscles": [
+      "Gracilis"
+    ],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_015",
+    "name": "Standing Calf Raise",
+    "equipment": "Standing Calf Raise Machine",
+    "category": "Lower Body",
+    "movement_pattern": "Ankle plantarflexion",
+    "primary_muscles": [
+      "Gastrocnemius"
+    ],
+    "secondary_muscles": [
+      "Soleus"
+    ],
+    "stabilizers": [
+      "Foot Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_016",
+    "name": "Seated Calf Raise",
+    "equipment": "Seated Calf Raise Machine",
+    "category": "Lower Body",
+    "movement_pattern": "Ankle plantarflexion",
+    "primary_muscles": [
+      "Soleus"
+    ],
+    "secondary_muscles": [
+      "Gastrocnemius"
+    ],
+    "stabilizers": [
+      "Foot Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_017",
+    "name": "Donkey Calf Raise",
+    "equipment": "Donkey Calf Raise Machine",
+    "category": "Lower Body",
+    "movement_pattern": "Ankle plantarflexion",
+    "primary_muscles": [
+      "Gastrocnemius",
+      "Soleus"
+    ],
+    "secondary_muscles": [],
+    "stabilizers": [
+      "Foot Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_018",
+    "name": "Horizontal Leg Press Calf Press",
+    "equipment": "Leg Press Machine",
+    "category": "Lower Body",
+    "movement_pattern": "Ankle plantarflexion",
+    "primary_muscles": [
+      "Gastrocnemius",
+      "Soleus"
+    ],
+    "secondary_muscles": [],
+    "stabilizers": [
+      "Foot Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_019",
+    "name": "Pendulum Squat",
+    "equipment": "Pendulum Squat Machine",
+    "category": "Lower Body",
+    "movement_pattern": "Squat",
+    "primary_muscles": [
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_020",
+    "name": "Belt Squat",
+    "equipment": "Belt Squat Machine",
+    "category": "Lower Body",
+    "movement_pattern": "Squat",
+    "primary_muscles": [
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors",
+      "Calves"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_021",
+    "name": "Chest Press",
+    "equipment": "Seated Chest Press Machine",
+    "category": "Upper Body Push",
+    "movement_pattern": "Horizontal press",
+    "primary_muscles": [
+      "Pectoralis Major"
+    ],
+    "secondary_muscles": [
+      "Anterior Deltoid",
+      "Triceps"
+    ],
+    "stabilizers": [
+      "Rotator Cuff"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_022",
+    "name": "Incline Chest Press",
+    "equipment": "Incline Chest Press Machine",
+    "category": "Upper Body Push",
+    "movement_pattern": "Incline press",
+    "primary_muscles": [
+      "Upper Pectoralis Major"
+    ],
+    "secondary_muscles": [
+      "Anterior Deltoid",
+      "Triceps"
+    ],
+    "stabilizers": [
+      "Rotator Cuff"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_023",
+    "name": "Decline Chest Press",
+    "equipment": "Decline Chest Press Machine",
+    "category": "Upper Body Push",
+    "movement_pattern": "Decline press",
+    "primary_muscles": [
+      "Lower Pectoralis Major"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Anterior Deltoid"
+    ],
+    "stabilizers": [
+      "Rotator Cuff"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_024",
+    "name": "Pec Deck Fly",
+    "equipment": "Pec Deck Machine",
+    "category": "Upper Body Push",
+    "movement_pattern": "Horizontal adduction",
+    "primary_muscles": [
+      "Pectoralis Major"
+    ],
+    "secondary_muscles": [
+      "Anterior Deltoid"
+    ],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_025",
+    "name": "Cable Chest Fly",
+    "equipment": "Cable Machine",
+    "category": "Upper Body Push",
+    "movement_pattern": "Horizontal adduction",
+    "primary_muscles": [
+      "Pectoralis Major"
+    ],
+    "secondary_muscles": [
+      "Anterior Deltoid",
+      "Biceps"
+    ],
+    "stabilizers": [
+      "Core",
+      "Rotator Cuff"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_026",
+    "name": "Low-to-High Cable Fly",
+    "equipment": "Cable Machine",
+    "category": "Upper Body Push",
+    "movement_pattern": "Diagonal fly",
+    "primary_muscles": [
+      "Upper Pectoralis Major"
+    ],
+    "secondary_muscles": [
+      "Anterior Deltoid"
+    ],
+    "stabilizers": [
+      "Core",
+      "Rotator Cuff"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_027",
+    "name": "High-to-Low Cable Fly",
+    "equipment": "Cable Machine",
+    "category": "Upper Body Push",
+    "movement_pattern": "Diagonal fly",
+    "primary_muscles": [
+      "Lower Pectoralis Major"
+    ],
+    "secondary_muscles": [
+      "Anterior Deltoid"
+    ],
+    "stabilizers": [
+      "Core",
+      "Rotator Cuff"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_028",
+    "name": "Shoulder Press",
+    "equipment": "Seated Shoulder Press Machine",
+    "category": "Upper Body Push",
+    "movement_pattern": "Vertical press",
+    "primary_muscles": [
+      "Anterior Deltoid",
+      "Medial Deltoid"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Upper Trapezius"
+    ],
+    "stabilizers": [
+      "Rotator Cuff",
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_029",
+    "name": "Smith Machine Overhead Press",
+    "equipment": "Smith Machine",
+    "category": "Upper Body Push",
+    "movement_pattern": "Vertical press",
+    "primary_muscles": [
+      "Anterior Deltoid",
+      "Medial Deltoid"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Upper Trapezius"
+    ],
+    "stabilizers": [
+      "Core",
+      "Rotator Cuff"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_030",
+    "name": "Machine Lateral Raise",
+    "equipment": "Lateral Raise Machine",
+    "category": "Upper Body Push",
+    "movement_pattern": "Shoulder abduction",
+    "primary_muscles": [
+      "Medial Deltoid"
+    ],
+    "secondary_muscles": [
+      "Supraspinatus"
+    ],
+    "stabilizers": [
+      "Upper Trapezius"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_031",
+    "name": "Cable Lateral Raise",
+    "equipment": "Cable Machine",
+    "category": "Upper Body Push",
+    "movement_pattern": "Shoulder abduction",
+    "primary_muscles": [
+      "Medial Deltoid"
+    ],
+    "secondary_muscles": [
+      "Supraspinatus"
+    ],
+    "stabilizers": [
+      "Core",
+      "Upper Trapezius"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "machine_032",
+    "name": "Cable Front Raise",
+    "equipment": "Cable Machine",
+    "category": "Upper Body Push",
+    "movement_pattern": "Shoulder flexion",
+    "primary_muscles": [
+      "Anterior Deltoid"
+    ],
+    "secondary_muscles": [
+      "Upper Pectoralis Major"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "machine_033",
+    "name": "Assisted Dip",
+    "equipment": "Assisted Dip Machine",
+    "category": "Upper Body Push",
+    "movement_pattern": "Dip",
+    "primary_muscles": [
+      "Triceps",
+      "Pectoralis Major"
+    ],
+    "secondary_muscles": [
+      "Anterior Deltoid"
+    ],
+    "stabilizers": [
+      "Core",
+      "Scapular Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_034",
+    "name": "Cable Triceps Pushdown",
+    "equipment": "Cable Machine",
+    "category": "Upper Body Push",
+    "movement_pattern": "Elbow extension",
+    "primary_muscles": [
+      "Triceps"
+    ],
+    "secondary_muscles": [],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_035",
+    "name": "Cable Overhead Triceps Extension",
+    "equipment": "Cable Machine",
+    "category": "Upper Body Push",
+    "movement_pattern": "Elbow extension",
+    "primary_muscles": [
+      "Triceps Long Head"
+    ],
+    "secondary_muscles": [
+      "Triceps"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_036",
+    "name": "Machine Triceps Extension",
+    "equipment": "Triceps Extension Machine",
+    "category": "Upper Body Push",
+    "movement_pattern": "Elbow extension",
+    "primary_muscles": [
+      "Triceps"
+    ],
+    "secondary_muscles": [],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_037",
+    "name": "Lat Pulldown",
+    "equipment": "Lat Pulldown Machine",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Vertical pull",
+    "primary_muscles": [
+      "Latissimus Dorsi"
+    ],
+    "secondary_muscles": [
+      "Biceps",
+      "Teres Major",
+      "Rhomboids",
+      "Lower Trapezius"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_038",
+    "name": "Neutral Grip Lat Pulldown",
+    "equipment": "Lat Pulldown Machine",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Vertical pull",
+    "primary_muscles": [
+      "Latissimus Dorsi"
+    ],
+    "secondary_muscles": [
+      "Biceps",
+      "Brachialis",
+      "Rhomboids"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_039",
+    "name": "Single-Arm Lat Pulldown",
+    "equipment": "Cable or Iso-Lateral Pulldown Machine",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Vertical pull",
+    "primary_muscles": [
+      "Latissimus Dorsi"
+    ],
+    "secondary_muscles": [
+      "Biceps",
+      "Teres Major",
+      "Rhomboids"
+    ],
+    "stabilizers": [
+      "Core",
+      "Obliques"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "machine_040",
+    "name": "Assisted Pull-Up",
+    "equipment": "Assisted Pull-Up Machine",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Vertical pull",
+    "primary_muscles": [
+      "Latissimus Dorsi"
+    ],
+    "secondary_muscles": [
+      "Biceps",
+      "Rhomboids",
+      "Lower Trapezius",
+      "Teres Major"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_041",
+    "name": "Seated Row",
+    "equipment": "Seated Row Machine",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Horizontal pull",
+    "primary_muscles": [
+      "Middle Trapezius",
+      "Rhomboids",
+      "Latissimus Dorsi"
+    ],
+    "secondary_muscles": [
+      "Biceps",
+      "Posterior Deltoid",
+      "Teres Major"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_042",
+    "name": "Chest-Supported Row",
+    "equipment": "Chest-Supported Row Machine",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Horizontal pull",
+    "primary_muscles": [
+      "Rhomboids",
+      "Middle Trapezius",
+      "Latissimus Dorsi"
+    ],
+    "secondary_muscles": [
+      "Posterior Deltoid",
+      "Biceps"
+    ],
+    "stabilizers": [
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_043",
+    "name": "Iso-Lateral Row",
+    "equipment": "Iso-Lateral Row Machine",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Horizontal pull",
+    "primary_muscles": [
+      "Latissimus Dorsi",
+      "Rhomboids"
+    ],
+    "secondary_muscles": [
+      "Biceps",
+      "Posterior Deltoid",
+      "Middle Trapezius"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "machine_044",
+    "name": "Low Row",
+    "equipment": "Low Row Machine",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Horizontal pull",
+    "primary_muscles": [
+      "Latissimus Dorsi",
+      "Rhomboids"
+    ],
+    "secondary_muscles": [
+      "Biceps",
+      "Posterior Deltoid",
+      "Middle Trapezius"
+    ],
+    "stabilizers": [
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_045",
+    "name": "Cable Row",
+    "equipment": "Cable Machine",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Horizontal pull",
+    "primary_muscles": [
+      "Latissimus Dorsi",
+      "Rhomboids",
+      "Middle Trapezius"
+    ],
+    "secondary_muscles": [
+      "Biceps",
+      "Posterior Deltoid"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_046",
+    "name": "Straight-Arm Cable Pulldown",
+    "equipment": "Cable Machine",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Shoulder extension",
+    "primary_muscles": [
+      "Latissimus Dorsi"
+    ],
+    "secondary_muscles": [
+      "Teres Major",
+      "Triceps Long Head"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_047",
+    "name": "Machine Pullover",
+    "equipment": "Pullover Machine",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Shoulder extension",
+    "primary_muscles": [
+      "Latissimus Dorsi",
+      "Teres Major"
+    ],
+    "secondary_muscles": [
+      "Pectoralis Major",
+      "Triceps Long Head"
+    ],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_048",
+    "name": "Reverse Pec Deck",
+    "equipment": "Reverse Pec Deck Machine",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Horizontal abduction",
+    "primary_muscles": [
+      "Posterior Deltoid"
+    ],
+    "secondary_muscles": [
+      "Rhomboids",
+      "Middle Trapezius"
+    ],
+    "stabilizers": [
+      "Rotator Cuff"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_049",
+    "name": "Cable Rear Delt Fly",
+    "equipment": "Cable Machine",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Horizontal abduction",
+    "primary_muscles": [
+      "Posterior Deltoid"
+    ],
+    "secondary_muscles": [
+      "Rhomboids",
+      "Middle Trapezius",
+      "Infraspinatus"
+    ],
+    "stabilizers": [
+      "Core",
+      "Rotator Cuff"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_050",
+    "name": "Cable Face Pull",
+    "equipment": "Cable Machine",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Scapular retraction and external rotation",
+    "primary_muscles": [
+      "Posterior Deltoid",
+      "Rhomboids",
+      "Middle Trapezius"
+    ],
+    "secondary_muscles": [
+      "Infraspinatus",
+      "Teres Minor"
+    ],
+    "stabilizers": [
+      "Core",
+      "Rotator Cuff"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_051",
+    "name": "Smith Machine Shrug",
+    "equipment": "Smith Machine",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Scapular elevation",
+    "primary_muscles": [
+      "Upper Trapezius"
+    ],
+    "secondary_muscles": [
+      "Levator Scapulae"
+    ],
+    "stabilizers": [
+      "Forearms",
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_052",
+    "name": "Machine Shrug",
+    "equipment": "Shrug Machine",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Scapular elevation",
+    "primary_muscles": [
+      "Upper Trapezius"
+    ],
+    "secondary_muscles": [
+      "Levator Scapulae"
+    ],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_053",
+    "name": "Back Extension",
+    "equipment": "Back Extension Machine",
+    "category": "Posterior Chain",
+    "movement_pattern": "Spinal extension / hip extension",
+    "primary_muscles": [
+      "Erector Spinae"
+    ],
+    "secondary_muscles": [
+      "Gluteus Maximus",
+      "Hamstrings"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_054",
+    "name": "Smith Machine Romanian Deadlift",
+    "equipment": "Smith Machine",
+    "category": "Posterior Chain",
+    "movement_pattern": "Hip hinge",
+    "primary_muscles": [
+      "Hamstrings",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Erector Spinae",
+      "Adductors"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_055",
+    "name": "Smith Machine Deadlift",
+    "equipment": "Smith Machine",
+    "category": "Posterior Chain",
+    "movement_pattern": "Hip hinge",
+    "primary_muscles": [
+      "Gluteus Maximus",
+      "Hamstrings",
+      "Quadriceps"
+    ],
+    "secondary_muscles": [
+      "Erector Spinae",
+      "Trapezius"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_056",
+    "name": "Cable Pull-Through",
+    "equipment": "Cable Machine",
+    "category": "Posterior Chain",
+    "movement_pattern": "Hip hinge",
+    "primary_muscles": [
+      "Gluteus Maximus",
+      "Hamstrings"
+    ],
+    "secondary_muscles": [
+      "Adductors",
+      "Erector Spinae"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_057",
+    "name": "Cable Good Morning",
+    "equipment": "Cable Machine",
+    "category": "Posterior Chain",
+    "movement_pattern": "Hip hinge",
+    "primary_muscles": [
+      "Hamstrings",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Erector Spinae"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_058",
+    "name": "Glute Kickback",
+    "equipment": "Glute Kickback Machine",
+    "category": "Posterior Chain",
+    "movement_pattern": "Hip extension",
+    "primary_muscles": [
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "machine_059",
+    "name": "Cable Kickback",
+    "equipment": "Cable Machine",
+    "category": "Posterior Chain",
+    "movement_pattern": "Hip extension",
+    "primary_muscles": [
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "machine_060",
+    "name": "Ab Crunch Machine",
+    "equipment": "Ab Crunch Machine",
+    "category": "Core",
+    "movement_pattern": "Spinal flexion",
+    "primary_muscles": [
+      "Rectus Abdominis"
+    ],
+    "secondary_muscles": [
+      "Obliques"
+    ],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_061",
+    "name": "Cable Crunch",
+    "equipment": "Cable Machine",
+    "category": "Core",
+    "movement_pattern": "Spinal flexion",
+    "primary_muscles": [
+      "Rectus Abdominis"
+    ],
+    "secondary_muscles": [
+      "Obliques",
+      "Transverse Abdominis"
+    ],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_062",
+    "name": "Rotary Torso",
+    "equipment": "Rotary Torso Machine",
+    "category": "Core",
+    "movement_pattern": "Trunk rotation",
+    "primary_muscles": [
+      "Obliques"
+    ],
+    "secondary_muscles": [
+      "Transverse Abdominis",
+      "Rectus Abdominis"
+    ],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_063",
+    "name": "Cable Wood Chop",
+    "equipment": "Cable Machine",
+    "category": "Core",
+    "movement_pattern": "Trunk rotation",
+    "primary_muscles": [
+      "Obliques"
+    ],
+    "secondary_muscles": [
+      "Rectus Abdominis",
+      "Transverse Abdominis",
+      "Serratus Anterior"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "machine_064",
+    "name": "Cable Reverse Wood Chop",
+    "equipment": "Cable Machine",
+    "category": "Core",
+    "movement_pattern": "Trunk rotation",
+    "primary_muscles": [
+      "Obliques"
+    ],
+    "secondary_muscles": [
+      "Rectus Abdominis",
+      "Transverse Abdominis",
+      "Shoulders"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "machine_065",
+    "name": "Pallof Press",
+    "equipment": "Cable Machine",
+    "category": "Core",
+    "movement_pattern": "Anti-rotation",
+    "primary_muscles": [
+      "Transverse Abdominis",
+      "Obliques"
+    ],
+    "secondary_muscles": [
+      "Rectus Abdominis"
+    ],
+    "stabilizers": [
+      "Gluteus Medius",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "machine_066",
+    "name": "Cable Side Bend",
+    "equipment": "Cable Machine",
+    "category": "Core",
+    "movement_pattern": "Lateral flexion",
+    "primary_muscles": [
+      "Obliques"
+    ],
+    "secondary_muscles": [
+      "Quadratus Lumborum"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "machine_067",
+    "name": "Captain's Chair Knee Raise",
+    "equipment": "Captain's Chair / Vertical Knee Raise Station",
+    "category": "Core",
+    "movement_pattern": "Hip flexion",
+    "primary_muscles": [
+      "Rectus Abdominis",
+      "Hip Flexors"
+    ],
+    "secondary_muscles": [
+      "Obliques"
+    ],
+    "stabilizers": [
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_068",
+    "name": "Captain's Chair Leg Raise",
+    "equipment": "Captain's Chair / Vertical Knee Raise Station",
+    "category": "Core",
+    "movement_pattern": "Hip flexion",
+    "primary_muscles": [
+      "Rectus Abdominis",
+      "Hip Flexors"
+    ],
+    "secondary_muscles": [
+      "Obliques"
+    ],
+    "stabilizers": [
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_069",
+    "name": "Biceps Curl Machine",
+    "equipment": "Biceps Curl Machine",
+    "category": "Arms",
+    "movement_pattern": "Elbow flexion",
+    "primary_muscles": [
+      "Biceps"
+    ],
+    "secondary_muscles": [
+      "Brachialis",
+      "Brachioradialis"
+    ],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_070",
+    "name": "Cable Biceps Curl",
+    "equipment": "Cable Machine",
+    "category": "Arms",
+    "movement_pattern": "Elbow flexion",
+    "primary_muscles": [
+      "Biceps"
+    ],
+    "secondary_muscles": [
+      "Brachialis",
+      "Brachioradialis"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_071",
+    "name": "Single-Arm Cable Curl",
+    "equipment": "Cable Machine",
+    "category": "Arms",
+    "movement_pattern": "Elbow flexion",
+    "primary_muscles": [
+      "Biceps"
+    ],
+    "secondary_muscles": [
+      "Brachialis",
+      "Brachioradialis"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "machine_072",
+    "name": "Cable Hammer Curl",
+    "equipment": "Cable Machine",
+    "category": "Arms",
+    "movement_pattern": "Elbow flexion",
+    "primary_muscles": [
+      "Brachialis",
+      "Brachioradialis"
+    ],
+    "secondary_muscles": [
+      "Biceps"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_073",
+    "name": "Preacher Curl Machine",
+    "equipment": "Preacher Curl Machine",
+    "category": "Arms",
+    "movement_pattern": "Elbow flexion",
+    "primary_muscles": [
+      "Biceps"
+    ],
+    "secondary_muscles": [
+      "Brachialis"
+    ],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_074",
+    "name": "Cable Reverse Curl",
+    "equipment": "Cable Machine",
+    "category": "Arms",
+    "movement_pattern": "Elbow flexion",
+    "primary_muscles": [
+      "Brachioradialis"
+    ],
+    "secondary_muscles": [
+      "Brachialis",
+      "Forearm Extensors"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_075",
+    "name": "Cable Wrist Curl",
+    "equipment": "Cable Machine",
+    "category": "Arms",
+    "movement_pattern": "Wrist flexion",
+    "primary_muscles": [
+      "Forearm Flexors"
+    ],
+    "secondary_muscles": [],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_076",
+    "name": "Cable Wrist Extension",
+    "equipment": "Cable Machine",
+    "category": "Arms",
+    "movement_pattern": "Wrist extension",
+    "primary_muscles": [
+      "Forearm Extensors"
+    ],
+    "secondary_muscles": [],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_077",
+    "name": "Dip Shrug / Scapular Depression",
+    "equipment": "Assisted Dip Machine",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Scapular depression",
+    "primary_muscles": [
+      "Lower Trapezius",
+      "Latissimus Dorsi"
+    ],
+    "secondary_muscles": [
+      "Pectoralis Minor"
+    ],
+    "stabilizers": [
+      "Core",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_078",
+    "name": "Cable Y Raise",
+    "equipment": "Cable Machine",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Scapular upward rotation",
+    "primary_muscles": [
+      "Lower Trapezius"
+    ],
+    "secondary_muscles": [
+      "Serratus Anterior",
+      "Posterior Deltoid"
+    ],
+    "stabilizers": [
+      "Core",
+      "Rotator Cuff"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_079",
+    "name": "Cable External Rotation",
+    "equipment": "Cable Machine",
+    "category": "Shoulder Health",
+    "movement_pattern": "Shoulder external rotation",
+    "primary_muscles": [
+      "Infraspinatus",
+      "Teres Minor"
+    ],
+    "secondary_muscles": [
+      "Posterior Deltoid"
+    ],
+    "stabilizers": [
+      "Scapular Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "machine_080",
+    "name": "Cable Internal Rotation",
+    "equipment": "Cable Machine",
+    "category": "Shoulder Health",
+    "movement_pattern": "Shoulder internal rotation",
+    "primary_muscles": [
+      "Subscapularis"
+    ],
+    "secondary_muscles": [
+      "Pectoralis Major",
+      "Latissimus Dorsi"
+    ],
+    "stabilizers": [
+      "Scapular Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "machine_081",
+    "name": "Abductor Kickout",
+    "equipment": "Cable Machine",
+    "category": "Lower Body",
+    "movement_pattern": "Hip abduction",
+    "primary_muscles": [
+      "Gluteus Medius",
+      "Gluteus Minimus"
+    ],
+    "secondary_muscles": [
+      "Tensor Fasciae Latae"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "machine_082",
+    "name": "Cable Hip Adduction",
+    "equipment": "Cable Machine",
+    "category": "Lower Body",
+    "movement_pattern": "Hip adduction",
+    "primary_muscles": [
+      "Adductors"
+    ],
+    "secondary_muscles": [
+      "Gracilis"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "machine_083",
+    "name": "Smith Machine Bulgarian Split Squat",
+    "equipment": "Smith Machine",
+    "category": "Lower Body",
+    "movement_pattern": "Single-leg squat",
+    "primary_muscles": [
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors",
+      "Calves"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "machine_084",
+    "name": "Smith Machine Calf Raise",
+    "equipment": "Smith Machine",
+    "category": "Lower Body",
+    "movement_pattern": "Ankle plantarflexion",
+    "primary_muscles": [
+      "Gastrocnemius",
+      "Soleus"
+    ],
+    "secondary_muscles": [],
+    "stabilizers": [
+      "Foot Stabilizers",
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_085",
+    "name": "Standing Cable Chest Press",
+    "equipment": "Cable Machine",
+    "category": "Upper Body Push",
+    "movement_pattern": "Horizontal press",
+    "primary_muscles": [
+      "Pectoralis Major"
+    ],
+    "secondary_muscles": [
+      "Anterior Deltoid",
+      "Triceps"
+    ],
+    "stabilizers": [
+      "Core",
+      "Rotator Cuff"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_086",
+    "name": "Single-Arm Cable Chest Press",
+    "equipment": "Cable Machine",
+    "category": "Upper Body Push",
+    "movement_pattern": "Horizontal press",
+    "primary_muscles": [
+      "Pectoralis Major"
+    ],
+    "secondary_muscles": [
+      "Anterior Deltoid",
+      "Triceps"
+    ],
+    "stabilizers": [
+      "Core",
+      "Obliques",
+      "Rotator Cuff"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "machine_087",
+    "name": "Cable Upright Row",
+    "equipment": "Cable Machine",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Vertical pull / shoulder abduction",
+    "primary_muscles": [
+      "Medial Deltoid",
+      "Upper Trapezius"
+    ],
+    "secondary_muscles": [
+      "Biceps",
+      "Forearms"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_088",
+    "name": "Cable High Row",
+    "equipment": "Cable Machine",
+    "category": "Upper Body Pull",
+    "movement_pattern": "High horizontal pull",
+    "primary_muscles": [
+      "Posterior Deltoid",
+      "Rhomboids",
+      "Middle Trapezius"
+    ],
+    "secondary_muscles": [
+      "Biceps",
+      "Latissimus Dorsi"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_089",
+    "name": "Machine Dip Press",
+    "equipment": "Seated Dip / Chest Dip Machine",
+    "category": "Upper Body Push",
+    "movement_pattern": "Dip / press",
+    "primary_muscles": [
+      "Triceps",
+      "Lower Pectoralis Major"
+    ],
+    "secondary_muscles": [
+      "Anterior Deltoid"
+    ],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "machine_090",
+    "name": "Cable Serratus Punch",
+    "equipment": "Cable Machine",
+    "category": "Shoulder Health",
+    "movement_pattern": "Scapular protraction",
+    "primary_muscles": [
+      "Serratus Anterior"
+    ],
+    "secondary_muscles": [
+      "Pectoralis Minor"
+    ],
+    "stabilizers": [
+      "Core",
+      "Rotator Cuff"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "machine_091",
+    "name": "Cable Reverse Fly to External Rotation",
+    "equipment": "Cable Machine",
+    "category": "Shoulder Health",
+    "movement_pattern": "Horizontal abduction with external rotation",
+    "primary_muscles": [
+      "Posterior Deltoid",
+      "Infraspinatus",
+      "Teres Minor"
+    ],
+    "secondary_muscles": [
+      "Rhomboids",
+      "Middle Trapezius"
+    ],
+    "stabilizers": [
+      "Core",
+      "Rotator Cuff"
+    ],
+    "unilateral": false
+  }
+]

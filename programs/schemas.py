@@ -52,6 +52,10 @@ CURRENT_PROGRAM_SCHEMA = {
                 "name": {"type": "string", "minLength": 1, "maxLength": 120},
                 "type": {"type": "string", "enum": ["training", "rest", "cardio", "mobility", "rehab"]},
                 "notes": {"type": "string", "maxLength": 500},
+                "warmup": {
+                    "type": "array",
+                    "items": {"$ref": "#/$defs/exercise"},
+                },
                 "exercises": {
                     "type": "array",
                     "items": {"$ref": "#/$defs/exercise"},
@@ -67,6 +71,7 @@ CURRENT_PROGRAM_SCHEMA = {
                 "order",
                 "modality",
                 "instructions",
+                "image_url",
                 "video_url",
                 "rest_seconds",
                 "set_plan",
@@ -92,6 +97,7 @@ CURRENT_PROGRAM_SCHEMA = {
                 },
                 "focus": {"type": "string", "maxLength": 300},
                 "instructions": {"type": "string", "minLength": 1, "maxLength": 1000},
+                "image_url": {"type": ["string", "null"], "format": "uri-reference", "maxLength": 500},
                 "video_url": {"type": ["string", "null"], "format": "uri", "maxLength": 500},
                 "rest_seconds": {"type": "integer", "minimum": 0, "maximum": 600},
                 "notes": {"type": "string", "maxLength": 500},
@@ -106,13 +112,25 @@ CURRENT_PROGRAM_SCHEMA = {
         "set_plan": {
             "type": "object",
             "additionalProperties": False,
-            "required": ["set_number", "target_reps"],
+            "required": ["set_number", "prescription_type"],
             "properties": {
                 "set_number": {"type": "integer", "minimum": 1, "maximum": 20},
-                "target_reps": {"type": "string", "minLength": 1, "maxLength": 20},
+                "prescription_type": {"type": "string", "enum": ["reps", "time"]},
+                "target_reps": {"type": ["string", "null"], "minLength": 1, "maxLength": 20},
+                "target_seconds": {"type": ["integer", "null"], "minimum": 1, "maximum": 3600},
                 "load_guidance": {"type": "string", "maxLength": 100},
                 "target_effort_rpe": {"type": ["number", "null"], "minimum": 1, "maximum": 10},
             },
+            "oneOf": [
+                {
+                    "properties": {"prescription_type": {"const": "reps"}},
+                    "required": ["target_reps"],
+                },
+                {
+                    "properties": {"prescription_type": {"const": "time"}},
+                    "required": ["target_seconds"],
+                },
+            ],
         },
     },
 }
@@ -154,6 +172,7 @@ HISTORY_SUMMARY_SCHEMA = {
                     "name": {"type": "string"},
                     "best_recent_weight": {"type": ["number", "null"]},
                     "best_recent_reps": {"type": ["integer", "null"]},
+                    "best_recent_seconds": {"type": ["integer", "null"]},
                     "trend_note": {"type": "string", "maxLength": 300},
                 },
             },
@@ -192,6 +211,29 @@ def sample_program(weight_unit: str = "kg") -> dict:
                 "name": "Full Body A",
                 "type": "training",
                 "notes": "Start each movement with 1-2 lighter warmup sets.",
+                "warmup": [
+                    {
+                        "exercise_key": "bike_warmup",
+                        "name": "Stationary Bike Warmup",
+                        "order": 1,
+                        "modality": "cardio",
+                        "focus": "Raise body temperature and prepare legs for training",
+                        "instructions": "Pedal at an easy pace and gradually increase effort over the final minute.",
+                        "image_url": None,
+                        "video_url": None,
+                        "rest_seconds": 0,
+                        "notes": "",
+                        "set_plan": [
+                            {
+                                "set_number": 1,
+                                "prescription_type": "time",
+                                "target_seconds": 300,
+                                "load_guidance": "Easy pace",
+                                "target_effort_rpe": 3,
+                            }
+                        ],
+                    }
+                ],
                 "exercises": [
                     {
                         "exercise_key": "leg_press_machine",
@@ -200,24 +242,28 @@ def sample_program(weight_unit: str = "kg") -> dict:
                         "modality": "machine",
                         "focus": "Leg strength",
                         "instructions": "Drive through the whole foot and avoid locking the knees.",
+                        "image_url": None,
                         "video_url": "https://www.youtube.com/watch?v=IZxyjW7MPJQ",
                         "rest_seconds": 90,
                         "notes": "",
                         "set_plan": [
                             {
                                 "set_number": 1,
+                                "prescription_type": "reps",
                                 "target_reps": "10-12",
                                 "load_guidance": "Light to moderate",
                                 "target_effort_rpe": 7,
                             },
                             {
                                 "set_number": 2,
+                                "prescription_type": "reps",
                                 "target_reps": "10-12",
                                 "load_guidance": "Light to moderate",
                                 "target_effort_rpe": 7,
                             },
                             {
                                 "set_number": 3,
+                                "prescription_type": "reps",
                                 "target_reps": "10-12",
                                 "load_guidance": "Moderate",
                                 "target_effort_rpe": 8,
@@ -231,27 +277,59 @@ def sample_program(weight_unit: str = "kg") -> dict:
                         "modality": "machine",
                         "focus": "Upper body push strength",
                         "instructions": "Keep your shoulders down and press in a smooth arc.",
+                        "image_url": None,
                         "video_url": "https://www.youtube.com/watch?v=igD7slG0QVU",
                         "rest_seconds": 75,
                         "notes": "",
                         "set_plan": [
                             {
                                 "set_number": 1,
+                                "prescription_type": "reps",
                                 "target_reps": "8-10",
                                 "load_guidance": "Moderate",
                                 "target_effort_rpe": 7,
                             },
                             {
                                 "set_number": 2,
+                                "prescription_type": "reps",
                                 "target_reps": "8-10",
                                 "load_guidance": "Moderate",
                                 "target_effort_rpe": 7,
                             },
                             {
                                 "set_number": 3,
+                                "prescription_type": "reps",
                                 "target_reps": "8-10",
                                 "load_guidance": "Moderate",
                                 "target_effort_rpe": 8,
+                            },
+                        ],
+                    },
+                    {
+                        "exercise_key": "front_plank",
+                        "name": "Front Plank",
+                        "order": 3,
+                        "modality": "bodyweight",
+                        "focus": "Core stability and trunk control",
+                        "instructions": "Keep your ribs down, squeeze glutes lightly, and breathe steadily.",
+                        "image_url": None,
+                        "video_url": "https://www.youtube.com/watch?v=pSHjTRCQxIw",
+                        "rest_seconds": 45,
+                        "notes": "",
+                        "set_plan": [
+                            {
+                                "set_number": 1,
+                                "prescription_type": "time",
+                                "target_seconds": 30,
+                                "load_guidance": "Bodyweight hold",
+                                "target_effort_rpe": 6,
+                            },
+                            {
+                                "set_number": 2,
+                                "prescription_type": "time",
+                                "target_seconds": 30,
+                                "load_guidance": "Bodyweight hold",
+                                "target_effort_rpe": 7,
                             },
                         ],
                     },
@@ -271,6 +349,29 @@ def sample_program(weight_unit: str = "kg") -> dict:
                 "name": "Full Body B",
                 "type": "training",
                 "notes": "Aim to finish within 60 minutes.",
+                "warmup": [
+                    {
+                        "exercise_key": "dynamic_mobility_flow",
+                        "name": "Dynamic Mobility Flow",
+                        "order": 1,
+                        "modality": "mobility",
+                        "focus": "Prepare hips, shoulders, and thoracic spine",
+                        "instructions": "Move through each drill continuously and focus on smooth range of motion.",
+                        "image_url": None,
+                        "video_url": None,
+                        "rest_seconds": 15,
+                        "notes": "",
+                        "set_plan": [
+                            {
+                                "set_number": 1,
+                                "prescription_type": "time",
+                                "target_seconds": 180,
+                                "load_guidance": "Controlled tempo",
+                                "target_effort_rpe": 3,
+                            }
+                        ],
+                    }
+                ],
                 "exercises": [
                     {
                         "exercise_key": "lat_pulldown",
@@ -279,18 +380,21 @@ def sample_program(weight_unit: str = "kg") -> dict:
                         "modality": "machine",
                         "focus": "Upper back strength",
                         "instructions": "Pull elbows down toward your sides without leaning back excessively.",
+                        "image_url": None,
                         "video_url": "https://www.youtube.com/watch?v=CAwf7n6Luuc",
                         "rest_seconds": 75,
                         "notes": "",
                         "set_plan": [
                             {
                                 "set_number": 1,
+                                "prescription_type": "reps",
                                 "target_reps": "10-12",
                                 "load_guidance": "Moderate",
                                 "target_effort_rpe": 7,
                             },
                             {
                                 "set_number": 2,
+                                "prescription_type": "reps",
                                 "target_reps": "10-12",
                                 "load_guidance": "Moderate",
                                 "target_effort_rpe": 8,
@@ -304,18 +408,21 @@ def sample_program(weight_unit: str = "kg") -> dict:
                         "modality": "dumbbell",
                         "focus": "Leg and core control",
                         "instructions": "Keep your chest tall and sit between your hips.",
+                        "image_url": None,
                         "video_url": "https://www.youtube.com/watch?v=MeIiIdhvXT4",
                         "rest_seconds": 90,
                         "notes": "",
                         "set_plan": [
                             {
                                 "set_number": 1,
+                                "prescription_type": "reps",
                                 "target_reps": "8-10",
                                 "load_guidance": "Moderate",
                                 "target_effort_rpe": 7,
                             },
                             {
                                 "set_number": 2,
+                                "prescription_type": "reps",
                                 "target_reps": "8-10",
                                 "load_guidance": "Moderate",
                                 "target_effort_rpe": 8,

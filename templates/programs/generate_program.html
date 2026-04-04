@@ -8,13 +8,84 @@
         <h1>Generate a new program</h1>
         <p>Describe your goals, constraints, and preferences in plain English.</p>
     </div>
+    <a class="button-link" href="{% url 'manual_program_create' %}">Build manually instead</a>
 </div>
 <div class="card narrow">
-    <form method="post" class="stack">
+    <form method="post" class="stack generate-form" id="generate-program-form">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Generate plan</button>
+        <div class="stack">
+            <div>
+                <h2>Example prompts</h2>
+                <p class="help-text">Choose one to fill the box, or click again later to add it to your own text.</p>
+                <div class="prompt-example-list" id="prompt-example-list">
+                    {% for item in prompt_examples %}
+                        <button
+                            type="button"
+                            class="prompt-example-chip"
+                            data-prompt="{{ item.prompt }}"
+                        >
+                            <strong>{{ item.title }}</strong>
+                            {% if item.summary %}
+                                <span>{{ item.summary }}</span>
+                            {% endif %}
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
+            {{ form.as_p }}
+        </div>
+        {% if profile_data_used %}
+            <div class="generation-context">
+                <strong>Profile data used automatically</strong>
+                <ul class="plain-list">
+                    {% for label, value in profile_data_used %}
+                        <li><strong>{{ label }}:</strong> {{ value }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        <div class="generation-pending" id="generation-pending" hidden aria-live="polite">
+            <strong>Generating your plan...</strong>
+            <p>This can take a little while while GymKompis builds and validates the program.</p>
+        </div>
+        <button type="submit" id="generate-plan-button" data-default-label="Generate plan" data-pending-label="Generating plan...">Generate plan</button>
     </form>
     <p class="help-text">If no OpenAI key is configured, the app uses a validated mock response in development.</p>
 </div>
+<script>
+    (function () {
+        const form = document.getElementById("generate-program-form");
+        const button = document.getElementById("generate-plan-button");
+        const pending = document.getElementById("generation-pending");
+        const promptField = document.getElementById("id_prompt_text");
+        const promptExamples = document.querySelectorAll(".prompt-example-chip");
+
+        if (!form || !button || !pending) {
+            return;
+        }
+
+        promptExamples.forEach(function (exampleButton) {
+            exampleButton.addEventListener("click", function () {
+                if (!promptField) {
+                    return;
+                }
+                const examplePrompt = exampleButton.dataset.prompt || "";
+                const currentValue = promptField.value.trim();
+                if (!currentValue) {
+                    promptField.value = examplePrompt;
+                } else if (!currentValue.includes(examplePrompt)) {
+                    promptField.value = `${currentValue}\n\n${examplePrompt}`;
+                }
+                promptField.focus();
+            });
+        });
+
+        form.addEventListener("submit", function () {
+            button.disabled = true;
+            button.textContent = button.dataset.pendingLabel || "Generating plan...";
+            pending.hidden = false;
+            form.classList.add("is-submitting");
+        });
+    }());
+</script>
 {% endblock %}

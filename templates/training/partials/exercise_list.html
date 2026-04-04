@@ -1,5 +1,9 @@
+{% load gymkompis_extras %}
 {% for item in exercise_forms %}
-    {% include "training/partials/exercise_card.html" with exercise=item.exercise form=item.form %}
+    {% ifchanged item.exercise_group %}
+        <div class="section-label">{{ item.group_label }}</div>
+    {% endifchanged %}
+    {% include "training/partials/exercise_card.html" with exercise=item.exercise form=item.form progression=item.progression %}
 {% empty %}
     <div class="card">
         <h2>All exercises saved</h2>

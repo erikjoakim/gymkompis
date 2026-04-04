@@ -100,6 +100,8 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -120,8 +122,12 @@ DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@gymkompis.local")
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
+OPENAI_IMAGE_MODEL = os.getenv("OPENAI_IMAGE_MODEL", "gpt-image-1.5")
+OPENAI_IMAGE_SIZE = os.getenv("OPENAI_IMAGE_SIZE", "1024x1024")
+OPENAI_IMAGE_QUALITY = os.getenv("OPENAI_IMAGE_QUALITY", "low")
 OPENAI_PROGRAM_PROMPT_VERSION = "program-v1"
 OPENAI_EVALUATION_PROMPT_VERSION = "evaluation-v1"
+OPENAI_IMAGE_PROMPT_VERSION = "exercise-image-v1"
 OPENAI_MOCK_RESPONSES = env_bool("OPENAI_MOCK_RESPONSES", DEBUG)
 DEFAULT_PLAN_HISTORY_WINDOW_SESSIONS = int(os.getenv("DEFAULT_PLAN_HISTORY_WINDOW_SESSIONS", "8"))
 

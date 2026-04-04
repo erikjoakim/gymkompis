@@ -5,10 +5,17 @@ from django.conf import settings
 from django.db import transaction
 from openai import OpenAI
 
+from core.json_utils import extract_json_object, extract_response_text
 from training.models import WorkoutSession
 
 from .models import WorkoutEvaluation
-from .schemas import validate_period_evaluation, validate_session_evaluation
+from .prompts import build_evaluation_input, build_evaluation_instructions
+from .schemas import (
+    PERIOD_EVALUATION_SCHEMA,
+    SESSION_EVALUATION_SCHEMA,
+    validate_period_evaluation,
+    validate_session_evaluation,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -74,17 +81,15 @@ def _mock_period_evaluation(sessions, start_date, end_date):
 
 def _llm_evaluate(payload: dict, evaluation_type: str):
     client = OpenAI(api_key=settings.OPENAI_API_KEY)
-    instructions = (
-        "Return strict JSON only for a GymKompis workout evaluation. "
-        "Use evaluation_type session or period as requested."
-    )
+    instructions = build_evaluation_instructions()
+    schema_hint = SESSION_EVALUATION_SCHEMA if evaluation_type == WorkoutEvaluation.EvaluationType.SESSION else PERIOD_EVALUATION_SCHEMA
     response = client.responses.create(
         model=settings.OPENAI_MODEL,
         instructions=instructions,
-        input=json.dumps(payload),
+        input=build_evaluation_input(payload, evaluation_type, schema_hint),
         temperature=0.3,
     )
-    data = json.loads(getattr(response, "output_text", ""))
+    data = extract_json_object(extract_response_text(response))
     if evaluation_type == WorkoutEvaluation.EvaluationType.SESSION:
         validate_session_evaluation(data)
     else:

@@ -8,3 +8,4 @@ python-dotenv==1.2.2
 openai==2.30.0
 jsonschema==4.26.0
 gunicorn==25.3.0
+Pillow==11.2.1

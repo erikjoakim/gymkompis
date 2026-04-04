@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Create Manual Plan | GymKompis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Create a manual plan</h1>
+        <p>Start with the plan basics, then add days and exercises from the library.</p>
+    </div>
+</div>
+<div class="card narrow">
+    <form method="post" class="stack">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Create draft</button>
+    </form>
+</div>
+{% endblock %}

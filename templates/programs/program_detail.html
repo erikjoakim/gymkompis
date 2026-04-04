@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load gymkompis_extras %}
 
 {% block title %}{{ program.name }} | GymKompis{% endblock %}
 
@@ -17,33 +18,41 @@
     <p><strong>Weight unit:</strong> {{ program_json.weight_unit }}</p>
 </div>
 
-{% for day in program_json.days %}
+{% for item in program_days %}
+    {% with day=item.day blocks=item.blocks %}
     <section class="card">
         <h2>{{ day.day_label }} - {{ day.name }}</h2>
         <p><strong>Type:</strong> {{ day.type }}</p>
         {% if day.notes %}<p>{{ day.notes }}</p>{% endif %}
-        {% if day.exercises %}
+        {% if blocks %}
             <div class="stack">
-                {% for exercise in day.exercises %}
-                    <article class="exercise-card">
-                        <h3>{{ exercise.order }}. {{ exercise.name }}</h3>
-                        <p><strong>Modality:</strong> {{ exercise.modality }}</p>
-                        <p><strong>Instructions:</strong> {{ exercise.instructions }}</p>
-                        <p><strong>Rest:</strong> {{ exercise.rest_seconds }} sec</p>
-                        {% if exercise.video_url %}
-                            <p><a href="{{ exercise.video_url }}" target="_blank" rel="noopener">Open demo video</a></p>
-                        {% endif %}
-                        <ul class="plain-list">
-                            {% for set in exercise.set_plan %}
-                                <li>Set {{ set.set_number }}: {{ set.target_reps }} reps, {{ set.load_guidance|default:"no load guidance" }}, target RPE {{ set.target_effort_rpe|default:"-" }}</li>
-                            {% endfor %}
-                        </ul>
-                    </article>
+                {% for block in blocks %}
+                    <div class="section-label">{{ block.label }}</div>
+                    {% for exercise in block.items %}
+                        <article class="exercise-card">
+                            <h3>{{ exercise.order }}. {{ exercise.name }}</h3>
+                            {% if exercise.image_url %}
+                                <p><img src="{{ exercise.image_url }}" alt="{{ exercise.name }}" class="exercise-thumb"></p>
+                            {% endif %}
+                            <p><strong>Modality:</strong> {{ exercise.modality }}</p>
+                            <p><strong>Instructions:</strong> {{ exercise.instructions }}</p>
+                            <p><strong>Rest:</strong> {{ exercise.rest_seconds }} sec</p>
+                            {% if exercise.video_url %}
+                                <p><a href="{{ exercise.video_url }}" target="_blank" rel="noopener">Open demo video</a></p>
+                            {% endif %}
+                            <ul class="plain-list">
+                                {% for set in exercise.set_plan %}
+                                    <li>Set {{ set.set_number }}: {{ set|set_target_display }}, {{ set.load_guidance|default:"no load guidance" }}, target RPE {{ set.target_effort_rpe|default:"-" }}</li>
+                                {% endfor %}
+                            </ul>
+                        </article>
+                    {% endfor %}
                 {% endfor %}
             </div>
         {% else %}
             <p>No exercises for this day.</p>
         {% endif %}
     </section>
+    {% endwith %}
 {% endfor %}
 {% endblock %}

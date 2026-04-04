@@ -1,0 +1,1570 @@
+[
+  {
+    "exercise_id": "static_001",
+    "name": "Front Plank",
+    "equipment": "Bodyweight",
+    "category": "Core",
+    "movement_pattern": "Anti-extension isometric hold",
+    "primary_muscles": [
+      "Rectus Abdominis",
+      "Transverse Abdominis"
+    ],
+    "secondary_muscles": [
+      "Obliques",
+      "Gluteus Maximus"
+    ],
+    "stabilizers": [
+      "Shoulder Stabilizers",
+      "Quadriceps"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_002",
+    "name": "Side Plank",
+    "equipment": "Bodyweight",
+    "category": "Core",
+    "movement_pattern": "Anti-lateral-flexion isometric hold",
+    "primary_muscles": [
+      "Obliques",
+      "Quadratus Lumborum"
+    ],
+    "secondary_muscles": [
+      "Transverse Abdominis",
+      "Gluteus Medius"
+    ],
+    "stabilizers": [
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "static_003",
+    "name": "RKC Plank",
+    "equipment": "Bodyweight",
+    "category": "Core",
+    "movement_pattern": "Anti-extension isometric hold",
+    "primary_muscles": [
+      "Rectus Abdominis",
+      "Transverse Abdominis"
+    ],
+    "secondary_muscles": [
+      "Obliques",
+      "Gluteus Maximus",
+      "Latissimus Dorsi"
+    ],
+    "stabilizers": [
+      "Shoulder Stabilizers",
+      "Quadriceps"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_004",
+    "name": "Hollow Body Hold",
+    "equipment": "Bodyweight",
+    "category": "Core",
+    "movement_pattern": "Anti-extension isometric hold",
+    "primary_muscles": [
+      "Rectus Abdominis",
+      "Transverse Abdominis"
+    ],
+    "secondary_muscles": [
+      "Hip Flexors",
+      "Obliques"
+    ],
+    "stabilizers": [
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_005",
+    "name": "Dead Bug Hold",
+    "equipment": "Bodyweight",
+    "category": "Core",
+    "movement_pattern": "Anti-extension isometric hold",
+    "primary_muscles": [
+      "Transverse Abdominis",
+      "Rectus Abdominis"
+    ],
+    "secondary_muscles": [
+      "Obliques",
+      "Hip Flexors"
+    ],
+    "stabilizers": [
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "static_006",
+    "name": "Boat Pose Hold",
+    "equipment": "Bodyweight",
+    "category": "Core",
+    "movement_pattern": "Trunk flexion isometric hold",
+    "primary_muscles": [
+      "Rectus Abdominis",
+      "Hip Flexors"
+    ],
+    "secondary_muscles": [
+      "Obliques",
+      "Transverse Abdominis"
+    ],
+    "stabilizers": [
+      "Erector Spinae"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_007",
+    "name": "Wall Sit",
+    "equipment": "Bodyweight",
+    "category": "Lower Body",
+    "movement_pattern": "Squat isometric hold",
+    "primary_muscles": [
+      "Quadriceps"
+    ],
+    "secondary_muscles": [
+      "Gluteus Maximus",
+      "Hamstrings"
+    ],
+    "stabilizers": [
+      "Core",
+      "Calves"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_008",
+    "name": "Split Squat Hold",
+    "equipment": "Bodyweight",
+    "category": "Lower Body",
+    "movement_pattern": "Lunge isometric hold",
+    "primary_muscles": [
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers",
+      "Calves"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "static_009",
+    "name": "Bulgarian Split Squat Hold",
+    "equipment": "Bench or Box",
+    "category": "Lower Body",
+    "movement_pattern": "Single-leg squat isometric hold",
+    "primary_muscles": [
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers",
+      "Calves"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "static_010",
+    "name": "Horse Stance Hold",
+    "equipment": "Bodyweight",
+    "category": "Lower Body",
+    "movement_pattern": "Wide squat isometric hold",
+    "primary_muscles": [
+      "Quadriceps",
+      "Adductors"
+    ],
+    "secondary_muscles": [
+      "Gluteus Maximus",
+      "Hamstrings"
+    ],
+    "stabilizers": [
+      "Core",
+      "Calves"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_011",
+    "name": "Glute Bridge Hold",
+    "equipment": "Bodyweight",
+    "category": "Posterior Chain",
+    "movement_pattern": "Hip extension isometric hold",
+    "primary_muscles": [
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_012",
+    "name": "Single-Leg Glute Bridge Hold",
+    "equipment": "Bodyweight",
+    "category": "Posterior Chain",
+    "movement_pattern": "Single-leg hip extension isometric hold",
+    "primary_muscles": [
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Gluteus Medius"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "static_013",
+    "name": "Hip Thrust Hold",
+    "equipment": "Bench or Box",
+    "category": "Posterior Chain",
+    "movement_pattern": "Hip extension isometric hold",
+    "primary_muscles": [
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_014",
+    "name": "Single-Leg Hip Thrust Hold",
+    "equipment": "Bench or Box",
+    "category": "Posterior Chain",
+    "movement_pattern": "Single-leg hip extension isometric hold",
+    "primary_muscles": [
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Gluteus Medius"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "static_015",
+    "name": "Calf Raise Hold",
+    "equipment": "Bodyweight",
+    "category": "Lower Body",
+    "movement_pattern": "Ankle plantarflexion isometric hold",
+    "primary_muscles": [
+      "Gastrocnemius",
+      "Soleus"
+    ],
+    "secondary_muscles": [],
+    "stabilizers": [
+      "Foot Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_016",
+    "name": "Single-Leg Calf Raise Hold",
+    "equipment": "Bodyweight",
+    "category": "Lower Body",
+    "movement_pattern": "Single-leg ankle plantarflexion isometric hold",
+    "primary_muscles": [
+      "Gastrocnemius",
+      "Soleus"
+    ],
+    "secondary_muscles": [],
+    "stabilizers": [
+      "Foot Stabilizers",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "static_017",
+    "name": "Tiptoe Balance Hold",
+    "equipment": "Bodyweight",
+    "category": "Lower Body",
+    "movement_pattern": "Balance isometric hold",
+    "primary_muscles": [
+      "Calves"
+    ],
+    "secondary_muscles": [
+      "Foot Intrinsics"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_018",
+    "name": "Single-Leg Balance Hold",
+    "equipment": "Bodyweight",
+    "category": "Lower Body",
+    "movement_pattern": "Balance isometric hold",
+    "primary_muscles": [
+      "Gluteus Medius",
+      "Foot Intrinsics"
+    ],
+    "secondary_muscles": [
+      "Calves",
+      "Quadriceps"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "static_019",
+    "name": "Single-Leg Romanian Deadlift Hold",
+    "equipment": "Bodyweight",
+    "category": "Posterior Chain",
+    "movement_pattern": "Hip hinge isometric hold",
+    "primary_muscles": [
+      "Hamstrings",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Erector Spinae",
+      "Gluteus Medius"
+    ],
+    "stabilizers": [
+      "Core",
+      "Foot Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "static_020",
+    "name": "Good Morning Hold",
+    "equipment": "Bodyweight",
+    "category": "Posterior Chain",
+    "movement_pattern": "Hip hinge isometric hold",
+    "primary_muscles": [
+      "Hamstrings",
+      "Erector Spinae"
+    ],
+    "secondary_muscles": [
+      "Gluteus Maximus"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_021",
+    "name": "Push-Up Plank Hold",
+    "equipment": "Bodyweight",
+    "category": "Upper Body Push",
+    "movement_pattern": "Horizontal press support hold",
+    "primary_muscles": [
+      "Pectoralis Major",
+      "Triceps"
+    ],
+    "secondary_muscles": [
+      "Anterior Deltoid",
+      "Serratus Anterior"
+    ],
+    "stabilizers": [
+      "Core",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_022",
+    "name": "Bottom Push-Up Hold",
+    "equipment": "Bodyweight",
+    "category": "Upper Body Push",
+    "movement_pattern": "Horizontal press isometric hold",
+    "primary_muscles": [
+      "Pectoralis Major",
+      "Triceps",
+      "Anterior Deltoid"
+    ],
+    "secondary_muscles": [
+      "Serratus Anterior"
+    ],
+    "stabilizers": [
+      "Core",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_023",
+    "name": "Top Push-Up Hold",
+    "equipment": "Bodyweight",
+    "category": "Upper Body Push",
+    "movement_pattern": "Horizontal press support hold",
+    "primary_muscles": [
+      "Serratus Anterior",
+      "Pectoralis Major"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Anterior Deltoid"
+    ],
+    "stabilizers": [
+      "Core",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_024",
+    "name": "Pseudo Planche Lean Hold",
+    "equipment": "Bodyweight",
+    "category": "Upper Body Push",
+    "movement_pattern": "Shoulder flexion support hold",
+    "primary_muscles": [
+      "Anterior Deltoid",
+      "Pectoralis Major",
+      "Triceps"
+    ],
+    "secondary_muscles": [
+      "Serratus Anterior"
+    ],
+    "stabilizers": [
+      "Core",
+      "Wrist Stabilizers",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_025",
+    "name": "Handstand Hold",
+    "equipment": "Wall or Freestanding",
+    "category": "Upper Body Push",
+    "movement_pattern": "Vertical press support hold",
+    "primary_muscles": [
+      "Anterior Deltoid",
+      "Triceps",
+      "Upper Trapezius"
+    ],
+    "secondary_muscles": [
+      "Serratus Anterior",
+      "Pectoralis Major"
+    ],
+    "stabilizers": [
+      "Core",
+      "Wrist Stabilizers",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_026",
+    "name": "Wall Handstand Hold",
+    "equipment": "Wall",
+    "category": "Upper Body Push",
+    "movement_pattern": "Vertical press support hold",
+    "primary_muscles": [
+      "Anterior Deltoid",
+      "Triceps",
+      "Upper Trapezius"
+    ],
+    "secondary_muscles": [
+      "Serratus Anterior",
+      "Pectoralis Major"
+    ],
+    "stabilizers": [
+      "Core",
+      "Wrist Stabilizers",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_027",
+    "name": "Pike Hold",
+    "equipment": "Bodyweight",
+    "category": "Upper Body Push",
+    "movement_pattern": "Shoulder flexion support hold",
+    "primary_muscles": [
+      "Anterior Deltoid",
+      "Upper Trapezius"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Serratus Anterior"
+    ],
+    "stabilizers": [
+      "Core",
+      "Wrist Stabilizers",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_028",
+    "name": "Dip Support Hold",
+    "equipment": "Dip Bars or Parallel Bars",
+    "category": "Upper Body Push",
+    "movement_pattern": "Dip support isometric hold",
+    "primary_muscles": [
+      "Triceps",
+      "Pectoralis Major"
+    ],
+    "secondary_muscles": [
+      "Anterior Deltoid",
+      "Lower Trapezius"
+    ],
+    "stabilizers": [
+      "Core",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_029",
+    "name": "Bottom Dip Hold",
+    "equipment": "Dip Bars or Parallel Bars",
+    "category": "Upper Body Push",
+    "movement_pattern": "Dip isometric hold",
+    "primary_muscles": [
+      "Pectoralis Major",
+      "Triceps",
+      "Anterior Deltoid"
+    ],
+    "secondary_muscles": [
+      "Serratus Anterior"
+    ],
+    "stabilizers": [
+      "Core",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_030",
+    "name": "L-Sit",
+    "equipment": "Floor, Parallettes, or Dip Bars",
+    "category": "Core",
+    "movement_pattern": "Hip flexion and support isometric hold",
+    "primary_muscles": [
+      "Hip Flexors",
+      "Rectus Abdominis"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Anterior Deltoid"
+    ],
+    "stabilizers": [
+      "Shoulder Stabilizers",
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_031",
+    "name": "Tuck Sit Hold",
+    "equipment": "Parallettes or Floor",
+    "category": "Core",
+    "movement_pattern": "Support isometric hold",
+    "primary_muscles": [
+      "Hip Flexors",
+      "Rectus Abdominis"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Anterior Deltoid"
+    ],
+    "stabilizers": [
+      "Shoulder Stabilizers",
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_032",
+    "name": "Pull-Up Top Hold",
+    "equipment": "Pull-Up Bar",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Vertical pull isometric hold",
+    "primary_muscles": [
+      "Latissimus Dorsi",
+      "Biceps"
+    ],
+    "secondary_muscles": [
+      "Rhomboids",
+      "Lower Trapezius"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_033",
+    "name": "Pull-Up Mid Hold",
+    "equipment": "Pull-Up Bar",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Vertical pull isometric hold",
+    "primary_muscles": [
+      "Latissimus Dorsi",
+      "Biceps"
+    ],
+    "secondary_muscles": [
+      "Rhomboids",
+      "Posterior Deltoid"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_034",
+    "name": "Flexed Arm Hang",
+    "equipment": "Pull-Up Bar",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Vertical pull isometric hold",
+    "primary_muscles": [
+      "Latissimus Dorsi",
+      "Biceps"
+    ],
+    "secondary_muscles": [
+      "Rhomboids",
+      "Lower Trapezius"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_035",
+    "name": "Scapular Pull-Up Hold",
+    "equipment": "Pull-Up Bar",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Scapular depression isometric hold",
+    "primary_muscles": [
+      "Lower Trapezius",
+      "Latissimus Dorsi"
+    ],
+    "secondary_muscles": [
+      "Rhomboids"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_036",
+    "name": "Active Hang",
+    "equipment": "Pull-Up Bar",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Overhead support hold",
+    "primary_muscles": [
+      "Latissimus Dorsi",
+      "Lower Trapezius"
+    ],
+    "secondary_muscles": [
+      "Forearm Flexors",
+      "Serratus Anterior"
+    ],
+    "stabilizers": [
+      "Core",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_037",
+    "name": "Dead Hang",
+    "equipment": "Pull-Up Bar",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Passive overhead hold",
+    "primary_muscles": [
+      "Forearm Flexors"
+    ],
+    "secondary_muscles": [
+      "Latissimus Dorsi",
+      "Rotator Cuff"
+    ],
+    "stabilizers": [
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_038",
+    "name": "Inverted Row Top Hold",
+    "equipment": "Bar or Rings",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Horizontal pull isometric hold",
+    "primary_muscles": [
+      "Rhomboids",
+      "Middle Trapezius",
+      "Latissimus Dorsi"
+    ],
+    "secondary_muscles": [
+      "Biceps",
+      "Posterior Deltoid"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_039",
+    "name": "Inverted Row Mid Hold",
+    "equipment": "Bar or Rings",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Horizontal pull isometric hold",
+    "primary_muscles": [
+      "Rhomboids",
+      "Latissimus Dorsi"
+    ],
+    "secondary_muscles": [
+      "Biceps",
+      "Posterior Deltoid"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_040",
+    "name": "Reverse Plank",
+    "equipment": "Bodyweight",
+    "category": "Posterior Chain",
+    "movement_pattern": "Hip extension support hold",
+    "primary_muscles": [
+      "Gluteus Maximus",
+      "Posterior Deltoid"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Erector Spinae"
+    ],
+    "stabilizers": [
+      "Core",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_041",
+    "name": "Tabletop Hold",
+    "equipment": "Bodyweight",
+    "category": "Posterior Chain",
+    "movement_pattern": "Hip extension support hold",
+    "primary_muscles": [
+      "Gluteus Maximus",
+      "Posterior Deltoid"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Triceps"
+    ],
+    "stabilizers": [
+      "Core",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_042",
+    "name": "Superman Hold",
+    "equipment": "Bodyweight",
+    "category": "Posterior Chain",
+    "movement_pattern": "Spinal extension isometric hold",
+    "primary_muscles": [
+      "Erector Spinae"
+    ],
+    "secondary_muscles": [
+      "Gluteus Maximus",
+      "Posterior Deltoid"
+    ],
+    "stabilizers": [
+      "Hamstrings",
+      "Upper Back"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_043",
+    "name": "Arch Hold",
+    "equipment": "Bodyweight",
+    "category": "Posterior Chain",
+    "movement_pattern": "Spinal extension isometric hold",
+    "primary_muscles": [
+      "Erector Spinae",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Posterior Deltoid"
+    ],
+    "stabilizers": [
+      "Upper Back"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_044",
+    "name": "Bird Dog Hold",
+    "equipment": "Bodyweight",
+    "category": "Core",
+    "movement_pattern": "Anti-rotation isometric hold",
+    "primary_muscles": [
+      "Transverse Abdominis",
+      "Multifidus"
+    ],
+    "secondary_muscles": [
+      "Gluteus Maximus",
+      "Posterior Deltoid"
+    ],
+    "stabilizers": [
+      "Shoulder Stabilizers",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "static_045",
+    "name": "Bear Plank Hold",
+    "equipment": "Bodyweight",
+    "category": "Core",
+    "movement_pattern": "Anti-extension isometric hold",
+    "primary_muscles": [
+      "Transverse Abdominis",
+      "Rectus Abdominis"
+    ],
+    "secondary_muscles": [
+      "Serratus Anterior",
+      "Hip Flexors"
+    ],
+    "stabilizers": [
+      "Shoulder Stabilizers",
+      "Quadriceps"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_046",
+    "name": "Quadruped Hover Hold",
+    "equipment": "Bodyweight",
+    "category": "Core",
+    "movement_pattern": "Anti-extension isometric hold",
+    "primary_muscles": [
+      "Transverse Abdominis",
+      "Rectus Abdominis"
+    ],
+    "secondary_muscles": [
+      "Serratus Anterior",
+      "Quadriceps"
+    ],
+    "stabilizers": [
+      "Shoulder Stabilizers",
+      "Hip Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_047",
+    "name": "Copenhagen Plank",
+    "equipment": "Bench or Box",
+    "category": "Core",
+    "movement_pattern": "Adduction and anti-lateral-flexion isometric hold",
+    "primary_muscles": [
+      "Adductors",
+      "Obliques"
+    ],
+    "secondary_muscles": [
+      "Quadratus Lumborum",
+      "Gluteus Medius"
+    ],
+    "stabilizers": [
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "static_048",
+    "name": "Reverse Nordic Hold",
+    "equipment": "Bodyweight",
+    "category": "Lower Body",
+    "movement_pattern": "Knee extension isometric hold",
+    "primary_muscles": [
+      "Quadriceps"
+    ],
+    "secondary_muscles": [
+      "Hip Flexors"
+    ],
+    "stabilizers": [
+      "Core",
+      "Gluteus Maximus"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_049",
+    "name": "Nordic Hamstring Hold",
+    "equipment": "Partner or Anchor",
+    "category": "Posterior Chain",
+    "movement_pattern": "Knee flexion isometric hold",
+    "primary_muscles": [
+      "Hamstrings"
+    ],
+    "secondary_muscles": [
+      "Gluteus Maximus",
+      "Calves"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_050",
+    "name": "Single-Leg Wall Sit",
+    "equipment": "Wall",
+    "category": "Lower Body",
+    "movement_pattern": "Single-leg squat isometric hold",
+    "primary_muscles": [
+      "Quadriceps"
+    ],
+    "secondary_muscles": [
+      "Gluteus Maximus",
+      "Hamstrings"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers",
+      "Calves"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "static_051",
+    "name": "Skater Squat Hold",
+    "equipment": "Bodyweight",
+    "category": "Lower Body",
+    "movement_pattern": "Single-leg squat isometric hold",
+    "primary_muscles": [
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers",
+      "Calves"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "static_052",
+    "name": "Pistol Squat Bottom Hold",
+    "equipment": "Bodyweight",
+    "category": "Lower Body",
+    "movement_pattern": "Single-leg squat isometric hold",
+    "primary_muscles": [
+      "Quadriceps",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers",
+      "Calves",
+      "Ankle Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "static_053",
+    "name": "Archer Squat Hold",
+    "equipment": "Bodyweight",
+    "category": "Lower Body",
+    "movement_pattern": "Lateral squat isometric hold",
+    "primary_muscles": [
+      "Quadriceps",
+      "Adductors"
+    ],
+    "secondary_muscles": [
+      "Gluteus Maximus",
+      "Hamstrings"
+    ],
+    "stabilizers": [
+      "Core",
+      "Hip Stabilizers"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "static_054",
+    "name": "Frog Stand",
+    "equipment": "Bodyweight",
+    "category": "Upper Body Push",
+    "movement_pattern": "Arm balance isometric hold",
+    "primary_muscles": [
+      "Anterior Deltoid",
+      "Triceps"
+    ],
+    "secondary_muscles": [
+      "Serratus Anterior",
+      "Rectus Abdominis"
+    ],
+    "stabilizers": [
+      "Wrist Stabilizers",
+      "Shoulder Stabilizers",
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_055",
+    "name": "Crow Pose Hold",
+    "equipment": "Bodyweight",
+    "category": "Upper Body Push",
+    "movement_pattern": "Arm balance isometric hold",
+    "primary_muscles": [
+      "Anterior Deltoid",
+      "Triceps"
+    ],
+    "secondary_muscles": [
+      "Serratus Anterior",
+      "Rectus Abdominis"
+    ],
+    "stabilizers": [
+      "Wrist Stabilizers",
+      "Shoulder Stabilizers",
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_056",
+    "name": "Tuck Planche Hold",
+    "equipment": "Parallettes or Floor",
+    "category": "Upper Body Push",
+    "movement_pattern": "Arm balance isometric hold",
+    "primary_muscles": [
+      "Anterior Deltoid",
+      "Triceps",
+      "Serratus Anterior"
+    ],
+    "secondary_muscles": [
+      "Pectoralis Major",
+      "Rectus Abdominis"
+    ],
+    "stabilizers": [
+      "Wrist Stabilizers",
+      "Shoulder Stabilizers",
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_057",
+    "name": "Straddle Planche Lean Hold",
+    "equipment": "Parallettes or Floor",
+    "category": "Upper Body Push",
+    "movement_pattern": "Arm balance support hold",
+    "primary_muscles": [
+      "Anterior Deltoid",
+      "Serratus Anterior",
+      "Triceps"
+    ],
+    "secondary_muscles": [
+      "Pectoralis Major",
+      "Rectus Abdominis"
+    ],
+    "stabilizers": [
+      "Wrist Stabilizers",
+      "Shoulder Stabilizers",
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_058",
+    "name": "Front Lever Tuck Hold",
+    "equipment": "Pull-Up Bar or Rings",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Shoulder extension isometric hold",
+    "primary_muscles": [
+      "Latissimus Dorsi",
+      "Rectus Abdominis"
+    ],
+    "secondary_muscles": [
+      "Teres Major",
+      "Posterior Deltoid"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_059",
+    "name": "Front Lever Hold",
+    "equipment": "Pull-Up Bar or Rings",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Shoulder extension isometric hold",
+    "primary_muscles": [
+      "Latissimus Dorsi",
+      "Rectus Abdominis"
+    ],
+    "secondary_muscles": [
+      "Teres Major",
+      "Posterior Deltoid",
+      "Gluteus Maximus"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_060",
+    "name": "Back Lever Tuck Hold",
+    "equipment": "Rings or Bar",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Shoulder extension support hold",
+    "primary_muscles": [
+      "Latissimus Dorsi",
+      "Posterior Deltoid"
+    ],
+    "secondary_muscles": [
+      "Pectoralis Major",
+      "Biceps"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_061",
+    "name": "German Hang Hold",
+    "equipment": "Rings or Bar",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Shoulder extension mobility hold",
+    "primary_muscles": [
+      "Pectoralis Major",
+      "Biceps"
+    ],
+    "secondary_muscles": [
+      "Anterior Deltoid",
+      "Latissimus Dorsi"
+    ],
+    "stabilizers": [
+      "Shoulder Stabilizers",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_062",
+    "name": "Ring Support Hold",
+    "equipment": "Gymnastic Rings",
+    "category": "Upper Body Push",
+    "movement_pattern": "Support isometric hold",
+    "primary_muscles": [
+      "Triceps",
+      "Pectoralis Major"
+    ],
+    "secondary_muscles": [
+      "Anterior Deltoid",
+      "Serratus Anterior"
+    ],
+    "stabilizers": [
+      "Core",
+      "Shoulder Stabilizers",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_063",
+    "name": "Ring Turned-Out Support Hold",
+    "equipment": "Gymnastic Rings",
+    "category": "Upper Body Push",
+    "movement_pattern": "Support isometric hold",
+    "primary_muscles": [
+      "Triceps",
+      "Pectoralis Major"
+    ],
+    "secondary_muscles": [
+      "Biceps",
+      "Anterior Deltoid"
+    ],
+    "stabilizers": [
+      "Shoulder Stabilizers",
+      "Forearms",
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_064",
+    "name": "Ring Dip Support Hold",
+    "equipment": "Gymnastic Rings",
+    "category": "Upper Body Push",
+    "movement_pattern": "Dip support isometric hold",
+    "primary_muscles": [
+      "Triceps",
+      "Pectoralis Major"
+    ],
+    "secondary_muscles": [
+      "Anterior Deltoid",
+      "Serratus Anterior"
+    ],
+    "stabilizers": [
+      "Core",
+      "Shoulder Stabilizers",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_065",
+    "name": "Ring Push-Up Hold",
+    "equipment": "Gymnastic Rings",
+    "category": "Upper Body Push",
+    "movement_pattern": "Horizontal press isometric hold",
+    "primary_muscles": [
+      "Pectoralis Major",
+      "Triceps"
+    ],
+    "secondary_muscles": [
+      "Anterior Deltoid",
+      "Serratus Anterior"
+    ],
+    "stabilizers": [
+      "Core",
+      "Shoulder Stabilizers",
+      "Forearms"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_066",
+    "name": "Ring Row Hold",
+    "equipment": "Gymnastic Rings",
+    "category": "Upper Body Pull",
+    "movement_pattern": "Horizontal pull isometric hold",
+    "primary_muscles": [
+      "Rhomboids",
+      "Middle Trapezius",
+      "Latissimus Dorsi"
+    ],
+    "secondary_muscles": [
+      "Biceps",
+      "Posterior Deltoid"
+    ],
+    "stabilizers": [
+      "Core",
+      "Forearms",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_067",
+    "name": "Towel Hang",
+    "equipment": "Towel and Pull-Up Bar",
+    "category": "Arms",
+    "movement_pattern": "Grip isometric hold",
+    "primary_muscles": [
+      "Forearm Flexors"
+    ],
+    "secondary_muscles": [
+      "Latissimus Dorsi",
+      "Biceps"
+    ],
+    "stabilizers": [
+      "Core",
+      "Shoulder Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_068",
+    "name": "Fingertip Plank Hold",
+    "equipment": "Bodyweight",
+    "category": "Arms",
+    "movement_pattern": "Support isometric hold",
+    "primary_muscles": [
+      "Forearm Flexors",
+      "Finger Flexors"
+    ],
+    "secondary_muscles": [
+      "Pectoralis Major",
+      "Triceps"
+    ],
+    "stabilizers": [
+      "Core",
+      "Shoulder Stabilizers",
+      "Wrist Stabilizers"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_069",
+    "name": "Neck Flexion Hold",
+    "equipment": "Bodyweight",
+    "category": "Neck",
+    "movement_pattern": "Cervical flexion isometric hold",
+    "primary_muscles": [
+      "Neck Flexors"
+    ],
+    "secondary_muscles": [],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_070",
+    "name": "Neck Extension Hold",
+    "equipment": "Bodyweight",
+    "category": "Neck",
+    "movement_pattern": "Cervical extension isometric hold",
+    "primary_muscles": [
+      "Neck Extensors"
+    ],
+    "secondary_muscles": [
+      "Upper Trapezius"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_071",
+    "name": "Neck Lateral Flexion Hold",
+    "equipment": "Bodyweight",
+    "category": "Neck",
+    "movement_pattern": "Cervical lateral flexion isometric hold",
+    "primary_muscles": [
+      "Sternocleidomastoid",
+      "Scalenes"
+    ],
+    "secondary_muscles": [
+      "Upper Trapezius"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "static_072",
+    "name": "Chin Tuck Hold",
+    "equipment": "Bodyweight",
+    "category": "Neck",
+    "movement_pattern": "Cervical retraction isometric hold",
+    "primary_muscles": [
+      "Deep Neck Flexors"
+    ],
+    "secondary_muscles": [],
+    "stabilizers": [
+      "Postural Muscles"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_073",
+    "name": "Prone Y Hold",
+    "equipment": "Bodyweight",
+    "category": "Shoulder Health",
+    "movement_pattern": "Scapular upward rotation isometric hold",
+    "primary_muscles": [
+      "Lower Trapezius"
+    ],
+    "secondary_muscles": [
+      "Posterior Deltoid",
+      "Serratus Anterior"
+    ],
+    "stabilizers": [
+      "Rotator Cuff"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_074",
+    "name": "Prone T Hold",
+    "equipment": "Bodyweight",
+    "category": "Shoulder Health",
+    "movement_pattern": "Horizontal abduction isometric hold",
+    "primary_muscles": [
+      "Posterior Deltoid",
+      "Middle Trapezius"
+    ],
+    "secondary_muscles": [
+      "Rhomboids"
+    ],
+    "stabilizers": [
+      "Rotator Cuff"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_075",
+    "name": "Prone W Hold",
+    "equipment": "Bodyweight",
+    "category": "Shoulder Health",
+    "movement_pattern": "Scapular retraction and external rotation isometric hold",
+    "primary_muscles": [
+      "Rhomboids",
+      "Infraspinatus",
+      "Teres Minor"
+    ],
+    "secondary_muscles": [
+      "Posterior Deltoid",
+      "Middle Trapezius"
+    ],
+    "stabilizers": [
+      "Rotator Cuff"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_076",
+    "name": "Wall Slide Hold",
+    "equipment": "Wall",
+    "category": "Shoulder Health",
+    "movement_pattern": "Overhead position isometric hold",
+    "primary_muscles": [
+      "Serratus Anterior",
+      "Lower Trapezius"
+    ],
+    "secondary_muscles": [
+      "Rotator Cuff"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_077",
+    "name": "Doorway Pec Stretch Hold",
+    "equipment": "Door Frame",
+    "category": "Mobility",
+    "movement_pattern": "Chest stretch hold",
+    "primary_muscles": [
+      "Pectoralis Major"
+    ],
+    "secondary_muscles": [
+      "Anterior Deltoid",
+      "Biceps"
+    ],
+    "stabilizers": [],
+    "unilateral": false
+  },
+  {
+    "exercise_id": "static_078",
+    "name": "Hip Flexor Stretch Hold",
+    "equipment": "Bodyweight",
+    "category": "Mobility",
+    "movement_pattern": "Hip extension stretch hold",
+    "primary_muscles": [
+      "Hip Flexors"
+    ],
+    "secondary_muscles": [
+      "Quadriceps"
+    ],
+    "stabilizers": [
+      "Core",
+      "Gluteus Maximus"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "static_079",
+    "name": "Hamstring Stretch Hold",
+    "equipment": "Bodyweight",
+    "category": "Mobility",
+    "movement_pattern": "Hip flexion stretch hold",
+    "primary_muscles": [
+      "Hamstrings"
+    ],
+    "secondary_muscles": [
+      "Calves"
+    ],
+    "stabilizers": [
+      "Core"
+    ],
+    "unilateral": true
+  },
+  {
+    "exercise_id": "static_080",
+    "name": "Deep Squat Hold",
+    "equipment": "Bodyweight",
+    "category": "Mobility",
+    "movement_pattern": "Deep squat position hold",
+    "primary_muscles": [
+      "Adductors",
+      "Gluteus Maximus"
+    ],
+    "secondary_muscles": [
+      "Quadriceps",
+      "Calves"
+    ],
+    "stabilizers": [
+      "Core",
+      "Ankle Stabilizers"
+    ],
+    "unilateral": false
+  }
+]
