@@ -434,21 +434,43 @@ pre {
     margin-top: 1rem;
 }
 
-.set-table {
-    width: 100%;
-    border-collapse: collapse;
+.set-entry-stack {
+    display: grid;
+    gap: 0.9rem;
 }
 
-.set-table th,
-.set-table td {
-    border-bottom: 1px solid var(--border);
-    padding: 0.5rem;
-    text-align: left;
-    vertical-align: top;
+.set-entry-card {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: #fcfaf5;
+    padding: 0.95rem 1rem;
 }
 
-.set-timer-row td {
-    border-bottom: 0;
+.set-entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 1rem;
+    margin-bottom: 0.8rem;
+}
+
+.set-entry-guidance {
+    text-align: right;
+    min-width: 120px;
+}
+
+.set-entry-guidance strong,
+.set-entry-meta strong {
+    display: block;
+    font-size: 0.9rem;
+}
+
+.set-entry-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 1rem;
+    margin-bottom: 0.9rem;
 }
 
 .set-timer-stack {
@@ -471,6 +493,32 @@ pre {
 
 .set-edge-controls {
     align-items: stretch;
+}
+
+.set-entry-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+    align-items: end;
+}
+
+.set-field {
+    min-width: 0;
+}
+
+.set-field label {
+    font-size: 0.88rem;
+    margin-bottom: 0.25rem;
+}
+
+.set-field input,
+.set-field textarea,
+.set-field select {
+    margin-bottom: 0;
+}
+
+.set-field-notes {
+    grid-column: span 2;
 }
 
 .set-control-buttons button {
@@ -509,16 +557,11 @@ pre {
     opacity: 0.75;
 }
 
-.set-save-row td {
-    border-bottom: 1px solid var(--border);
-    border-top: 0;
-    padding-top: 0;
-    padding-bottom: 0.8rem;
-}
-
-.set-save-cell {
+.set-entry-save {
     text-align: right;
-    padding-right: 1.75rem;
+    padding-top: 0.85rem;
+    margin-top: 0.85rem;
+    border-top: 1px solid var(--border);
 }
 
 .set-save-button {
@@ -684,6 +727,24 @@ pre {
     .builder-result-row,
     .builder-selected-summary {
         flex-direction: column;
+    }
+
+    .set-entry-header,
+    .set-entry-meta {
+        flex-direction: column;
+    }
+
+    .set-entry-guidance,
+    .set-entry-save {
+        text-align: left;
+    }
+
+    .set-entry-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .set-field-notes {
+        grid-column: auto;
     }
 
     .swap-option-row {
