@@ -256,7 +256,14 @@
                                 <article class="builder-result-row">
                                     <div class="builder-row-main">
                                         {% if exercise.display_image_url %}
-                                            <img src="{{ exercise.display_image_url }}" alt="{{ exercise.name }}" class="exercise-thumb builder-thumb-small">
+                                            <button
+                                                type="button"
+                                                class="exercise-image-trigger"
+                                                data-image-url="{{ exercise.display_image_url }}"
+                                                data-image-alt="{{ exercise.name }}"
+                                            >
+                                                <img src="{{ exercise.display_image_url }}" alt="{{ exercise.name }}" class="exercise-thumb builder-thumb-small">
+                                            </button>
                                         {% endif %}
                                         <div>
                                             <h3>{{ exercise.name }}</h3>
@@ -265,6 +272,9 @@
                                                 {% if exercise.brand %} &middot; {{ exercise.brand }}{% endif %}
                                                 {% if exercise.line %} &middot; {{ exercise.line }}{% elif exercise.equipment %} &middot; {{ exercise.equipment }}{% endif %}
                                             </p>
+                                            {% if exercise.verification_status == "pending_review" %}
+                                                <p class="help-text">Pending staff review. Visible to you and staff until approved.</p>
+                                            {% endif %}
                                             <p>{{ exercise.instructions }}</p>
                                             <p class="help-text">{{ exercise.movement_pattern }}{% if exercise.supports_time %} &middot; supports time{% endif %}{% if exercise.supports_reps %} &middot; supports reps{% endif %}</p>
                                         </div>
@@ -310,5 +320,85 @@
         {% else %}
             <p>No exercises match the current filter.</p>
         {% endif %}
+        {% if submission_query %}
+            <section class="card library-admin-edit-panel" style="margin-top:1rem;">
+                <h3>AI Exercise Search</h3>
+                {% if exercise_result_groups %}
+                    <p class="help-text">Not seeing the exact exercise you meant for "{{ submission_query }}"? Ask AI to draft it, then edit anything before saving it to your personal library.</p>
+                {% else %}
+                    <p class="help-text">No match for "{{ submission_query }}". Ask AI to draft the exercise metadata, then edit anything before saving it to your personal library.</p>
+                {% endif %}
+                {% if submission_form %}
+                    <form
+                        method="post"
+                        class="stack"
+                        hx-post="{% url 'manual_program_day_detail' draft.id day.id %}"
+                        hx-target="#manual-day-shell"
+                        hx-swap="innerHTML show:#manual-day-search-panel:top"
+                    >
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="save_user_exercise_submission">
+                        {% for key, value in active_filter_fields %}
+                            <input type="hidden" name="{{ key }}" value="{{ value }}">
+                        {% endfor %}
+                        {% if expanded_entry_id %}
+                            <input type="hidden" name="expanded" value="{{ expanded_entry_id }}">
+                        {% endif %}
+                        {{ submission_form.as_p }}
+                        <button type="submit">Save pending exercise</button>
+                    </form>
+                {% else %}
+                    <form
+                        method="post"
+                        hx-post="{% url 'manual_program_day_detail' draft.id day.id %}"
+                        hx-target="#manual-day-shell"
+                        hx-swap="innerHTML show:#manual-day-search-panel:top"
+                    >
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="generate_ai_exercise_suggestion">
+                        {% for key, value in active_filter_fields %}
+                            <input type="hidden" name="{{ key }}" value="{{ value }}">
+                        {% endfor %}
+                        {% if expanded_entry_id %}
+                            <input type="hidden" name="expanded" value="{{ expanded_entry_id }}">
+                        {% endif %}
+                        <button type="submit">Draft exercise with AI</button>
+                    </form>
+                {% endif %}
+            </section>
+        {% endif %}
     </section>
 </section>
+
+<dialog id="exercise-image-lightbox" class="exercise-image-lightbox">
+    <form method="dialog" class="exercise-image-lightbox-close-row">
+        <button type="submit" class="secondary-button">Close</button>
+    </form>
+    <img src="" alt="" class="exercise-image-lightbox-image">
+</dialog>
+
+<script>
+    (function () {
+        const dialog = document.getElementById("exercise-image-lightbox");
+        if (!dialog) {
+            return;
+        }
+        const image = dialog.querySelector(".exercise-image-lightbox-image");
+        document.addEventListener("click", function (event) {
+            const trigger = event.target.closest(".exercise-image-trigger");
+            if (!trigger) {
+                return;
+            }
+            image.src = trigger.dataset.imageUrl || "";
+            image.alt = trigger.dataset.imageAlt || "Exercise image";
+            if (typeof dialog.showModal === "function") {
+                dialog.showModal();
+            }
+        });
+        dialog.addEventListener("click", function (event) {
+            if (event.target === dialog) {
+                dialog.close();
+            }
+        });
+    })();
+</script>

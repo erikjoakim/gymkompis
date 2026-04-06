@@ -353,6 +353,41 @@ class ManualProgramBuilderTests(TestCase):
         self.assertContains(response, '<button type="submit">Search</button>', html=False)
         self.assertContains(response, 'hx-swap="innerHTML show:#manual-day-search-panel:top"', html=False)
 
+    def test_manual_day_detail_search_results_support_image_lightbox(self):
+        self.client.force_login(self.user)
+        draft = ManualProgramDraft.objects.create(
+            user=self.user,
+            name="Manual Strength Draft",
+            goal_summary="Build strength manually.",
+            duration_weeks=6,
+            weight_unit="kg",
+        )
+        day = ManualProgramDay.objects.create(
+            draft=draft,
+            day_key="monday",
+            name="Full Body A",
+            day_type="training",
+        )
+        Exercise.objects.create(
+            external_id="img_result_1",
+            name="Chest Press",
+            modality=Exercise.Modality.MACHINE,
+            category="Chest",
+            movement_pattern="Horizontal Press",
+            equipment="Machine",
+            image_url="https://example.com/images/chest-press.png",
+            instructions="Press with control.",
+            instructions_status=Exercise.InstructionStatus.SEEDED,
+        )
+
+        response = self.client.get(
+            reverse("manual_program_day_detail", args=[draft.id, day.id]),
+            {"query": "Chest Press"},
+        )
+
+        self.assertContains(response, 'class="exercise-image-trigger"', html=False)
+        self.assertContains(response, 'id="exercise-image-lightbox"', html=False)
+
     def test_manual_day_detail_filters_by_brand(self):
         self.client.force_login(self.user)
         draft = ManualProgramDraft.objects.create(
@@ -404,6 +439,40 @@ class ManualProgramBuilderTests(TestCase):
         self.assertContains(response, technogym.name)
         self.assertContains(response, "Technogym")
         self.assertNotContains(response, "Plate-loaded machine")
+
+    def test_manual_day_detail_search_is_fuzzy_for_hyphens_and_spacing(self):
+        self.client.force_login(self.user)
+        draft = ManualProgramDraft.objects.create(
+            user=self.user,
+            name="Manual Strength Draft",
+            goal_summary="Build strength manually.",
+            duration_weeks=6,
+            weight_unit="kg",
+        )
+        day = ManualProgramDay.objects.create(
+            draft=draft,
+            day_key="monday",
+            name="Full Body A",
+            day_type="training",
+        )
+        Exercise.objects.create(
+            external_id="lat_pulldown_machine",
+            name="Lat Pulldown",
+            modality=Exercise.Modality.MACHINE,
+            category="Upper Body",
+            movement_pattern="Vertical Pull",
+            equipment="Machine",
+            supports_reps=True,
+            instructions="Pull with control.",
+            instructions_status=Exercise.InstructionStatus.SEEDED,
+        )
+
+        response = self.client.get(
+            reverse("manual_program_day_detail", args=[draft.id, day.id]),
+            {"query": "lat pull-down"},
+        )
+
+        self.assertContains(response, "Lat Pulldown")
 
     def test_import_exercise_library_creates_seeded_instructions(self):
         with TemporaryDirectory() as temp_dir:
@@ -608,6 +677,73 @@ class ManualProgramBuilderTests(TestCase):
         self.assertNotContains(response, "Suggested:</strong> Technogym", html=False)
         self.assertNotContains(response, "Suggested:</strong> Selection 900", html=False)
 
+    def test_library_admin_pending_review_record_shows_metadata_complete_not_missing_complete(self):
+        self.user.is_staff = True
+        self.user.save(update_fields=["is_staff"])
+        self.client.force_login(self.user)
+        submitter = User.objects.create_user(email="submitter@example.com", password="password123")
+        Exercise.objects.create(
+            external_id="pending_ab_crunch",
+            source_dataset="user",
+            source_kind=Exercise.SourceKind.AI_SUGGESTED,
+            name="Ab Crunch",
+            created_by=submitter,
+            modality=Exercise.Modality.MACHINE,
+            library_role=Exercise.LibraryRole.MAIN,
+            equipment="Machine",
+            category="Core",
+            movement_pattern="Abdominal Crunch",
+            primary_muscles=["Abdominals"],
+            instructions="Crunch with control.",
+            instructions_status=Exercise.InstructionStatus.AI_DRAFT,
+            verification_status=Exercise.VerificationStatus.PENDING_REVIEW,
+        )
+
+        response = self.client.get(reverse("library_admin"))
+
+        self.assertContains(response, "Ab Crunch")
+        self.assertContains(response, "Metadata: Complete")
+        self.assertNotContains(response, "Missing: Complete")
+        self.assertContains(response, "Status: Pending review")
+
+    def test_library_admin_initial_queue_hides_complete_approved_records(self):
+        self.user.is_staff = True
+        self.user.save(update_fields=["is_staff"])
+        self.client.force_login(self.user)
+        Exercise.objects.create(
+            external_id="approved_complete_record",
+            name="Approved Complete",
+            modality=Exercise.Modality.MACHINE,
+            library_role=Exercise.LibraryRole.MAIN,
+            equipment="Machine",
+            category="Upper Body",
+            movement_pattern="Vertical Pull",
+            primary_muscles=["Lats"],
+            instructions="Pull with control.",
+            instructions_status=Exercise.InstructionStatus.SEEDED,
+            verification_status=Exercise.VerificationStatus.APPROVED,
+        )
+        Exercise.objects.create(
+            external_id="pending_complete_record",
+            source_dataset="user",
+            source_kind=Exercise.SourceKind.AI_SUGGESTED,
+            name="Pending Complete",
+            modality=Exercise.Modality.MACHINE,
+            library_role=Exercise.LibraryRole.MAIN,
+            equipment="Machine",
+            category="Upper Body",
+            movement_pattern="Vertical Pull",
+            primary_muscles=["Lats"],
+            instructions="Pull with control.",
+            instructions_status=Exercise.InstructionStatus.AI_DRAFT,
+            verification_status=Exercise.VerificationStatus.PENDING_REVIEW,
+        )
+
+        response = self.client.get(reverse("library_admin"))
+
+        self.assertNotContains(response, "Approved Complete")
+        self.assertContains(response, "Pending Complete")
+
     def test_library_admin_apply_suggestions_updates_record(self):
         self.user.is_staff = True
         self.user.save(update_fields=["is_staff"])
@@ -746,6 +882,7 @@ class ManualProgramBuilderTests(TestCase):
         with TemporaryDirectory() as temp_dir, override_settings(
             MEDIA_ROOT=temp_dir,
             MEDIA_URL="/media/",
+            EXERCISE_IMAGE_STATIC_DIR=Path(temp_dir) / "static" / "exercise_images",
             OPENAI_MOCK_RESPONSES=True,
             OPENAI_API_KEY="",
         ):
@@ -783,11 +920,37 @@ class ManualProgramBuilderTests(TestCase):
 
             self.assertContains(response, "Saved the generated image")
             exercise.refresh_from_db()
-            self.assertTrue(bool(exercise.generated_image))
+            self.assertFalse(bool(exercise.generated_image))
+            self.assertEqual(exercise.image_url, "/static/exercise_images/lat_machine_image.png")
+            self.assertTrue((Path(temp_dir) / "static" / "exercise_images" / "lat_machine_image.png").exists())
             self.assertEqual(exercise.image_status, Exercise.ImageStatus.REVIEWED)
             self.assertEqual(exercise.image_prompt, custom_prompt)
+            self.assertContains(response, "Copy Saved Image")
             self.assertNotIn("library_admin_image_preview", self.client.session)
             self.assertFalse(default_storage.exists(storage_name))
+
+    def test_library_image_admin_search_results_show_existing_images(self):
+        self.user.is_staff = True
+        self.user.save(update_fields=["is_staff"])
+        self.client.force_login(self.user)
+        exercise = Exercise.objects.create(
+            external_id="ab_crunch_with_image",
+            name="Abdominal Crunch",
+            modality=Exercise.Modality.MACHINE,
+            category="Core",
+            movement_pattern="Abdominal Crunch",
+            equipment="Selectorized machine",
+            image_url="https://example.com/images/ab-crunch.png",
+            instructions="Crunch with control.",
+            instructions_status=Exercise.InstructionStatus.SEEDED,
+        )
+
+        response = self.client.get(reverse("library_admin_images"), {"query": "Abdominal Crunch"})
+
+        self.assertContains(response, 'src="https://example.com/images/ab-crunch.png"', html=False)
+        self.assertContains(response, f'alt="{exercise.name}"', html=False)
+        self.assertContains(response, 'class="exercise-image-trigger"', html=False)
+        self.assertContains(response, 'id="exercise-image-lightbox"', html=False)
 
     def test_library_image_admin_preview_can_be_ignored(self):
         self.user.is_staff = True
@@ -807,6 +970,7 @@ class ManualProgramBuilderTests(TestCase):
         with TemporaryDirectory() as temp_dir, override_settings(
             MEDIA_ROOT=temp_dir,
             MEDIA_URL="/media/",
+            EXERCISE_IMAGE_STATIC_DIR=Path(temp_dir) / "static" / "exercise_images",
             OPENAI_MOCK_RESPONSES=True,
             OPENAI_API_KEY="",
         ):
@@ -838,6 +1002,200 @@ class ManualProgramBuilderTests(TestCase):
             self.assertFalse(bool(exercise.generated_image))
             self.assertNotIn("library_admin_image_preview", self.client.session)
             self.assertFalse(default_storage.exists(storage_name))
+
+    def test_library_image_admin_can_copy_saved_image_to_same_named_exercises(self):
+        self.user.is_staff = True
+        self.user.save(update_fields=["is_staff"])
+        self.client.force_login(self.user)
+        source = Exercise.objects.create(
+            external_id="tg_900_ab_crunch",
+            name="Abdominal Crunch",
+            brand="Technogym",
+            line="Selection 900",
+            modality=Exercise.Modality.MACHINE,
+            category="Core",
+            movement_pattern="Abdominal Crunch",
+            equipment="Selectorized machine",
+            instructions="Crunch with control.",
+            instructions_status=Exercise.InstructionStatus.SEEDED,
+        )
+        target_same_name = Exercise.objects.create(
+            external_id="tg_700_ab_crunch",
+            name="Abdominal Crunch",
+            brand="Technogym",
+            line="Selection 700",
+            modality=Exercise.Modality.MACHINE,
+            category="Core",
+            movement_pattern="Abdominal Crunch",
+            equipment="Selectorized machine",
+            instructions="Crunch with control.",
+            instructions_status=Exercise.InstructionStatus.SEEDED,
+        )
+        target_other_brand = Exercise.objects.create(
+            external_id="generic_ab_crunch",
+            name="Abdominal Crunch",
+            modality=Exercise.Modality.MACHINE,
+            category="Core",
+            movement_pattern="Abdominal Crunch",
+            equipment="Machine",
+            instructions="Crunch with control.",
+            instructions_status=Exercise.InstructionStatus.SEEDED,
+        )
+        different_name = Exercise.objects.create(
+            external_id="abdominal_machine",
+            name="Abdominal",
+            brand="Precor",
+            line="Discovery Series",
+            modality=Exercise.Modality.MACHINE,
+            category="Core",
+            movement_pattern="Abdominal Crunch",
+            equipment="Selectorized machine",
+            instructions="Crunch with control.",
+            instructions_status=Exercise.InstructionStatus.SEEDED,
+        )
+
+        with TemporaryDirectory() as temp_dir, override_settings(
+            MEDIA_ROOT=temp_dir,
+            MEDIA_URL="/media/",
+            EXERCISE_IMAGE_STATIC_DIR=Path(temp_dir) / "static" / "exercise_images",
+            OPENAI_MOCK_RESPONSES=True,
+            OPENAI_API_KEY="",
+        ):
+            generate_and_attach_exercise_image(source, use_mock=True)
+            source.refresh_from_db()
+
+            response = self.client.get(reverse("library_admin_images"), {"selected": source.id})
+            self.assertContains(response, "Copy Saved Image")
+            self.assertContains(response, target_same_name.external_id)
+            self.assertContains(response, target_other_brand.external_id)
+            self.assertNotContains(response, different_name.external_id)
+
+            response = self.client.post(
+                reverse("library_admin_images"),
+                {
+                    "action": "copy_saved_image",
+                    "source_exercise_id": source.id,
+                    "target_exercise_ids": [str(target_same_name.id), str(target_other_brand.id)],
+                    "selected": source.id,
+                },
+                follow=True,
+            )
+
+            self.assertContains(response, "Copied the saved image to 2 exercise records.")
+            target_same_name.refresh_from_db()
+            target_other_brand.refresh_from_db()
+            different_name.refresh_from_db()
+            self.assertFalse(bool(target_same_name.generated_image))
+            self.assertFalse(bool(target_other_brand.generated_image))
+            self.assertEqual(target_same_name.image_url, "/static/exercise_images/tg_700_ab_crunch.png")
+            self.assertEqual(target_other_brand.image_url, "/static/exercise_images/generic_ab_crunch.png")
+            self.assertTrue((Path(temp_dir) / "static" / "exercise_images" / "tg_700_ab_crunch.png").exists())
+            self.assertTrue((Path(temp_dir) / "static" / "exercise_images" / "generic_ab_crunch.png").exists())
+            self.assertEqual(target_same_name.image_prompt, source.image_prompt)
+            self.assertEqual(target_other_brand.image_prompt, source.image_prompt)
+            self.assertFalse(bool(different_name.generated_image))
+
+    def test_library_image_admin_copy_candidates_follow_filtered_search_results(self):
+        self.user.is_staff = True
+        self.user.save(update_fields=["is_staff"])
+        self.client.force_login(self.user)
+        selected = Exercise.objects.create(
+            external_id="tg_900_abdominal_crunch",
+            name="Abdominal Crunch",
+            brand="Technogym",
+            line="Selection 900",
+            modality=Exercise.Modality.MACHINE,
+            category="Core",
+            movement_pattern="Abdominal Crunch",
+            equipment="Selectorized machine",
+            instructions="Crunch with control.",
+            instructions_status=Exercise.InstructionStatus.AI_DRAFT,
+            instruction_source="gpt-4.1-mini:program-v1",
+        )
+        candidates = [
+            Exercise.objects.create(
+                external_id="lf_ab_crunch",
+                name="Ab Crunch",
+                brand="Life Fitness",
+                line="Signature Series",
+                modality=Exercise.Modality.MACHINE,
+                category="Core",
+                movement_pattern="Abdominal Crunch",
+                equipment="Selectorized machine",
+                instructions="Crunch with control.",
+                instructions_status=Exercise.InstructionStatus.AI_DRAFT,
+                instruction_source="gpt-4.1-mini:program-v1",
+            ),
+            Exercise.objects.create(
+                external_id="matrix_ab_crunch",
+                name="Ab Crunch",
+                brand="Matrix Fitness",
+                line="Ultra Series",
+                modality=Exercise.Modality.MACHINE,
+                category="Core",
+                movement_pattern="Abdominal Crunch",
+                equipment="Selectorized machine",
+                instructions="Crunch with control.",
+                instructions_status=Exercise.InstructionStatus.AI_DRAFT,
+                instruction_source="gpt-4.1-mini:program-v1",
+            ),
+            Exercise.objects.create(
+                external_id="precor_abdominal",
+                name="Abdominal",
+                brand="Precor",
+                line="Discovery Series",
+                modality=Exercise.Modality.MACHINE,
+                category="Core",
+                movement_pattern="Abdominal Crunch",
+                equipment="Selectorized machine",
+                instructions="Crunch with control.",
+                instructions_status=Exercise.InstructionStatus.AI_DRAFT,
+                instruction_source="gpt-4.1-mini:program-v1",
+            ),
+            Exercise.objects.create(
+                external_id="tg_700_abdominal_crunch",
+                name="Abdominal Crunch",
+                brand="Technogym",
+                line="Selection 700",
+                modality=Exercise.Modality.MACHINE,
+                category="Core",
+                movement_pattern="Abdominal Crunch",
+                equipment="Selectorized machine",
+                instructions="Crunch with control.",
+                instructions_status=Exercise.InstructionStatus.AI_DRAFT,
+                instruction_source="gpt-4.1-mini:program-v1",
+            ),
+        ]
+        excluded = Exercise.objects.create(
+            external_id="tg_abductor",
+            name="Abductor",
+            brand="Technogym",
+            line="Selection 900",
+            modality=Exercise.Modality.MACHINE,
+            category="Lower Body",
+            movement_pattern="Hip Abduction",
+            equipment="Selectorized machine",
+            instructions="Move with control.",
+            instructions_status=Exercise.InstructionStatus.AI_DRAFT,
+            instruction_source="gpt-4.1-mini:program-v1",
+        )
+
+        with TemporaryDirectory() as temp_dir, override_settings(
+            MEDIA_ROOT=temp_dir,
+            MEDIA_URL="/media/",
+            OPENAI_MOCK_RESPONSES=True,
+            OPENAI_API_KEY="",
+        ):
+            generate_and_attach_exercise_image(selected, use_mock=True)
+            selected.refresh_from_db()
+
+            response = self.client.get(
+                reverse("library_admin_images"),
+                {"query": "Abdominal Crunch", "selected": selected.id},
+            )
+
+        self.assertEqual([exercise.id for exercise in response.context["copy_candidates"]], [item.id for item in candidates])
+        self.assertNotIn(excluded.id, [exercise.id for exercise in response.context["copy_candidates"]])
 
     def test_library_admin_merge_duplicates_marks_canonical_and_hides_group(self):
         self.user.is_staff = True
@@ -985,3 +1343,295 @@ class ManualProgramBuilderTests(TestCase):
         self.assertEqual(request_kwargs["output_format"], "png")
         exercise.refresh_from_db()
         self.assertEqual(exercise.image_source, "gpt-image-1.5")
+
+    def test_manual_builder_no_results_offers_ai_exercise_draft(self):
+        self.client.force_login(self.user)
+        draft = ManualProgramDraft.objects.create(
+            user=self.user,
+            name="Manual Strength Draft",
+            goal_summary="Build strength manually.",
+            duration_weeks=6,
+            weight_unit="kg",
+        )
+        day = ManualProgramDay.objects.create(
+            draft=draft,
+            day_key="monday",
+            name="Full Body A",
+            day_type="training",
+        )
+
+        response = self.client.get(
+            reverse("manual_program_day_detail", args=[draft.id, day.id]),
+            {"query": "Cable Lat Pull-Down"},
+        )
+
+        self.assertContains(response, "No exercises match the current filter.")
+        self.assertContains(response, "AI Exercise Search")
+        self.assertContains(response, "Draft exercise with AI")
+        self.assertContains(response, '<option value="cable">Cable</option>', html=False)
+
+    def test_manual_builder_no_results_still_offers_ai_draft_with_cable_modality_filter(self):
+        self.client.force_login(self.user)
+        draft = ManualProgramDraft.objects.create(
+            user=self.user,
+            name="Manual Strength Draft",
+            goal_summary="Build strength manually.",
+            duration_weeks=6,
+            weight_unit="kg",
+        )
+        day = ManualProgramDay.objects.create(
+            draft=draft,
+            day_key="monday",
+            name="Full Body A",
+            day_type="training",
+        )
+
+        response = self.client.get(
+            reverse("manual_program_day_detail", args=[draft.id, day.id]),
+            {"query": "Cable Lat Pull-Down", "modality": Exercise.Modality.CABLE},
+        )
+
+        self.assertContains(response, "No exercises match the current filter.")
+        self.assertContains(response, "AI Exercise Search")
+        self.assertContains(response, "Draft exercise with AI")
+
+    def test_manual_builder_still_offers_ai_draft_when_results_exist(self):
+        self.client.force_login(self.user)
+        draft = ManualProgramDraft.objects.create(
+            user=self.user,
+            name="Manual Strength Draft",
+            goal_summary="Build strength manually.",
+            duration_weeks=6,
+            weight_unit="kg",
+        )
+        day = ManualProgramDay.objects.create(
+            draft=draft,
+            day_key="monday",
+            name="Full Body A",
+            day_type="training",
+        )
+        Exercise.objects.create(
+            external_id="machine_lat_pulldown",
+            name="Lat Pulldown",
+            modality=Exercise.Modality.MACHINE,
+            category="Upper Body",
+            movement_pattern="Vertical Pull",
+            equipment="Machine",
+            instructions="Pull down with control.",
+            instructions_status=Exercise.InstructionStatus.SEEDED,
+        )
+
+        response = self.client.get(
+            reverse("manual_program_day_detail", args=[draft.id, day.id]),
+            {"query": "Lat Pulldown"},
+        )
+
+        self.assertContains(response, "Lat Pulldown")
+        self.assertContains(response, "AI Exercise Search")
+        self.assertContains(response, "Draft exercise with AI")
+
+    @override_settings(OPENAI_MOCK_RESPONSES=True, OPENAI_API_KEY="")
+    def test_user_can_save_ai_suggested_exercise_as_pending_and_only_creator_sees_it(self):
+        self.client.force_login(self.user)
+        draft = ManualProgramDraft.objects.create(
+            user=self.user,
+            name="Manual Strength Draft",
+            goal_summary="Build strength manually.",
+            duration_weeks=6,
+            weight_unit="kg",
+        )
+        day = ManualProgramDay.objects.create(
+            draft=draft,
+            day_key="monday",
+            name="Full Body A",
+            day_type="training",
+        )
+
+        response = self.client.post(
+            reverse("manual_program_day_detail", args=[draft.id, day.id]),
+            {
+                "action": "generate_ai_exercise_suggestion",
+                "query": "Cable Lat Pull-Down",
+            },
+            follow=True,
+        )
+
+        self.assertContains(response, "Drafted a new exercise suggestion")
+        self.assertContains(response, "Save pending exercise")
+        self.assertContains(response, "Cable Lat Pull-Down")
+
+        response = self.client.post(
+            reverse("manual_program_day_detail", args=[draft.id, day.id]),
+            {
+                "action": "save_user_exercise_submission",
+                "query": "Cable Lat Pull-Down",
+                "submission-name": "Cable Lat Pull Down",
+                "submission-aliases": "",
+                "submission-brand": "",
+                "submission-line": "",
+                "submission-modality": Exercise.Modality.CABLE,
+                "submission-library_role": Exercise.LibraryRole.MAIN,
+                "submission-equipment": "Cable",
+                "submission-category": "Upper Body",
+                "submission-movement_pattern": "Vertical Pull",
+                "submission-primary_muscles": "Lats, Upper Back",
+                "submission-secondary_muscles": "Biceps",
+                "submission-stabilizers": "Core",
+                "submission-supports_reps": "on",
+                "submission-instructions": "Set the cable high, pull the handle down toward the upper chest, and keep your torso steady.",
+                "submission-submission_query": "Cable Lat Pull-Down",
+                "submission-source_kind": Exercise.SourceKind.AI_SUGGESTED,
+            },
+            follow=True,
+        )
+
+        self.assertContains(response, "pending staff review")
+        exercise = Exercise.objects.get(name="Cable Lat Pull Down")
+        self.assertEqual(exercise.created_by, self.user)
+        self.assertEqual(exercise.verification_status, Exercise.VerificationStatus.PENDING_REVIEW)
+        self.assertEqual(exercise.source_kind, Exercise.SourceKind.AI_SUGGESTED)
+        self.assertEqual(exercise.modality, Exercise.Modality.CABLE)
+
+        response = self.client.get(
+            reverse("manual_program_day_detail", args=[draft.id, day.id]),
+            {"query": "Cable Lat Pull-Down"},
+        )
+        self.assertContains(response, "Cable Lat Pull Down")
+        self.assertContains(response, "Pending staff review")
+
+        other_user = User.objects.create_user(email="other@example.com", password="password123")
+        other_draft = ManualProgramDraft.objects.create(
+            user=other_user,
+            name="Other Draft",
+            goal_summary="Other user plan.",
+            duration_weeks=6,
+            weight_unit="kg",
+        )
+        other_day = ManualProgramDay.objects.create(
+            draft=other_draft,
+            day_key="monday",
+            name="Other Day",
+            day_type="training",
+        )
+        self.client.force_login(other_user)
+        response = self.client.get(
+            reverse("manual_program_day_detail", args=[other_draft.id, other_day.id]),
+            {"query": "Cable Lat Pull-Down"},
+        )
+        self.assertNotContains(response, "Cable Lat Pull Down")
+
+    def test_library_admin_can_approve_pending_user_exercise(self):
+        staff_user = User.objects.create_user(email="staff@example.com", password="password123", is_staff=True)
+        submitted = Exercise.objects.create(
+            external_id="user__1__cable-lat-pull-down__abcd1234",
+            source_dataset="user",
+            source_kind=Exercise.SourceKind.AI_SUGGESTED,
+            name="Cable Lat Pull Down",
+            aliases=["Cable Lat Pull-Down"],
+            created_by=self.user,
+            modality=Exercise.Modality.CABLE,
+            library_role=Exercise.LibraryRole.MAIN,
+            equipment="Cable",
+            category="Upper Body",
+            movement_pattern="Vertical Pull",
+            primary_muscles=["Lats", "Upper Back"],
+            secondary_muscles=["Biceps"],
+            stabilizers=["Core"],
+            instructions="Pull down with control.",
+            instructions_status=Exercise.InstructionStatus.AI_DRAFT,
+            verification_status=Exercise.VerificationStatus.PENDING_REVIEW,
+        )
+
+        self.client.force_login(staff_user)
+        response = self.client.post(
+            reverse("library_admin"),
+            {
+                "action": "approve_exercise",
+                "exercise_id": submitted.id,
+            },
+            follow=True,
+        )
+
+        self.assertContains(response, "Approved Cable Lat Pull Down")
+        submitted.refresh_from_db()
+        self.assertEqual(submitted.verification_status, Exercise.VerificationStatus.APPROVED)
+        self.assertEqual(submitted.verified_by, staff_user)
+        self.assertIsNotNone(submitted.verified_at)
+
+        other_user = User.objects.create_user(email="approved-other@example.com", password="password123")
+        other_draft = ManualProgramDraft.objects.create(
+            user=other_user,
+            name="Approved Draft",
+            goal_summary="Approved search.",
+            duration_weeks=6,
+            weight_unit="kg",
+        )
+        other_day = ManualProgramDay.objects.create(
+            draft=other_draft,
+            day_key="monday",
+            name="Approved Day",
+            day_type="training",
+        )
+        self.client.force_login(other_user)
+        response = self.client.get(
+            reverse("manual_program_day_detail", args=[other_draft.id, other_day.id]),
+            {"query": "Cable Lat Pull-Down"},
+        )
+        self.assertContains(response, "Cable Lat Pull Down")
+
+    def test_library_admin_can_reject_pending_user_exercise(self):
+        staff_user = User.objects.create_user(email="reject-staff@example.com", password="password123", is_staff=True)
+        creator = User.objects.create_user(email="reject-owner@example.com", password="password123")
+        submitted = Exercise.objects.create(
+            external_id="user__2__cable-lat-pull-down__efgh5678",
+            source_dataset="user",
+            source_kind=Exercise.SourceKind.AI_SUGGESTED,
+            name="Cable Lat Pull Down",
+            aliases=["Cable Lat Pull-Down"],
+            created_by=creator,
+            modality=Exercise.Modality.CABLE,
+            library_role=Exercise.LibraryRole.MAIN,
+            equipment="Cable",
+            category="Upper Body",
+            movement_pattern="Vertical Pull",
+            primary_muscles=["Lats", "Upper Back"],
+            secondary_muscles=["Biceps"],
+            stabilizers=["Core"],
+            instructions="Pull down with control.",
+            instructions_status=Exercise.InstructionStatus.AI_DRAFT,
+            verification_status=Exercise.VerificationStatus.PENDING_REVIEW,
+        )
+        creator_draft = ManualProgramDraft.objects.create(
+            user=creator,
+            name="Creator Draft",
+            goal_summary="Rejected search.",
+            duration_weeks=6,
+            weight_unit="kg",
+        )
+        creator_day = ManualProgramDay.objects.create(
+            draft=creator_draft,
+            day_key="monday",
+            name="Creator Day",
+            day_type="training",
+        )
+
+        self.client.force_login(staff_user)
+        response = self.client.post(
+            reverse("library_admin"),
+            {
+                "action": "reject_exercise",
+                "exercise_id": submitted.id,
+            },
+            follow=True,
+        )
+
+        self.assertContains(response, "Rejected Cable Lat Pull Down")
+        submitted.refresh_from_db()
+        self.assertEqual(submitted.verification_status, Exercise.VerificationStatus.REJECTED)
+
+        self.client.force_login(creator)
+        response = self.client.get(
+            reverse("manual_program_day_detail", args=[creator_draft.id, creator_day.id]),
+            {"query": "Cable Lat Pull-Down"},
+        )
+        self.assertNotContains(response, "Cable Lat Pull Down")

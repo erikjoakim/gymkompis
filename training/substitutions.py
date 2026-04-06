@@ -1,6 +1,6 @@
 from collections import Counter
 
-from programs.library import root_exercise_queryset
+from programs.library import visible_exercise_queryset
 from programs.models import Exercise
 from programs.structure import infer_prescription_type
 
@@ -186,7 +186,7 @@ def suggest_substitutions(user, current_exercise: dict, *, excluded_keys: set[st
     current_name_normalized = _normalize_text(current.get("name"))
     candidates = []
 
-    queryset = root_exercise_queryset().filter(is_active=True)
+    queryset = visible_exercise_queryset(user)
     for candidate in queryset:
         candidate_key = candidate.exercise_key
         candidate_name_normalized = _normalize_text(candidate.name)

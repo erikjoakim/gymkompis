@@ -1,8 +1,11 @@
 import json
 import re
+import uuid
 from pathlib import Path
 
 from django.conf import settings
+from django.db.models import Q
+from django.utils import timezone
 from django.utils.text import slugify
 
 from openai import OpenAI
@@ -121,6 +124,20 @@ def root_exercise_queryset():
     return Exercise.objects.filter(canonical_exercise__isnull=True)
 
 
+def visible_exercise_queryset(user=None):
+    queryset = root_exercise_queryset().filter(is_active=True)
+    if user and getattr(user, "is_staff", False):
+        return queryset
+
+    filters = Q(verification_status=Exercise.VerificationStatus.APPROVED)
+    if user and getattr(user, "is_authenticated", False):
+        filters |= Q(
+            verification_status=Exercise.VerificationStatus.PENDING_REVIEW,
+            created_by=user,
+        )
+    return queryset.filter(filters)
+
+
 def resolve_canonical_exercise(exercise: Exercise | None) -> Exercise | None:
     if not exercise:
         return None
@@ -146,6 +163,11 @@ def _normalize_string_list(values) -> list[str]:
 
 def _brand_source_dataset(brand: str) -> str:
     return f"{_slugify_value(brand)[:24]}_catalog"[:32]
+
+
+def _user_submission_external_id(user, name: str) -> str:
+    slug = _slugify_value(name, fallback="exercise")[:32]
+    return f"user__{getattr(user, 'pk', 'anon')}__{slug}__{uuid.uuid4().hex[:8]}"
 
 
 def _catalog_paths(root: Path) -> list[Path]:
@@ -378,6 +400,148 @@ def generate_ai_exercise_metadata(exercise_payload: dict) -> dict:
     }
 
 
+def _movement_key_from_query(query: str) -> str:
+    text = " ".join((query or "").lower().replace("-", " ").replace("_", " ").split())
+    if not text:
+        return ""
+    if "lat" in text and any(token in text for token in ("pull", "pulldown", "pull down", "traction")):
+        return "vertical_pull"
+    if "row" in text:
+        return "horizontal_pull"
+    if "chest press" in text or ("press" in text and "shoulder" not in text and "overhead" not in text):
+        return "horizontal_press"
+    if "shoulder press" in text or "overhead press" in text:
+        return "vertical_press"
+    if "curl" in text and "leg" not in text:
+        return "elbow_flexion"
+    if "leg curl" in text:
+        return "knee_flexion"
+    if "extension" in text and "leg" in text:
+        return "knee_extension"
+    if "crunch" in text or "abdominal" in text:
+        return "abdominal_crunch"
+    if "adductor" in text:
+        return "hip_adduction"
+    if "abductor" in text:
+        return "hip_abduction"
+    if "squat" in text:
+        return "squat"
+    if "leg press" in text:
+        return "leg_press"
+    if "hip thrust" in text:
+        return "hip_thrust"
+    if "calf" in text:
+        return "calf_raise"
+    if "bike" in text:
+        return "upright_bike"
+    if "treadmill" in text or "run" in text:
+        return "treadmill"
+    if "rower" in text or "rowing" in text:
+        return "rower"
+    if "cable" in text and "pulley" in text:
+        return "adjustable_cable_pulley"
+    return ""
+
+
+def build_exercise_suggestion_prompt(search_query: str) -> tuple[str, str]:
+    instructions = (
+        "You draft metadata for a gym exercise library when a user searches for a missing exercise. "
+        "Return only a JSON object with the keys name, aliases, brand, line, modality, library_role, equipment, "
+        "category, movement_pattern, primary_muscles, secondary_muscles, stabilizers, supports_reps, supports_time, "
+        "is_static, unilateral, and instructions. "
+        "Use concise gym-library values and arrays of strings for list fields. "
+        "If the query looks generic, keep brand and line empty."
+    )
+    return instructions, json.dumps({"query": search_query}, ensure_ascii=False)
+
+
+def _deterministic_exercise_suggestion(search_query: str) -> dict:
+    query = re.sub(r"\s+", " ", (search_query or "").strip())
+    movement = _movement_key_from_query(query)
+    normalized_name = _titleize_identifier(query.replace("/", " "))
+    modality = infer_modality("user", query, "", name=query, movement_pattern=movement)
+    movement_pattern = infer_movement_pattern("", movement, normalized_name)
+    category = infer_category("", movement=movement, movement_pattern=movement_pattern, modality=modality)
+    primary_muscles, secondary_muscles, stabilizers = infer_muscle_groups(
+        [],
+        [],
+        [],
+        movement=movement,
+        category=category,
+    )
+    is_static = any(token in query.lower() for token in ("hold", "plank", "isometric"))
+    supports_time = is_static or modality == Exercise.Modality.CARDIO
+    supports_reps = not supports_time or modality not in {Exercise.Modality.CARDIO, Exercise.Modality.MOBILITY}
+    equipment = infer_equipment("", modality=modality)
+    payload = {
+        "name": normalized_name,
+        "aliases": [],
+        "brand": "",
+        "line": "",
+        "modality": modality,
+        "library_role": infer_library_role("user", category),
+        "equipment": equipment,
+        "category": category,
+        "movement_pattern": movement_pattern,
+        "primary_muscles": primary_muscles,
+        "secondary_muscles": secondary_muscles,
+        "stabilizers": stabilizers,
+        "supports_reps": supports_reps,
+        "supports_time": supports_time,
+        "is_static": is_static,
+        "unilateral": False,
+    }
+    payload["instructions"] = build_seed_instruction(
+        {
+            "name": payload["name"],
+            "equipment": payload["equipment"],
+            "category": payload["category"],
+            "movement_pattern": payload["movement_pattern"],
+            "primary_muscles": payload["primary_muscles"],
+            "secondary_muscles": payload["secondary_muscles"],
+            "stabilizers": payload["stabilizers"],
+            "unilateral": payload["unilateral"],
+            "is_static": payload["is_static"],
+        }
+    )
+    return payload
+
+
+def generate_ai_exercise_suggestion(search_query: str) -> dict:
+    fallback = _deterministic_exercise_suggestion(search_query)
+    if settings.OPENAI_MOCK_RESPONSES or not settings.OPENAI_API_KEY:
+        return fallback
+
+    client = OpenAI(api_key=settings.OPENAI_API_KEY)
+    instructions, prompt = build_exercise_suggestion_prompt(search_query)
+    response = client.responses.create(
+        model=settings.OPENAI_MODEL,
+        instructions=instructions,
+        input=prompt,
+        temperature=0.2,
+    )
+    data = extract_json_object(extract_response_text(response))
+    return {
+        "name": data.get("name") or fallback["name"],
+        "aliases": data.get("aliases") or fallback["aliases"],
+        "brand": data.get("brand", ""),
+        "line": data.get("line", ""),
+        "modality": data.get("modality") or fallback["modality"],
+        "library_role": data.get("library_role") or fallback["library_role"],
+        "equipment": data.get("equipment") or fallback["equipment"],
+        "category": data.get("category") or fallback["category"],
+        "movement_pattern": data.get("movement_pattern") or fallback["movement_pattern"],
+        "primary_muscles": data.get("primary_muscles") or fallback["primary_muscles"],
+        "secondary_muscles": data.get("secondary_muscles") or fallback["secondary_muscles"],
+        "stabilizers": data.get("stabilizers") or fallback["stabilizers"],
+        "supports_reps": data.get("supports_reps", fallback["supports_reps"]),
+        "supports_time": data.get("supports_time", fallback["supports_time"]),
+        "is_static": data.get("is_static", fallback["is_static"]),
+        "unilateral": data.get("unilateral", fallback["unilateral"]),
+        "instructions": data.get("instructions") or fallback["instructions"],
+    }
+
+
 def _instruction_payload_from_record(record: dict) -> dict:
     return {
         "name": record["name"],
@@ -435,6 +599,7 @@ def normalize_exercise_record(source_dataset: str, record: dict) -> dict:
     payload = {
         "external_id": record["exercise_id"],
         "source_dataset": source_dataset,
+        "source_kind": Exercise.SourceKind.SYSTEM,
         "name": record["name"],
         "brand": record.get("brand", ""),
         "line": record.get("line", ""),
@@ -462,6 +627,10 @@ def normalize_exercise_record(source_dataset: str, record: dict) -> dict:
         "image_source": "",
         "image_error_message": "",
         "image_generated_at": None,
+        "verification_status": Exercise.VerificationStatus.APPROVED,
+        "verified_by": None,
+        "verified_at": None,
+        "review_notes": "",
         "is_active": True,
     }
     return payload
@@ -513,6 +682,7 @@ def normalize_catalog_machine_record(brand: str, line_name: str, catalog_type: s
         },
     }
     payload = normalize_exercise_record(source_dataset, record)
+    payload["source_kind"] = Exercise.SourceKind.CATALOG
     payload["modality"] = modality
     payload["library_role"] = infer_library_role(source_dataset, payload["category"], catalog_type=catalog_type)
     payload["supports_time"] = infer_supports_time(source_dataset, payload["movement_pattern"], payload["category"], catalog_type=catalog_type)
@@ -605,6 +775,85 @@ def import_exercise_library(
             obj.save()
             updated += 1
     return {"created": created, "updated": updated, "total": len(records)}
+
+
+def create_user_exercise_submission(user, payload: dict, *, submission_query: str = "", source_kind: str = Exercise.SourceKind.AI_SUGGESTED) -> tuple[Exercise, bool]:
+    name = re.sub(r"\s+", " ", str(payload.get("name", "")).strip())
+    brand = re.sub(r"\s+", " ", str(payload.get("brand", "")).strip())
+    line = re.sub(r"\s+", " ", str(payload.get("line", "")).strip())
+    existing = visible_exercise_queryset(user).filter(
+        name__iexact=name,
+        brand__iexact=brand,
+        line__iexact=line,
+    ).first()
+    if existing:
+        return existing, False
+
+    movement_pattern = re.sub(r"\s+", " ", str(payload.get("movement_pattern", "")).strip())
+    category = re.sub(r"\s+", " ", str(payload.get("category", "")).strip())
+    modality = payload.get("modality") or infer_modality("user", payload.get("equipment", ""), category, name=name, movement_pattern=movement_pattern)
+    primary_muscles = _normalize_string_list(payload.get("primary_muscles") or [])
+    secondary_muscles = _normalize_string_list(payload.get("secondary_muscles") or [])
+    stabilizers = _normalize_string_list(payload.get("stabilizers") or [])
+    equipment = payload.get("equipment") or infer_equipment("", modality=modality)
+    instructions = re.sub(r"\s+", " ", str(payload.get("instructions", "")).strip())
+    if not instructions:
+        instructions = build_seed_instruction(
+            {
+                "name": name,
+                "equipment": equipment,
+                "category": category,
+                "movement_pattern": movement_pattern,
+                "primary_muscles": primary_muscles,
+                "secondary_muscles": secondary_muscles,
+                "stabilizers": stabilizers,
+                "unilateral": bool(payload.get("unilateral")),
+                "is_static": bool(payload.get("is_static")),
+            }
+        )
+
+    alias_values = _normalize_string_list(payload.get("aliases") or [])
+    if submission_query:
+        normalized_submission_query = re.sub(r"\s+", " ", str(submission_query).strip())
+        if normalized_submission_query and normalized_submission_query not in alias_values and normalized_submission_query.lower() != name.lower():
+            alias_values.append(normalized_submission_query)
+
+    exercise = Exercise.objects.create(
+        external_id=_user_submission_external_id(user, name),
+        source_dataset="user",
+        source_kind=source_kind,
+        name=name,
+        brand=brand,
+        line=line,
+        created_by=user,
+        aliases=alias_values,
+        raw_catalog_data={
+            "submission_query": submission_query,
+            "submitted_payload": payload,
+            "submitted_at": timezone.now().isoformat(),
+        },
+        modality=modality,
+        library_role=payload.get("library_role") or infer_library_role("user", category),
+        equipment=equipment,
+        category=category,
+        movement_pattern=movement_pattern,
+        primary_muscles=primary_muscles,
+        secondary_muscles=secondary_muscles,
+        stabilizers=stabilizers,
+        unilateral=bool(payload.get("unilateral")),
+        is_static=bool(payload.get("is_static")),
+        supports_reps=bool(payload.get("supports_reps", True)),
+        supports_time=bool(payload.get("supports_time")),
+        instructions=instructions,
+        instructions_status=Exercise.InstructionStatus.AI_DRAFT if source_kind == Exercise.SourceKind.AI_SUGGESTED else Exercise.InstructionStatus.SEEDED,
+        instruction_source=f"{settings.OPENAI_MODEL}:exercise-discovery-v1" if source_kind == Exercise.SourceKind.AI_SUGGESTED else "seed-template-v1",
+        verification_status=Exercise.VerificationStatus.PENDING_REVIEW,
+        verified_by=None,
+        verified_at=None,
+        review_notes="",
+        is_active=True,
+    )
+    return exercise, True
 
 
 def exercise_metadata_gaps(exercise: Exercise) -> list[str]:

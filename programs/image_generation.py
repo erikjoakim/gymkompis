@@ -1,6 +1,9 @@
 import base64
 import io
 import logging
+import os
+from pathlib import Path
+import re
 from uuid import uuid4
 
 from django.conf import settings
@@ -15,6 +18,67 @@ from .models import Exercise
 
 
 logger = logging.getLogger(__name__)
+
+
+def _exercise_static_publish_dir() -> Path:
+    configured = getattr(settings, "EXERCISE_IMAGE_STATIC_DIR", None)
+    if configured:
+        return Path(configured)
+    return Path(settings.BASE_DIR) / "static" / "exercise_images"
+
+
+def _safe_image_basename(exercise: Exercise) -> str:
+    return re.sub(r"[^A-Za-z0-9._-]+", "_", exercise.external_id or exercise.name or "exercise")
+
+
+def _published_static_relpath(exercise: Exercise, suffix: str = "png") -> str:
+    suffix = (suffix or "png").lstrip(".").lower()
+    return f"exercise_images/{_safe_image_basename(exercise)}.{suffix}"
+
+
+def _published_static_url(relpath: str) -> str:
+    base = (settings.STATIC_URL or "/static/").rstrip("/")
+    rel = relpath.lstrip("/")
+    return f"{base}/{rel}"
+
+
+def _published_static_path_from_relpath(relpath: str) -> Path:
+    return _exercise_static_publish_dir().parent / relpath.replace("/", os.sep)
+
+
+def _write_published_static_image(exercise: Exercise, image_bytes: bytes, *, suffix: str = "png") -> str:
+    relpath = _published_static_relpath(exercise, suffix=suffix)
+    target_path = _published_static_path_from_relpath(relpath)
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    target_path.write_bytes(image_bytes)
+    return relpath
+
+
+def _clear_generated_media_image(exercise: Exercise) -> None:
+    if not exercise.generated_image:
+        return
+    try:
+        exercise.generated_image.delete(save=False)
+    except Exception:
+        logger.warning("Could not delete previous generated image for exercise=%s", exercise.pk)
+    exercise.generated_image = ""
+
+
+def _read_saved_exercise_image_bytes(exercise: Exercise) -> tuple[bytes, str]:
+    if exercise.generated_image:
+        with exercise.generated_image.open("rb") as image_file:
+            suffix = os.path.splitext(exercise.generated_image.name or "")[1].lstrip(".") or "png"
+            return image_file.read(), suffix
+
+    static_prefix = f"{settings.STATIC_URL}exercise_images/"
+    if exercise.image_url and exercise.image_url.startswith(static_prefix):
+        relpath = exercise.image_url[len((settings.STATIC_URL or "/static/")) :].lstrip("/")
+        static_path = _published_static_path_from_relpath(relpath)
+        if static_path.exists():
+            suffix = static_path.suffix.lstrip(".") or "png"
+            return static_path.read_bytes(), suffix
+
+    raise ValueError("The source exercise does not have a saved generated image to copy.")
 
 
 def build_exercise_image_prompt(exercise: Exercise) -> str:
@@ -144,7 +208,9 @@ def attach_preview_image_to_exercise(
 ) -> Exercise:
     with default_storage.open(storage_name, "rb") as image_file:
         image_bytes = image_file.read()
-    _store_generated_image(exercise, image_bytes)
+    relpath = _write_published_static_image(exercise, image_bytes)
+    _clear_generated_media_image(exercise)
+    exercise.image_url = _published_static_url(relpath)
     exercise.image_prompt = prompt
     exercise.image_error_message = ""
     exercise.image_status = Exercise.ImageStatus.REVIEWED if mark_reviewed else Exercise.ImageStatus.AI_DRAFT
@@ -153,6 +219,7 @@ def attach_preview_image_to_exercise(
     exercise.save(
         update_fields=[
             "generated_image",
+            "image_url",
             "image_status",
             "image_prompt",
             "image_source",
@@ -163,6 +230,37 @@ def attach_preview_image_to_exercise(
     )
     delete_exercise_image_preview(storage_name)
     return exercise
+
+
+def copy_exercise_image_to_targets(source_exercise: Exercise, target_exercises) -> list[int]:
+    image_bytes, suffix = _read_saved_exercise_image_bytes(source_exercise)
+
+    copied_ids: list[int] = []
+    for target in target_exercises:
+        if target.pk == source_exercise.pk:
+            continue
+        relpath = _write_published_static_image(target, image_bytes, suffix=suffix)
+        _clear_generated_media_image(target)
+        target.image_url = _published_static_url(relpath)
+        target.image_prompt = source_exercise.image_prompt
+        target.image_status = source_exercise.image_status
+        target.image_source = source_exercise.image_source
+        target.image_generated_at = timezone.now()
+        target.image_error_message = ""
+        target.save(
+            update_fields=[
+                "generated_image",
+                "image_url",
+                "image_prompt",
+                "image_status",
+                "image_source",
+                "image_generated_at",
+                "image_error_message",
+                "updated_at",
+            ]
+        )
+        copied_ids.append(target.id)
+    return copied_ids
 
 
 def generate_and_attach_exercise_image(exercise: Exercise, *, use_mock: bool = False) -> Exercise:

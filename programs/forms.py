@@ -111,7 +111,7 @@ class LibraryEnrichAdminForm(forms.Form):
 class LibraryAdminFilterForm(forms.Form):
     query = forms.CharField(required=False, label="Search")
     brand = forms.ChoiceField(required=False, label="Brand")
-    only_incomplete = forms.BooleanField(required=False, initial=True, label="Only incomplete")
+    only_incomplete = forms.BooleanField(required=False, initial=True, label="Only incomplete or pending review")
     limit = forms.IntegerField(min_value=1, max_value=200, initial=25, label="Rows")
 
     def __init__(self, *args, brand_choices=None, **kwargs):
@@ -170,6 +170,84 @@ class ExerciseImagePromptForm(forms.Form):
         widget=forms.Textarea(attrs={"rows": 8}),
         label="Image prompt",
     )
+
+
+class ExerciseImageCopyForm(forms.Form):
+    source_exercise_id = forms.IntegerField(widget=forms.HiddenInput())
+    target_exercise_ids = forms.MultipleChoiceField(
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+        label="Copy this saved image to",
+    )
+
+    def __init__(self, *args, available_exercises=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["target_exercise_ids"].choices = [
+            (
+                str(exercise.id),
+                " / ".join(
+                    part
+                    for part in [
+                        exercise.name,
+                        exercise.brand,
+                        exercise.line,
+                        exercise.external_id,
+                    ]
+                    if part
+                ),
+            )
+            for exercise in (available_exercises or [])
+        ]
+
+    def clean_target_exercise_ids(self):
+        target_exercise_ids = self.cleaned_data.get("target_exercise_ids") or []
+        if not target_exercise_ids:
+            raise forms.ValidationError("Select at least one exercise to copy the image to.")
+        return target_exercise_ids
+
+
+class UserExerciseSubmissionForm(forms.Form):
+    name = forms.CharField()
+    aliases = forms.CharField(required=False, help_text="Comma-separated alternate names")
+    brand = forms.CharField(required=False)
+    line = forms.CharField(required=False)
+    modality = forms.ChoiceField(choices=Exercise.Modality.choices)
+    library_role = forms.ChoiceField(choices=Exercise.LibraryRole.choices)
+    equipment = forms.CharField(required=False)
+    category = forms.CharField(required=False)
+    movement_pattern = forms.CharField(required=False, label="Movement")
+    primary_muscles = forms.CharField(required=False, help_text="Comma-separated")
+    secondary_muscles = forms.CharField(required=False, help_text="Comma-separated")
+    stabilizers = forms.CharField(required=False, help_text="Comma-separated")
+    supports_reps = forms.BooleanField(required=False, initial=True)
+    supports_time = forms.BooleanField(required=False)
+    is_static = forms.BooleanField(required=False)
+    instructions = forms.CharField(required=False, widget=forms.Textarea(attrs={"rows": 4}))
+    submission_query = forms.CharField(widget=forms.HiddenInput(), required=False)
+    source_kind = forms.CharField(widget=forms.HiddenInput(), required=False)
+
+    @classmethod
+    def initial_from_suggestion(cls, suggestion, *, submission_query="", source_kind=Exercise.SourceKind.AI_SUGGESTED):
+        return {
+            "name": suggestion.get("name", ""),
+            "aliases": LibraryExerciseReviewForm.list_to_text(suggestion.get("aliases", [])),
+            "brand": suggestion.get("brand", ""),
+            "line": suggestion.get("line", ""),
+            "modality": suggestion.get("modality", Exercise.Modality.OTHER),
+            "library_role": suggestion.get("library_role", Exercise.LibraryRole.MAIN),
+            "equipment": suggestion.get("equipment", ""),
+            "category": suggestion.get("category", ""),
+            "movement_pattern": suggestion.get("movement_pattern", ""),
+            "primary_muscles": LibraryExerciseReviewForm.list_to_text(suggestion.get("primary_muscles", [])),
+            "secondary_muscles": LibraryExerciseReviewForm.list_to_text(suggestion.get("secondary_muscles", [])),
+            "stabilizers": LibraryExerciseReviewForm.list_to_text(suggestion.get("stabilizers", [])),
+            "supports_reps": suggestion.get("supports_reps", True),
+            "supports_time": suggestion.get("supports_time", False),
+            "is_static": suggestion.get("is_static", False),
+            "instructions": suggestion.get("instructions", ""),
+            "submission_query": submission_query,
+            "source_kind": source_kind,
+        }
 
 
 class AddExerciseToDayForm(forms.Form):

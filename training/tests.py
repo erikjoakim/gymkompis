@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.test import TestCase, override_settings
+from django.urls import reverse
 from django.utils import timezone
 
 from accounts.models import User
@@ -304,6 +305,16 @@ class WorkoutSessionTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(f"/evaluations/{evaluation.id}/", content)
         self.assertNotIn(f"/evaluations/session/{session.id}/request/", content)
+
+    def test_train_day_uses_mobile_compact_training_classes(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse("train_day", args=[self.day["day_key"]]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'class="stack training-day-stack"', html=False)
+        self.assertContains(response, 'class="card training-exercise-card"', html=False)
+        self.assertContains(response, 'class="card training-finish-card"', html=False)
 
     def test_swap_session_exercise_updates_current_slot_only_for_today(self):
         session = get_or_create_session(self.user, self.program, self.day)

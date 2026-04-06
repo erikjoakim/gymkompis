@@ -826,6 +826,48 @@ pre {
     flex: 0 0 72px;
 }
 
+.exercise-image-trigger {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    cursor: zoom-in;
+    line-height: 0;
+}
+
+.exercise-image-trigger .builder-thumb-small {
+    display: block;
+}
+
+.exercise-image-lightbox {
+    border: 0;
+    padding: 1rem;
+    border-radius: 18px;
+    max-width: min(90vw, 920px);
+    width: fit-content;
+    background: #fffdf9;
+    box-shadow: 0 24px 80px rgba(29, 42, 36, 0.28);
+}
+
+.exercise-image-lightbox::backdrop {
+    background: rgba(20, 26, 23, 0.72);
+}
+
+.exercise-image-lightbox-close-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0.75rem;
+}
+
+.exercise-image-lightbox-image {
+    display: block;
+    max-width: min(84vw, 860px);
+    max-height: 80vh;
+    width: auto;
+    height: auto;
+    border-radius: 14px;
+}
+
 .builder-selected-card.is-expanded {
     background: linear-gradient(135deg, #fffdf9 0%, #f3f7f4 100%);
 }
@@ -1033,5 +1075,104 @@ pre {
 
     .manual-day-checkbox-grid {
         grid-template-columns: 1fr 1fr;
+    }
+
+    .training-exercise-card {
+        padding: 0.95rem;
+    }
+
+    .training-exercise-card h2 {
+        margin-bottom: 0.55rem;
+        font-size: 1.08rem;
+    }
+
+    .training-exercise-card p,
+    .training-exercise-card details,
+    .training-finish-card p {
+        margin-top: 0.45rem;
+        margin-bottom: 0.45rem;
+    }
+
+    .set-timer-row,
+    .set-save-row {
+        border-radius: 14px;
+        margin-bottom: 0.55rem;
+    }
+
+    .set-timer-row td,
+    .set-save-row td {
+        padding: 0.35rem 0.65rem;
+    }
+
+    .set-timer-row td::before {
+        min-width: 6.25rem;
+        font-size: 0.8rem;
+    }
+
+    .set-timer-row td:first-child {
+        padding-top: 0.65rem;
+    }
+
+    .set-timer-row td:first-child strong {
+        font-size: 0.95rem;
+    }
+
+    .set-timer-stack .help-text,
+    .training-exercise-card .help-text {
+        font-size: 0.82rem;
+    }
+
+    .set-control-buttons button,
+    .training-finish-card button {
+        padding: 0.55rem 0.75rem;
+        font-size: 0.88rem;
+    }
+
+    .set-save-button {
+        min-width: 0;
+        width: auto;
+    }
+
+    .training-exercise-card input:not([type="hidden"]):not([type="checkbox"]),
+    .training-exercise-card select,
+    .training-exercise-card textarea {
+        width: auto;
+        max-width: 100%;
+        padding: 0.5rem 0.6rem;
+        font-size: 0.94rem;
+        border-radius: 10px;
+    }
+
+    .training-exercise-card input[type="number"],
+    .training-exercise-card input[type="text"] {
+        min-width: 0;
+    }
+
+    .set-timer-row td:nth-child(5) input,
+    .set-timer-row td:nth-child(6) input,
+    .set-timer-row td:nth-child(7) input {
+        width: min(100%, 5.5rem);
+    }
+
+    .set-timer-row td:nth-child(8) input,
+    .training-exercise-card textarea {
+        width: 100%;
+    }
+
+    .training-exercise-card textarea {
+        min-height: 2.3rem;
+    }
+
+    .training-finish-card {
+        padding: 1rem;
+    }
+
+    .training-finish-card input[type="number"] {
+        width: min(100%, 6.5rem);
+    }
+
+    .training-finish-card textarea {
+        min-height: 4.5rem;
+        padding: 0.55rem 0.65rem;
     }
 }

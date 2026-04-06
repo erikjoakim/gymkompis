@@ -67,6 +67,16 @@
                             {% for exercise in group.exercises %}
                                 <article class="builder-result-row">
                                     <div class="builder-row-main">
+                                        {% if exercise.display_image_url %}
+                                            <button
+                                                type="button"
+                                                class="exercise-image-trigger"
+                                                data-image-url="{{ exercise.display_image_url }}"
+                                                data-image-alt="{{ exercise.name }}"
+                                            >
+                                                <img src="{{ exercise.display_image_url }}" alt="{{ exercise.name }}" class="exercise-thumb builder-thumb-small">
+                                            </button>
+                                        {% endif %}
                                         <div>
                                             <h3>{{ exercise.name }}</h3>
                                             <p>
@@ -170,10 +180,64 @@
                     <p class="help-text">No preview yet. Generate one from the prompt above.</p>
                 {% endif %}
             </section>
+
+            {% if selected_exercise.can_copy_saved_image %}
+                <section class="library-image-panel-section">
+                    <h3>Copy Saved Image</h3>
+                    {% if copy_candidates %}
+                        <p class="help-text">Reuse this saved image for the other exercises currently matched by your search. Without an active filter, this falls back to same-name exercises.</p>
+                        <form method="post" class="stack">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="copy_saved_image">
+                            <input type="hidden" name="selected" value="{{ selected_exercise.id }}">
+                            {% for key, value in active_filter_fields %}
+                                <input type="hidden" name="{{ key }}" value="{{ value }}">
+                            {% endfor %}
+                            {{ copy_form.as_p }}
+                            <button type="submit">Copy image to selected exercises</button>
+                        </form>
+                    {% else %}
+                        <p class="help-text">No other same-name exercises are available to copy this saved image to.</p>
+                    {% endif %}
+                </section>
+            {% endif %}
         {% else %}
             <h2>Select an exercise</h2>
             <p class="help-text">Pick one result from the search list to open the prompt editor and image preview workflow.</p>
         {% endif %}
     </section>
 </div>
+
+<dialog id="exercise-image-lightbox" class="exercise-image-lightbox">
+    <form method="dialog" class="exercise-image-lightbox-close-row">
+        <button type="submit" class="secondary-button">Close</button>
+    </form>
+    <img src="" alt="" class="exercise-image-lightbox-image">
+</dialog>
+
+<script>
+    (function () {
+        const dialog = document.getElementById("exercise-image-lightbox");
+        if (!dialog) {
+            return;
+        }
+        const image = dialog.querySelector(".exercise-image-lightbox-image");
+        document.addEventListener("click", function (event) {
+            const trigger = event.target.closest(".exercise-image-trigger");
+            if (!trigger) {
+                return;
+            }
+            image.src = trigger.dataset.imageUrl || "";
+            image.alt = trigger.dataset.imageAlt || "Exercise image";
+            if (typeof dialog.showModal === "function") {
+                dialog.showModal();
+            }
+        });
+        dialog.addEventListener("click", function (event) {
+            if (event.target === dialog) {
+                dialog.close();
+            }
+        });
+    })();
+</script>
 {% endblock %}

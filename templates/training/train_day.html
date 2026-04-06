@@ -16,11 +16,11 @@
         <p>This is a {{ day.type }} day, so there is no exercise logging form.</p>
     </div>
 {% else %}
-    <div class="stack" id="exercise-list">
+    <div class="stack training-day-stack" id="exercise-list">
         {% include "training/partials/exercise_list.html" %}
     </div>
 
-    <div class="card">
+    <div class="card training-finish-card">
         <h2>Finish workout</h2>
         <form method="post" action="{% url 'complete_session' session.id %}" class="stack">
             {% csrf_token %}

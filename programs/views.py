@@ -5,9 +5,12 @@ from django.db.models import Q
 from django.http import HttpResponseForbidden, QueryDict
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
+import re
 
 from .forms import (
     AddExerciseToDayForm,
+    ExerciseImageCopyForm,
     ExerciseImagePromptForm,
     ExerciseLibraryFilterForm,
     LibraryAdminFilterForm,
@@ -19,21 +22,26 @@ from .forms import (
     ManualProgramDayForm,
     ManualProgramDraftForm,
     ProgramGenerateForm,
+    UserExerciseSubmissionForm,
 )
 from .image_generation import (
     attach_preview_image_to_exercise,
     build_exercise_image_preview,
     build_exercise_image_prompt,
+    copy_exercise_image_to_targets,
     delete_exercise_image_preview,
 )
 from .library import (
+    create_user_exercise_submission,
     enrich_exercise_metadata,
     exercise_metadata_gaps,
     find_duplicate_exercise_groups,
+    generate_ai_exercise_suggestion,
     import_exercise_library,
     merge_exercise_duplicates,
     root_exercise_queryset,
     suggested_exercise_updates,
+    visible_exercise_queryset,
 )
 from .manual_services import DAY_ORDER, copy_manual_day, create_manual_exercise_for_day, publish_manual_program
 from .models import DAY_KEY_CHOICES, Exercise, ManualProgramDay, ManualProgramDraft, ManualProgramExercise, TrainingProgram
@@ -42,15 +50,30 @@ from .services import build_program_profile_context, generate_program_for_user, 
 from .structure import get_day_blocks
 
 
-def _exercise_filter_choices():
-    base_queryset = root_exercise_queryset().filter(is_active=True)
-    modalities = list(base_queryset.values_list("modality", "modality").distinct().order_by("modality"))
+def _exercise_filter_choices(user=None):
+    base_queryset = visible_exercise_queryset(user) if user else root_exercise_queryset().filter(is_active=True)
+    modalities = list(Exercise.Modality.choices)
     brands = list(base_queryset.values_list("brand", "brand").distinct().order_by("brand"))
     return modalities, [item for item in brands if item[0]]
 
 
 FILTER_FIELDS = ("query", "modality", "brand", "library_role", "supports_time")
 LIBRARY_IMAGE_PREVIEW_SESSION_KEY = "library_admin_image_preview"
+IMAGE_COPY_NAME_ALIASES = {
+    "ab": "abdominal",
+    "abs": "abdominal",
+    "crunches": "crunch",
+}
+
+SEARCH_FIELDS = (
+    "name",
+    "aliases",
+    "brand",
+    "line",
+    "category",
+    "movement_pattern",
+    "equipment",
+)
 
 
 def _get_manual_day_filter_data(request):
@@ -72,6 +95,34 @@ def _build_filter_hidden_fields(filter_form):
             continue
         fields.append((key, "on" if value is True else str(value)))
     return fields
+
+
+def _search_tokens(query: str) -> list[str]:
+    return [
+        token
+        for token in re.split(r"[^0-9A-Za-z]+", (query or "").lower())
+        if len(token) >= 2
+    ]
+
+
+def _exercise_search_filter(query: str, *, include_external_id: bool = False) -> Q:
+    query = (query or "").strip()
+    if not query:
+        return Q()
+
+    fields = SEARCH_FIELDS + (("external_id",) if include_external_id else ())
+    filter_query = Q()
+    for field in fields:
+        filter_query |= Q(**{f"{field}__icontains": query})
+
+    tokens = _search_tokens(query)
+    if len(tokens) > 1:
+        for field in fields:
+            token_query = Q()
+            for token in tokens:
+                token_query &= Q(**{f"{field}__icontains": token})
+            filter_query |= token_query
+    return filter_query
 
 
 def _entry_summary(entry: ManualProgramExercise) -> str:
@@ -115,24 +166,18 @@ def _sync_manual_draft_days(draft: ManualProgramDraft, selected_day_keys: list[s
         )
 
 
-def _manual_day_workspace_context(request, day, expanded_entry_id=None, invalid_entry_forms=None):
+def _manual_day_workspace_context(request, day, expanded_entry_id=None, invalid_entry_forms=None, submission_form=None):
     invalid_entry_forms = invalid_entry_forms or {}
     filter_data = _get_manual_day_filter_data(request)
-    modalities, brands = _exercise_filter_choices()
+    submission_query = (filter_data.get("query") or "").strip()
+    modalities, brands = _exercise_filter_choices(request.user)
     filter_form = ExerciseLibraryFilterForm(filter_data or None, modality_choices=modalities, brand_choices=brands)
     selected_exercise_ids = list(day.manual_exercises.values_list("exercise_id", flat=True))
-    exercise_queryset = root_exercise_queryset().filter(is_active=True).exclude(id__in=selected_exercise_ids).order_by("name")
+    exercise_queryset = visible_exercise_queryset(request.user).exclude(id__in=selected_exercise_ids).order_by("name")
     if filter_form.is_valid():
         query = filter_form.cleaned_data.get("query")
         if query:
-            exercise_queryset = exercise_queryset.filter(
-                Q(name__icontains=query)
-                | Q(brand__icontains=query)
-                | Q(line__icontains=query)
-                | Q(category__icontains=query)
-                | Q(movement_pattern__icontains=query)
-                | Q(equipment__icontains=query)
-            )
+            exercise_queryset = exercise_queryset.filter(_exercise_search_filter(query))
         modality = filter_form.cleaned_data.get("modality")
         if modality:
             exercise_queryset = exercise_queryset.filter(modality=modality)
@@ -164,7 +209,6 @@ def _manual_day_workspace_context(request, day, expanded_entry_id=None, invalid_
             main_entries.append(item)
 
     exercise_results = list(exercise_queryset[:40])
-
     return {
         "filter_form": filter_form,
         "exercise_results": exercise_results,
@@ -173,6 +217,9 @@ def _manual_day_workspace_context(request, day, expanded_entry_id=None, invalid_
         "main_entries": main_entries,
         "active_filter_fields": _build_filter_hidden_fields(filter_form),
         "expanded_entry_id": expanded_entry_id,
+        "submission_form": submission_form,
+        "submission_query": submission_query,
+        "show_submission_prompt": bool(submission_query and not exercise_results),
     }
 
 
@@ -213,6 +260,33 @@ def _format_admin_value(value):
     if value in ("", None):
         return "-"
     return str(value)
+
+
+def _normalized_copy_name_tokens(value: str) -> set[str]:
+    tokens = set()
+    for token in "".join(char.lower() if char.isalnum() else " " for char in (value or "")).split():
+        tokens.add(IMAGE_COPY_NAME_ALIASES.get(token, token))
+    return tokens
+
+
+def _is_reasonable_image_copy_match(source, candidate) -> bool:
+    if not source or not candidate or source.pk == candidate.pk:
+        return False
+    if source.movement_pattern and candidate.movement_pattern:
+        if source.movement_pattern.strip().lower() != candidate.movement_pattern.strip().lower():
+            return False
+    elif source.category and candidate.category:
+        if source.category.strip().lower() != candidate.category.strip().lower():
+            return False
+    if source.modality and candidate.modality and source.modality != Exercise.Modality.OTHER and candidate.modality != Exercise.Modality.OTHER:
+        if source.modality != candidate.modality:
+            return False
+
+    source_tokens = _normalized_copy_name_tokens(source.name)
+    candidate_tokens = _normalized_copy_name_tokens(candidate.name)
+    if source_tokens and candidate_tokens and not (source_tokens & candidate_tokens):
+        return False
+    return True
 
 
 def _review_form_initial(exercise):
@@ -272,14 +346,7 @@ def _library_admin_image_queryset(filter_form):
     if filter_form.is_valid():
         query = filter_form.cleaned_data.get("query")
         if query:
-            queryset = queryset.filter(
-                Q(name__icontains=query)
-                | Q(brand__icontains=query)
-                | Q(line__icontains=query)
-                | Q(category__icontains=query)
-                | Q(movement_pattern__icontains=query)
-                | Q(equipment__icontains=query)
-            )
+            queryset = queryset.filter(_exercise_search_filter(query))
         modality = filter_form.cleaned_data.get("modality")
         if modality:
             queryset = queryset.filter(modality=modality)
@@ -297,17 +364,66 @@ def _library_admin_image_queryset(filter_form):
     return queryset
 
 
+def _library_image_copy_candidates(exercise, *, filtered_results=None, use_filtered_results=False):
+    if not exercise:
+        return []
+    if use_filtered_results and filtered_results is not None:
+        ordered = []
+        seen_ids = set()
+        for candidate in filtered_results:
+            if candidate.pk == exercise.pk or candidate.pk in seen_ids:
+                continue
+            if not _is_reasonable_image_copy_match(exercise, candidate):
+                continue
+            ordered.append(candidate)
+            seen_ids.add(candidate.pk)
+        return ordered
+    return [
+        candidate
+        for candidate in
+        root_exercise_queryset()
+        .filter(is_active=True, name__iexact=exercise.name)
+        .exclude(pk=exercise.pk)
+        .order_by("brand", "line", "external_id")
+        if _is_reasonable_image_copy_match(exercise, candidate)
+    ]
+
+
+def _build_library_image_copy_form(exercise, *, data=None, filtered_results=None, use_filtered_results=False):
+    candidates = _library_image_copy_candidates(
+        exercise,
+        filtered_results=filtered_results,
+        use_filtered_results=use_filtered_results,
+    )
+    return (
+        ExerciseImageCopyForm(
+            data=data,
+            available_exercises=candidates,
+            initial={"source_exercise_id": exercise.id} if exercise and data is None else None,
+        )
+        if exercise
+        else None,
+        candidates,
+    )
+
+
 def _library_admin_reports(filter_form):
     queryset = _library_admin_filtered_queryset(filter_form)
+    only_incomplete = filter_form.fields["only_incomplete"].initial
+    limit = filter_form.fields["limit"].initial or 25
     if filter_form.is_valid():
-        if filter_form.cleaned_data.get("only_incomplete"):
-            queryset = [exercise for exercise in queryset if exercise_metadata_gaps(exercise)]
-        else:
-            queryset = list(queryset)
-        limit = filter_form.cleaned_data.get("limit") or 25
+        only_incomplete = filter_form.cleaned_data.get("only_incomplete")
+        limit = filter_form.cleaned_data.get("limit") or limit
+
+    if only_incomplete:
+        queryset = [
+            exercise
+            for exercise in queryset
+            if exercise_metadata_gaps(exercise)
+            or exercise.verification_status == Exercise.VerificationStatus.PENDING_REVIEW
+        ]
     else:
         queryset = list(queryset)
-        limit = 25
 
     exercises = list(queryset[:limit])
     reports = []
@@ -319,6 +435,9 @@ def _library_admin_reports(filter_form):
                 "exercise": exercise,
                 "gaps": gaps,
                 "gap_labels": ", ".join(gaps) if gaps else "Complete",
+                "metadata_summary": f"Missing: {', '.join(gaps)}" if gaps else "Metadata: Complete",
+                "needs_verification": exercise.verification_status == Exercise.VerificationStatus.PENDING_REVIEW,
+                "verification_label": exercise.get_verification_status_display(),
                 "suggestions": [
                     {
                         "field": field.replace("_", " ").title(),
@@ -339,14 +458,7 @@ def _library_admin_filtered_queryset(filter_form):
     if filter_form.is_valid():
         query = filter_form.cleaned_data.get("query")
         if query:
-            queryset = queryset.filter(
-                Q(name__icontains=query)
-                | Q(external_id__icontains=query)
-                | Q(brand__icontains=query)
-                | Q(line__icontains=query)
-                | Q(category__icontains=query)
-                | Q(movement_pattern__icontains=query)
-            )
+            queryset = queryset.filter(_exercise_search_filter(query, include_external_id=True))
         brand = filter_form.cleaned_data.get("brand")
         if brand:
             queryset = queryset.filter(brand=brand)
@@ -519,6 +631,7 @@ def manual_program_day_detail_view(request, draft_id, day_id):
     day_form = ManualProgramDayForm(instance=day, prefix="day")
     copy_form, copy_target_days = _build_manual_day_copy_form(day)
     invalid_entry_forms = {}
+    submission_form = None
     expanded_entry_id = request.GET.get("expanded")
 
     if request.method == "POST":
@@ -550,7 +663,7 @@ def manual_program_day_detail_view(request, draft_id, day_id):
         if action == "add_exercise":
             add_form = AddExerciseToDayForm(request.POST, prefix="add")
             if add_form.is_valid():
-                exercise = get_object_or_404(Exercise, pk=add_form.cleaned_data["exercise_id"], is_active=True)
+                exercise = get_object_or_404(visible_exercise_queryset(request.user), pk=add_form.cleaned_data["exercise_id"])
                 entry = create_manual_exercise_for_day(day, exercise, add_form.cleaned_data["block_type"])
                 messages.success(request, f"{exercise.name} added to {day.day_label}.")
                 workspace_context = _manual_day_workspace_context(request, day, expanded_entry_id=entry.id)
@@ -583,12 +696,76 @@ def manual_program_day_detail_view(request, draft_id, day_id):
             if getattr(request, "htmx", False):
                 return _manual_day_render(request, draft, day, day_form, copy_form, copy_target_days, workspace_context)
             return _manual_day_redirect(draft, day, workspace_context["active_filter_fields"])
+        if action == "generate_ai_exercise_suggestion":
+            submission_query = (request.POST.get("query") or "").strip()
+            if not submission_query:
+                messages.error(request, "Enter an exercise name before using AI search.")
+            else:
+                try:
+                    suggestion = generate_ai_exercise_suggestion(submission_query)
+                except Exception as exc:
+                    messages.error(request, f"AI exercise search failed: {exc}")
+                else:
+                    submission_form = UserExerciseSubmissionForm(
+                        prefix="submission",
+                        initial=UserExerciseSubmissionForm.initial_from_suggestion(
+                            suggestion,
+                            submission_query=submission_query,
+                            source_kind=Exercise.SourceKind.AI_SUGGESTED,
+                        ),
+                    )
+                    messages.success(request, f"Drafted a new exercise suggestion for '{submission_query}'.")
+        if action == "save_user_exercise_submission":
+            submission_form = UserExerciseSubmissionForm(request.POST, prefix="submission")
+            if submission_form.is_valid():
+                payload = {
+                    "name": submission_form.cleaned_data["name"],
+                    "aliases": LibraryExerciseReviewForm.parse_text_list(submission_form.cleaned_data["aliases"]),
+                    "brand": submission_form.cleaned_data["brand"],
+                    "line": submission_form.cleaned_data["line"],
+                    "modality": submission_form.cleaned_data["modality"],
+                    "library_role": submission_form.cleaned_data["library_role"],
+                    "equipment": submission_form.cleaned_data["equipment"],
+                    "category": submission_form.cleaned_data["category"],
+                    "movement_pattern": submission_form.cleaned_data["movement_pattern"],
+                    "primary_muscles": LibraryExerciseReviewForm.parse_text_list(submission_form.cleaned_data["primary_muscles"]),
+                    "secondary_muscles": LibraryExerciseReviewForm.parse_text_list(submission_form.cleaned_data["secondary_muscles"]),
+                    "stabilizers": LibraryExerciseReviewForm.parse_text_list(submission_form.cleaned_data["stabilizers"]),
+                    "supports_reps": submission_form.cleaned_data["supports_reps"],
+                    "supports_time": submission_form.cleaned_data["supports_time"],
+                    "is_static": submission_form.cleaned_data["is_static"],
+                    "instructions": submission_form.cleaned_data["instructions"],
+                }
+                exercise, created = create_user_exercise_submission(
+                    request.user,
+                    payload,
+                    submission_query=submission_form.cleaned_data["submission_query"],
+                    source_kind=submission_form.cleaned_data["source_kind"] or Exercise.SourceKind.USER_SUBMITTED,
+                )
+                if created:
+                    messages.success(
+                        request,
+                        f"{exercise.name} was added to your library and is pending staff review.",
+                    )
+                else:
+                    messages.info(request, f"{exercise.name} already exists in your visible library.")
+                workspace_context = _manual_day_workspace_context(request, day, expanded_entry_id=expanded_entry_id)
+                if getattr(request, "htmx", False):
+                    return _manual_day_render(request, draft, day, day_form, copy_form, copy_target_days, workspace_context)
+                return _manual_day_redirect(
+                    draft,
+                    day,
+                    workspace_context["active_filter_fields"],
+                    expanded_entry_id=expanded_entry_id,
+                )
+            messages.error(request, "Please review the suggested exercise details before saving.")
 
     workspace_context = _manual_day_workspace_context(
         request,
         day,
         expanded_entry_id=expanded_entry_id,
         invalid_entry_forms=invalid_entry_forms,
+        submission_form=submission_form,
     )
     return _manual_day_render(request, draft, day, day_form, copy_form, copy_target_days, workspace_context)
 
@@ -598,13 +775,14 @@ def library_admin_images_view(request):
     if not request.user.is_staff:
         return HttpResponseForbidden("Staff access required.")
 
-    modalities, brands = _exercise_filter_choices()
+    modalities, brands = _exercise_filter_choices(request.user)
     filter_form = ExerciseLibraryFilterForm(
         request.GET or None,
         modality_choices=modalities,
         brand_choices=brands,
     )
     exercise_results = list(_library_admin_image_queryset(filter_form)[:40])
+    active_filter_fields = _build_filter_hidden_fields(filter_form)
     selected_exercise = None
     selected_value = request.POST.get("selected") or request.GET.get("selected")
     if selected_value and selected_value.isdigit():
@@ -612,6 +790,11 @@ def library_admin_images_view(request):
         if selected_exercise is None:
             selected_exercise = get_object_or_404(root_exercise_queryset().filter(is_active=True), pk=int(selected_value))
     prompt_form = None
+    copy_form, copy_candidates = _build_library_image_copy_form(
+        selected_exercise,
+        filtered_results=exercise_results,
+        use_filtered_results=bool(active_filter_fields),
+    )
 
     if request.method == "POST":
         action = request.POST.get("action")
@@ -658,6 +841,25 @@ def library_admin_images_view(request):
             _clear_library_image_preview(request)
             messages.info(request, f"Ignored the generated preview for {exercise.name}.")
             return _library_admin_image_redirect(request, selected_exercise_id=exercise.id)
+        if action == "copy_saved_image":
+            exercise = get_object_or_404(root_exercise_queryset().filter(is_active=True), pk=request.POST.get("source_exercise_id"))
+            copy_form, copy_candidates = _build_library_image_copy_form(
+                exercise,
+                data=request.POST,
+                filtered_results=exercise_results,
+                use_filtered_results=bool(active_filter_fields),
+            )
+            if copy_form.is_valid():
+                target_ids = {int(item) for item in copy_form.cleaned_data["target_exercise_ids"]}
+                targets = [candidate for candidate in copy_candidates if candidate.id in target_ids]
+                try:
+                    copied_ids = copy_exercise_image_to_targets(exercise, targets)
+                except ValueError as exc:
+                    messages.error(request, str(exc))
+                    return _library_admin_image_redirect(request, selected_exercise_id=exercise.id)
+                messages.success(request, f"Copied the saved image to {len(copied_ids)} exercise records.")
+                return _library_admin_image_redirect(request, selected_exercise_id=exercise.id)
+            messages.error(request, "Select at least one target exercise before copying the image.")
 
     preview = _current_library_image_preview(request, selected_exercise)
     if selected_exercise:
@@ -673,10 +875,12 @@ def library_admin_images_view(request):
         "filter_form": filter_form,
         "exercise_results": exercise_results,
         "exercise_result_groups": _group_exercise_results_by_category(exercise_results),
-        "active_filter_fields": _build_filter_hidden_fields(filter_form),
+        "active_filter_fields": active_filter_fields,
         "selected_exercise": selected_exercise,
         "prompt_form": prompt_form,
         "preview": preview,
+        "copy_form": copy_form,
+        "copy_candidates": copy_candidates,
     }
     return render(request, "programs/library_admin_images.html", context)
 
@@ -767,6 +971,22 @@ def library_admin_view(request):
                 messages.success(request, f"Saved review changes for {exercise.name}.")
                 return _library_admin_redirect(request)
             messages.error(request, f"Please correct the review fields for {exercise.name}.")
+        if action == "approve_exercise":
+            exercise = get_object_or_404(Exercise, pk=request.POST.get("exercise_id"))
+            exercise.verification_status = Exercise.VerificationStatus.APPROVED
+            exercise.verified_by = request.user
+            exercise.verified_at = timezone.now()
+            exercise.save(update_fields=["verification_status", "verified_by", "verified_at", "updated_at"])
+            messages.success(request, f"Approved {exercise.name} for the shared library.")
+            return _library_admin_redirect(request)
+        if action == "reject_exercise":
+            exercise = get_object_or_404(Exercise, pk=request.POST.get("exercise_id"))
+            exercise.verification_status = Exercise.VerificationStatus.REJECTED
+            exercise.verified_by = request.user
+            exercise.verified_at = timezone.now()
+            exercise.save(update_fields=["verification_status", "verified_by", "verified_at", "updated_at"])
+            messages.success(request, f"Rejected {exercise.name}.")
+            return _library_admin_redirect(request)
         if action == "merge_duplicates":
             canonical = get_object_or_404(Exercise, pk=request.POST.get("canonical_exercise_id"))
             duplicate_ids = [int(item) for item in request.POST.getlist("duplicate_ids") if item.isdigit()]
@@ -798,6 +1018,9 @@ def library_admin_view(request):
         "duplicate_groups": duplicate_groups,
         "total_exercises": Exercise.objects.count(),
         "incomplete_exercises": sum(1 for exercise in Exercise.objects.order_by("id") if exercise_metadata_gaps(exercise)),
+        "pending_review_exercises": Exercise.objects.filter(
+            verification_status=Exercise.VerificationStatus.PENDING_REVIEW
+        ).count(),
         "catalog_backed_exercises": Exercise.objects.exclude(brand="").count(),
         "current_query_string": request.GET.urlencode(),
     }

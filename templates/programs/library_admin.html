@@ -35,6 +35,10 @@
         <h2>{{ duplicate_groups|length }}</h2>
         <p>Duplicate groups</p>
     </article>
+    <article class="card">
+        <h2>{{ pending_review_exercises }}</h2>
+        <p>Pending submissions</p>
+    </article>
 </section>
 
 <section class="grid-two">
@@ -152,15 +156,37 @@
                             {% if report.exercise.brand %} &middot; {{ report.exercise.brand }}{% endif %}
                             {% if report.exercise.line %} &middot; {{ report.exercise.line }}{% endif %}
                         </p>
-                        <p class="help-text">Missing: {{ report.gap_labels }}</p>
+                        <p class="help-text">{{ report.metadata_summary }}</p>
+                        <p class="help-text">
+                            Status: {{ report.verification_label }}
+                            {% if report.exercise.created_by %} &middot; Submitted by {{ report.exercise.created_by.email }}{% endif %}
+                        </p>
                     </div>
-                    <form method="post" class="inline-form">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="apply_suggestions">
-                        <input type="hidden" name="exercise_id" value="{{ report.exercise.id }}">
-                        <input type="hidden" name="return_query" value="{{ current_query_string }}">
-                        <button type="submit">Apply suggestions</button>
-                    </form>
+                    <div style="display:flex;gap:0.6rem;flex-wrap:wrap;">
+                        <form method="post" class="inline-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="apply_suggestions">
+                            <input type="hidden" name="exercise_id" value="{{ report.exercise.id }}">
+                            <input type="hidden" name="return_query" value="{{ current_query_string }}">
+                            <button type="submit">Apply suggestions</button>
+                        </form>
+                        {% if report.needs_verification %}
+                            <form method="post" class="inline-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="approve_exercise">
+                                <input type="hidden" name="exercise_id" value="{{ report.exercise.id }}">
+                                <input type="hidden" name="return_query" value="{{ current_query_string }}">
+                                <button type="submit">Approve</button>
+                            </form>
+                            <form method="post" class="inline-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="reject_exercise">
+                                <input type="hidden" name="exercise_id" value="{{ report.exercise.id }}">
+                                <input type="hidden" name="return_query" value="{{ current_query_string }}">
+                                <button type="submit" class="secondary-button">Reject</button>
+                            </form>
+                        {% endif %}
+                    </div>
                 </div>
 
                 <div class="grid-two library-admin-detail-grid">

@@ -23,6 +23,17 @@ DAY_TYPE_CHOICES = [
 
 
 class Exercise(models.Model):
+    class SourceKind(models.TextChoices):
+        SYSTEM = "system", "System"
+        CATALOG = "catalog", "Catalog"
+        USER_SUBMITTED = "user_submitted", "User submitted"
+        AI_SUGGESTED = "ai_suggested", "AI suggested"
+
+    class VerificationStatus(models.TextChoices):
+        APPROVED = "approved", "Approved"
+        PENDING_REVIEW = "pending_review", "Pending review"
+        REJECTED = "rejected", "Rejected"
+
     class Modality(models.TextChoices):
         BARBELL = "barbell", "Barbell"
         DUMBBELL = "dumbbell", "Dumbbell"
@@ -54,9 +65,17 @@ class Exercise(models.Model):
 
     external_id = models.CharField(max_length=64, unique=True)
     source_dataset = models.CharField(max_length=32, blank=True)
+    source_kind = models.CharField(max_length=24, choices=SourceKind.choices, default=SourceKind.SYSTEM)
     name = models.CharField(max_length=160)
     brand = models.CharField(max_length=80, blank=True)
     line = models.CharField(max_length=120, blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="submitted_exercises",
+    )
     aliases = models.JSONField(default=list, blank=True)
     raw_catalog_data = models.JSONField(default=dict, blank=True)
     canonical_exercise = models.ForeignKey(
@@ -97,6 +116,20 @@ class Exercise(models.Model):
     image_source = models.CharField(max_length=64, blank=True)
     image_generated_at = models.DateTimeField(null=True, blank=True)
     image_error_message = models.TextField(blank=True)
+    verification_status = models.CharField(
+        max_length=24,
+        choices=VerificationStatus.choices,
+        default=VerificationStatus.APPROVED,
+    )
+    verified_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="verified_exercises",
+    )
+    verified_at = models.DateTimeField(null=True, blank=True)
+    review_notes = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -119,6 +152,11 @@ class Exercise(models.Model):
             except ValueError:
                 return self.image_url
         return self.image_url
+
+    @property
+    def can_copy_saved_image(self):
+        static_prefix = f"{settings.STATIC_URL}exercise_images/"
+        return bool(self.generated_image or (self.image_url and self.image_url.startswith(static_prefix)))
 
 
 class TrainingProgram(models.Model):
