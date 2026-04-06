@@ -38,6 +38,9 @@
             <li><a href="{% url 'request_period_evaluation' %}">Request period evaluation</a></li>
             <li><a href="{% url 'manual_program_list' %}">Manual plan builder</a></li>
             <li><a href="{% url 'program_history' %}">Program history</a></li>
+            {% if request.user.is_staff %}
+                <li><a href="{% url 'library_admin' %}">Library admin</a></li>
+            {% endif %}
         </ul>
     </article>
 </section>

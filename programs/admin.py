@@ -23,6 +23,9 @@ class ExerciseAdmin(admin.ModelAdmin):
     list_display = (
         "image_preview",
         "name",
+        "brand",
+        "line",
+        "canonical_exercise",
         "external_id",
         "modality",
         "category",
@@ -34,15 +37,17 @@ class ExerciseAdmin(admin.ModelAdmin):
         "is_active",
     )
     list_filter = (
+        "brand",
         "modality",
         "library_role",
+        "canonical_exercise",
         "supports_reps",
         "supports_time",
         "instructions_status",
         "image_status",
         "is_active",
     )
-    search_fields = ("name", "external_id", "equipment", "category", "movement_pattern")
+    search_fields = ("name", "brand", "line", "external_id", "equipment", "category", "movement_pattern")
     readonly_fields = ("image_preview_large",)
     actions = ("mark_images_reviewed", "reset_image_status")
 
@@ -54,7 +59,11 @@ class ExerciseAdmin(admin.ModelAdmin):
                     "external_id",
                     "source_dataset",
                     "name",
+                    "brand",
+                    "line",
+                    "canonical_exercise",
                     "aliases",
+                    "raw_catalog_data",
                     "modality",
                     "library_role",
                     "equipment",

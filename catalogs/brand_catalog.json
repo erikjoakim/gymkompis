@@ -1,0 +1,908 @@
+{
+  "dataset_name": "commercial_gym_machines_merged_normalized",
+  "version": "1.0",
+  "scope": "Normalized multi-brand baseline dataset",
+  "notes": [
+    "This is a normalized merged dataset across major commercial gym brands.",
+    "It is not a complete historical archive of every SKU or every regional variant.",
+    "Primary and secondary muscles are inferred from the exercise pattern of each machine.",
+    "Difficulty is a practical programming estimate on a 1-5 scale, where 1 = beginner-friendly and 5 = advanced/high coordination or loading demand."
+  ],
+  "difficulty_scale": {
+    "1": "Very easy / beginner-friendly",
+    "2": "Easy",
+    "3": "Moderate",
+    "4": "Hard",
+    "5": "Very hard / advanced"
+  },
+  "brands": [
+    {
+      "brand": "Technogym",
+      "lines": [
+        {
+          "line": "Selection 900",
+          "type": "selectorized_strength",
+          "machines": [
+            {
+              "name": "Adductor",
+              "movement": "hip_adduction",
+              "primary_muscles": ["adductors"],
+              "secondary_muscles": ["gluteus minimus", "gracilis"],
+              "difficulty": 1
+            },
+            {
+              "name": "Abductor",
+              "movement": "hip_abduction",
+              "primary_muscles": ["gluteus medius", "gluteus minimus"],
+              "secondary_muscles": ["tensor fasciae latae"],
+              "difficulty": 1
+            },
+            {
+              "name": "Arm Extension",
+              "movement": "triceps_extension",
+              "primary_muscles": ["triceps"],
+              "secondary_muscles": ["anconeus"],
+              "difficulty": 1
+            },
+            {
+              "name": "Delts Machine",
+              "movement": "shoulder_abduction",
+              "primary_muscles": ["lateral deltoids"],
+              "secondary_muscles": ["supraspinatus", "upper traps"],
+              "difficulty": 2
+            },
+            {
+              "name": "Lat Machine",
+              "movement": "vertical_pull",
+              "primary_muscles": ["latissimus dorsi"],
+              "secondary_muscles": ["biceps", "teres major", "rhomboids"],
+              "difficulty": 2
+            },
+            {
+              "name": "Pulldown",
+              "movement": "vertical_pull",
+              "primary_muscles": ["latissimus dorsi"],
+              "secondary_muscles": ["biceps", "teres major", "rhomboids"],
+              "difficulty": 2
+            },
+            {
+              "name": "Vertical Traction",
+              "movement": "vertical_pull",
+              "primary_muscles": ["latissimus dorsi"],
+              "secondary_muscles": ["biceps", "teres major", "rear delts"],
+              "difficulty": 2
+            },
+            {
+              "name": "Low Row",
+              "movement": "horizontal_pull",
+              "primary_muscles": ["mid traps", "rhomboids", "latissimus dorsi"],
+              "secondary_muscles": ["biceps", "rear delts"],
+              "difficulty": 2
+            },
+            {
+              "name": "Upper Back",
+              "movement": "rear_upper_back_pull",
+              "primary_muscles": ["mid traps", "rhomboids", "rear delts"],
+              "secondary_muscles": ["biceps", "teres major"],
+              "difficulty": 2
+            },
+            {
+              "name": "Pectoral",
+              "movement": "chest_fly",
+              "primary_muscles": ["pectoralis major"],
+              "secondary_muscles": ["anterior deltoids", "biceps short head"],
+              "difficulty": 2
+            },
+            {
+              "name": "Reverse Fly",
+              "movement": "rear_delt_fly",
+              "primary_muscles": ["rear delts"],
+              "secondary_muscles": ["rhomboids", "mid traps"],
+              "difficulty": 2
+            },
+            {
+              "name": "Rotary Torso",
+              "movement": "trunk_rotation",
+              "primary_muscles": ["obliques"],
+              "secondary_muscles": ["transverse abdominis", "erector spinae"],
+              "difficulty": 2
+            },
+            {
+              "name": "Total Abdominal",
+              "movement": "abdominal_flexion",
+              "primary_muscles": ["rectus abdominis"],
+              "secondary_muscles": ["obliques", "hip flexors"],
+              "difficulty": 2
+            },
+            {
+              "name": "Abdominal Crunch",
+              "movement": "abdominal_crunch",
+              "primary_muscles": ["rectus abdominis"],
+              "secondary_muscles": ["obliques"],
+              "difficulty": 1
+            },
+            {
+              "name": "Lower Back",
+              "movement": "spinal_extension",
+              "primary_muscles": ["erector spinae"],
+              "secondary_muscles": ["glutes", "hamstrings"],
+              "difficulty": 2
+            },
+            {
+              "name": "Leg Extension",
+              "movement": "knee_extension",
+              "primary_muscles": ["quadriceps"],
+              "secondary_muscles": ["hip flexors"],
+              "difficulty": 1
+            },
+            {
+              "name": "Prone Leg Curl",
+              "movement": "knee_flexion",
+              "primary_muscles": ["hamstrings"],
+              "secondary_muscles": ["gastrocnemius"],
+              "difficulty": 1
+            },
+            {
+              "name": "Leg Press",
+              "movement": "leg_press",
+              "primary_muscles": ["quadriceps", "glutes"],
+              "secondary_muscles": ["hamstrings", "adductors", "calves"],
+              "difficulty": 2
+            },
+            {
+              "name": "Multi Hip",
+              "movement": "multi_hip",
+              "primary_muscles": ["glutes", "hip flexors", "adductors", "abductors"],
+              "secondary_muscles": ["hamstrings", "core"],
+              "difficulty": 2
+            }
+          ]
+        },
+        {
+          "line": "Selection 700",
+          "type": "selectorized_strength",
+          "machines": [
+            {
+              "name": "Chest Press",
+              "movement": "horizontal_press",
+              "primary_muscles": ["pectoralis major"],
+              "secondary_muscles": ["triceps", "anterior deltoids"],
+              "difficulty": 2
+            },
+            {
+              "name": "Abdominal Crunch",
+              "movement": "abdominal_crunch",
+              "primary_muscles": ["rectus abdominis"],
+              "secondary_muscles": ["obliques"],
+              "difficulty": 1
+            },
+            {
+              "name": "Lower Back",
+              "movement": "spinal_extension",
+              "primary_muscles": ["erector spinae"],
+              "secondary_muscles": ["glutes", "hamstrings"],
+              "difficulty": 2
+            },
+            {
+              "name": "Lat Machine",
+              "movement": "vertical_pull",
+              "primary_muscles": ["latissimus dorsi"],
+              "secondary_muscles": ["biceps", "teres major", "rhomboids"],
+              "difficulty": 2
+            },
+            {
+              "name": "Vertical Traction",
+              "movement": "vertical_pull",
+              "primary_muscles": ["latissimus dorsi"],
+              "secondary_muscles": ["biceps", "teres major", "rear delts"],
+              "difficulty": 2
+            },
+            {
+              "name": "Low Row",
+              "movement": "horizontal_pull",
+              "primary_muscles": ["mid traps", "rhomboids", "latissimus dorsi"],
+              "secondary_muscles": ["biceps", "rear delts"],
+              "difficulty": 2
+            },
+            {
+              "name": "Leg Press",
+              "movement": "leg_press",
+              "primary_muscles": ["quadriceps", "glutes"],
+              "secondary_muscles": ["hamstrings", "adductors", "calves"],
+              "difficulty": 2
+            },
+            {
+              "name": "Reverse Fly",
+              "movement": "rear_delt_fly",
+              "primary_muscles": ["rear delts"],
+              "secondary_muscles": ["rhomboids", "mid traps"],
+              "difficulty": 2
+            },
+            {
+              "name": "Multi Hip",
+              "movement": "multi_hip",
+              "primary_muscles": ["glutes", "hip flexors", "adductors", "abductors"],
+              "secondary_muscles": ["hamstrings", "core"],
+              "difficulty": 2
+            },
+            {
+              "name": "Dual Leg Curl / Extension",
+              "movement": "dual_knee_flexion_extension",
+              "primary_muscles": ["quadriceps", "hamstrings"],
+              "secondary_muscles": ["gastrocnemius"],
+              "difficulty": 2
+            }
+          ]
+        },
+        {
+          "line": "Artis Cardio",
+          "type": "cardio",
+          "machines": [
+            {
+              "name": "Run",
+              "movement": "treadmill",
+              "primary_muscles": ["quadriceps", "glutes", "calves"],
+              "secondary_muscles": ["hamstrings", "core"],
+              "difficulty": 3
+            },
+            {
+              "name": "Bike",
+              "movement": "upright_bike",
+              "primary_muscles": ["quadriceps"],
+              "secondary_muscles": ["glutes", "hamstrings", "calves"],
+              "difficulty": 2
+            },
+            {
+              "name": "Recline",
+              "movement": "recumbent_bike",
+              "primary_muscles": ["quadriceps"],
+              "secondary_muscles": ["glutes", "hamstrings"],
+              "difficulty": 1
+            },
+            {
+              "name": "Synchro",
+              "movement": "elliptical",
+              "primary_muscles": ["quadriceps", "glutes"],
+              "secondary_muscles": ["hamstrings", "calves", "deltoids"],
+              "difficulty": 2
+            },
+            {
+              "name": "Vario",
+              "movement": "adaptive_elliptical",
+              "primary_muscles": ["quadriceps", "glutes"],
+              "secondary_muscles": ["hamstrings", "calves", "deltoids"],
+              "difficulty": 3
+            },
+            {
+              "name": "Climb",
+              "movement": "stair_climber",
+              "primary_muscles": ["glutes", "quadriceps"],
+              "secondary_muscles": ["hamstrings", "calves"],
+              "difficulty": 4
+            }
+          ]
+        },
+        {
+          "line": "Skill Line",
+          "type": "performance_cardio",
+          "machines": [
+            {
+              "name": "Skillrun",
+              "movement": "performance_treadmill",
+              "primary_muscles": ["quadriceps", "glutes", "calves"],
+              "secondary_muscles": ["hamstrings", "core"],
+              "difficulty": 4
+            },
+            {
+              "name": "Skillmill",
+              "movement": "curved_or_multidrive_treadmill",
+              "primary_muscles": ["quadriceps", "glutes", "calves"],
+              "secondary_muscles": ["hamstrings", "core", "shoulders"],
+              "difficulty": 5
+            },
+            {
+              "name": "Skillbike",
+              "movement": "performance_bike",
+              "primary_muscles": ["quadriceps"],
+              "secondary_muscles": ["glutes", "hamstrings", "calves"],
+              "difficulty": 3
+            },
+            {
+              "name": "Skillrow",
+              "movement": "rower",
+              "primary_muscles": ["lats", "quadriceps", "glutes"],
+              "secondary_muscles": ["hamstrings", "mid back", "biceps", "core"],
+              "difficulty": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Life Fitness",
+      "lines": [
+        {
+          "line": "Signature Series",
+          "type": "selectorized_strength",
+          "machines": [
+            {
+              "name": "Chest Press",
+              "movement": "horizontal_press",
+              "primary_muscles": ["pectoralis major"],
+              "secondary_muscles": ["triceps", "anterior deltoids"],
+              "difficulty": 2
+            },
+            {
+              "name": "Incline Press",
+              "movement": "incline_press",
+              "primary_muscles": ["upper pectorals"],
+              "secondary_muscles": ["triceps", "anterior deltoids"],
+              "difficulty": 2
+            },
+            {
+              "name": "Lat Pulldown",
+              "movement": "vertical_pull",
+              "primary_muscles": ["latissimus dorsi"],
+              "secondary_muscles": ["biceps", "teres major", "rhomboids"],
+              "difficulty": 2
+            },
+            {
+              "name": "Seated Row",
+              "movement": "horizontal_pull",
+              "primary_muscles": ["mid traps", "rhomboids", "latissimus dorsi"],
+              "secondary_muscles": ["biceps", "rear delts"],
+              "difficulty": 2
+            },
+            {
+              "name": "Shoulder Press",
+              "movement": "vertical_press",
+              "primary_muscles": ["anterior deltoids", "lateral deltoids"],
+              "secondary_muscles": ["triceps", "upper chest"],
+              "difficulty": 2
+            },
+            {
+              "name": "Lateral Raise",
+              "movement": "shoulder_abduction",
+              "primary_muscles": ["lateral deltoids"],
+              "secondary_muscles": ["supraspinatus", "upper traps"],
+              "difficulty": 2
+            },
+            {
+              "name": "Triceps Extension",
+              "movement": "triceps_extension",
+              "primary_muscles": ["triceps"],
+              "secondary_muscles": ["anconeus"],
+              "difficulty": 1
+            },
+            {
+              "name": "Biceps Curl",
+              "movement": "elbow_flexion",
+              "primary_muscles": ["biceps"],
+              "secondary_muscles": ["brachialis", "brachioradialis"],
+              "difficulty": 1
+            },
+            {
+              "name": "Ab Crunch",
+              "movement": "abdominal_crunch",
+              "primary_muscles": ["rectus abdominis"],
+              "secondary_muscles": ["obliques"],
+              "difficulty": 1
+            },
+            {
+              "name": "Back Extension",
+              "movement": "spinal_extension",
+              "primary_muscles": ["erector spinae"],
+              "secondary_muscles": ["glutes", "hamstrings"],
+              "difficulty": 2
+            },
+            {
+              "name": "Leg Press",
+              "movement": "leg_press",
+              "primary_muscles": ["quadriceps", "glutes"],
+              "secondary_muscles": ["hamstrings", "adductors", "calves"],
+              "difficulty": 2
+            },
+            {
+              "name": "Leg Extension",
+              "movement": "knee_extension",
+              "primary_muscles": ["quadriceps"],
+              "secondary_muscles": ["hip flexors"],
+              "difficulty": 1
+            },
+            {
+              "name": "Leg Curl",
+              "movement": "knee_flexion",
+              "primary_muscles": ["hamstrings"],
+              "secondary_muscles": ["gastrocnemius"],
+              "difficulty": 1
+            }
+          ]
+        },
+        {
+          "line": "Integrity+ Cardio",
+          "type": "cardio",
+          "machines": [
+            {
+              "name": "Treadmill",
+              "movement": "treadmill",
+              "primary_muscles": ["quadriceps", "glutes", "calves"],
+              "secondary_muscles": ["hamstrings", "core"],
+              "difficulty": 3
+            },
+            {
+              "name": "Elliptical",
+              "movement": "elliptical",
+              "primary_muscles": ["quadriceps", "glutes"],
+              "secondary_muscles": ["hamstrings", "calves", "deltoids"],
+              "difficulty": 2
+            },
+            {
+              "name": "Upright Bike",
+              "movement": "upright_bike",
+              "primary_muscles": ["quadriceps"],
+              "secondary_muscles": ["glutes", "hamstrings", "calves"],
+              "difficulty": 2
+            },
+            {
+              "name": "Recumbent Bike",
+              "movement": "recumbent_bike",
+              "primary_muscles": ["quadriceps"],
+              "secondary_muscles": ["glutes", "hamstrings"],
+              "difficulty": 1
+            },
+            {
+              "name": "Climber",
+              "movement": "stair_climber",
+              "primary_muscles": ["glutes", "quadriceps"],
+              "secondary_muscles": ["hamstrings", "calves"],
+              "difficulty": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Hammer Strength",
+      "lines": [
+        {
+          "line": "Plate Loaded",
+          "type": "plate_loaded_strength",
+          "machines": [
+            {
+              "name": "Iso-Lateral Chest Press",
+              "movement": "horizontal_press",
+              "primary_muscles": ["pectoralis major"],
+              "secondary_muscles": ["triceps", "anterior deltoids"],
+              "difficulty": 3
+            },
+            {
+              "name": "Incline Press",
+              "movement": "incline_press",
+              "primary_muscles": ["upper pectorals"],
+              "secondary_muscles": ["triceps", "anterior deltoids"],
+              "difficulty": 3
+            },
+            {
+              "name": "Shoulder Press",
+              "movement": "vertical_press",
+              "primary_muscles": ["anterior deltoids", "lateral deltoids"],
+              "secondary_muscles": ["triceps", "upper chest"],
+              "difficulty": 3
+            },
+            {
+              "name": "High Row",
+              "movement": "vertical_pull",
+              "primary_muscles": ["latissimus dorsi", "upper back"],
+              "secondary_muscles": ["biceps", "rear delts", "teres major"],
+              "difficulty": 3
+            },
+            {
+              "name": "Low Row",
+              "movement": "horizontal_pull",
+              "primary_muscles": ["mid traps", "rhomboids", "latissimus dorsi"],
+              "secondary_muscles": ["biceps", "rear delts"],
+              "difficulty": 3
+            },
+            {
+              "name": "Pulldown",
+              "movement": "vertical_pull",
+              "primary_muscles": ["latissimus dorsi"],
+              "secondary_muscles": ["biceps", "teres major", "rhomboids"],
+              "difficulty": 3
+            },
+            {
+              "name": "Hack Squat",
+              "movement": "squat",
+              "primary_muscles": ["quadriceps", "glutes"],
+              "secondary_muscles": ["hamstrings", "adductors", "calves"],
+              "difficulty": 4
+            },
+            {
+              "name": "Leg Press",
+              "movement": "leg_press",
+              "primary_muscles": ["quadriceps", "glutes"],
+              "secondary_muscles": ["hamstrings", "adductors", "calves"],
+              "difficulty": 3
+            },
+            {
+              "name": "Glute Drive",
+              "movement": "hip_thrust",
+              "primary_muscles": ["glutes"],
+              "secondary_muscles": ["hamstrings", "adductors", "erector spinae"],
+              "difficulty": 3
+            },
+            {
+              "name": "Calf Raise",
+              "movement": "calf_raise",
+              "primary_muscles": ["gastrocnemius", "soleus"],
+              "secondary_muscles": ["tibialis posterior"],
+              "difficulty": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Matrix Fitness",
+      "lines": [
+        {
+          "line": "Ultra Series",
+          "type": "selectorized_strength",
+          "machines": [
+            {
+              "name": "Chest Press",
+              "movement": "horizontal_press",
+              "primary_muscles": ["pectoralis major"],
+              "secondary_muscles": ["triceps", "anterior deltoids"],
+              "difficulty": 2
+            },
+            {
+              "name": "Lat Pulldown",
+              "movement": "vertical_pull",
+              "primary_muscles": ["latissimus dorsi"],
+              "secondary_muscles": ["biceps", "teres major", "rhomboids"],
+              "difficulty": 2
+            },
+            {
+              "name": "Seated Row",
+              "movement": "horizontal_pull",
+              "primary_muscles": ["mid traps", "rhomboids", "latissimus dorsi"],
+              "secondary_muscles": ["biceps", "rear delts"],
+              "difficulty": 2
+            },
+            {
+              "name": "Shoulder Press",
+              "movement": "vertical_press",
+              "primary_muscles": ["anterior deltoids", "lateral deltoids"],
+              "secondary_muscles": ["triceps", "upper chest"],
+              "difficulty": 2
+            },
+            {
+              "name": "Ab Crunch",
+              "movement": "abdominal_crunch",
+              "primary_muscles": ["rectus abdominis"],
+              "secondary_muscles": ["obliques"],
+              "difficulty": 1
+            },
+            {
+              "name": "Back Extension",
+              "movement": "spinal_extension",
+              "primary_muscles": ["erector spinae"],
+              "secondary_muscles": ["glutes", "hamstrings"],
+              "difficulty": 2
+            },
+            {
+              "name": "Leg Press",
+              "movement": "leg_press",
+              "primary_muscles": ["quadriceps", "glutes"],
+              "secondary_muscles": ["hamstrings", "adductors", "calves"],
+              "difficulty": 2
+            },
+            {
+              "name": "Leg Extension",
+              "movement": "knee_extension",
+              "primary_muscles": ["quadriceps"],
+              "secondary_muscles": ["hip flexors"],
+              "difficulty": 1
+            },
+            {
+              "name": "Leg Curl",
+              "movement": "knee_flexion",
+              "primary_muscles": ["hamstrings"],
+              "secondary_muscles": ["gastrocnemius"],
+              "difficulty": 1
+            }
+          ]
+        },
+        {
+          "line": "Cardio",
+          "type": "cardio",
+          "machines": [
+            {
+              "name": "Treadmill",
+              "movement": "treadmill",
+              "primary_muscles": ["quadriceps", "glutes", "calves"],
+              "secondary_muscles": ["hamstrings", "core"],
+              "difficulty": 3
+            },
+            {
+              "name": "Elliptical",
+              "movement": "elliptical",
+              "primary_muscles": ["quadriceps", "glutes"],
+              "secondary_muscles": ["hamstrings", "calves", "deltoids"],
+              "difficulty": 2
+            },
+            {
+              "name": "Bike",
+              "movement": "upright_bike",
+              "primary_muscles": ["quadriceps"],
+              "secondary_muscles": ["glutes", "hamstrings", "calves"],
+              "difficulty": 2
+            },
+            {
+              "name": "ClimbMill",
+              "movement": "stair_climber",
+              "primary_muscles": ["glutes", "quadriceps"],
+              "secondary_muscles": ["hamstrings", "calves"],
+              "difficulty": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Precor",
+      "lines": [
+        {
+          "line": "Discovery Series",
+          "type": "selectorized_strength",
+          "machines": [
+            {
+              "name": "Chest Press",
+              "movement": "horizontal_press",
+              "primary_muscles": ["pectoralis major"],
+              "secondary_muscles": ["triceps", "anterior deltoids"],
+              "difficulty": 2
+            },
+            {
+              "name": "Pulldown",
+              "movement": "vertical_pull",
+              "primary_muscles": ["latissimus dorsi"],
+              "secondary_muscles": ["biceps", "teres major", "rhomboids"],
+              "difficulty": 2
+            },
+            {
+              "name": "Row",
+              "movement": "horizontal_pull",
+              "primary_muscles": ["mid traps", "rhomboids", "latissimus dorsi"],
+              "secondary_muscles": ["biceps", "rear delts"],
+              "difficulty": 2
+            },
+            {
+              "name": "Shoulder Press",
+              "movement": "vertical_press",
+              "primary_muscles": ["anterior deltoids", "lateral deltoids"],
+              "secondary_muscles": ["triceps", "upper chest"],
+              "difficulty": 2
+            },
+            {
+              "name": "Abdominal",
+              "movement": "abdominal_crunch",
+              "primary_muscles": ["rectus abdominis"],
+              "secondary_muscles": ["obliques"],
+              "difficulty": 1
+            },
+            {
+              "name": "Back Extension",
+              "movement": "spinal_extension",
+              "primary_muscles": ["erector spinae"],
+              "secondary_muscles": ["glutes", "hamstrings"],
+              "difficulty": 2
+            },
+            {
+              "name": "Leg Press",
+              "movement": "leg_press",
+              "primary_muscles": ["quadriceps", "glutes"],
+              "secondary_muscles": ["hamstrings", "adductors", "calves"],
+              "difficulty": 2
+            },
+            {
+              "name": "Leg Extension",
+              "movement": "knee_extension",
+              "primary_muscles": ["quadriceps"],
+              "secondary_muscles": ["hip flexors"],
+              "difficulty": 1
+            },
+            {
+              "name": "Seated Leg Curl",
+              "movement": "knee_flexion",
+              "primary_muscles": ["hamstrings"],
+              "secondary_muscles": ["gastrocnemius"],
+              "difficulty": 1
+            }
+          ]
+        },
+        {
+          "line": "Cardio",
+          "type": "cardio",
+          "machines": [
+            {
+              "name": "Treadmill",
+              "movement": "treadmill",
+              "primary_muscles": ["quadriceps", "glutes", "calves"],
+              "secondary_muscles": ["hamstrings", "core"],
+              "difficulty": 3
+            },
+            {
+              "name": "Elliptical (EFX)",
+              "movement": "elliptical",
+              "primary_muscles": ["quadriceps", "glutes"],
+              "secondary_muscles": ["hamstrings", "calves", "deltoids"],
+              "difficulty": 2
+            },
+            {
+              "name": "Adaptive Motion Trainer",
+              "movement": "adaptive_cardio",
+              "primary_muscles": ["quadriceps", "glutes"],
+              "secondary_muscles": ["hamstrings", "calves", "deltoids", "core"],
+              "difficulty": 3
+            },
+            {
+              "name": "Bike",
+              "movement": "upright_bike",
+              "primary_muscles": ["quadriceps"],
+              "secondary_muscles": ["glutes", "hamstrings", "calves"],
+              "difficulty": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Cybex",
+      "lines": [
+        {
+          "line": "Eagle NX / VR3",
+          "type": "selectorized_strength",
+          "machines": [
+            {
+              "name": "Chest Press",
+              "movement": "horizontal_press",
+              "primary_muscles": ["pectoralis major"],
+              "secondary_muscles": ["triceps", "anterior deltoids"],
+              "difficulty": 2
+            },
+            {
+              "name": "Pulldown",
+              "movement": "vertical_pull",
+              "primary_muscles": ["latissimus dorsi"],
+              "secondary_muscles": ["biceps", "teres major", "rhomboids"],
+              "difficulty": 2
+            },
+            {
+              "name": "Row",
+              "movement": "horizontal_pull",
+              "primary_muscles": ["mid traps", "rhomboids", "latissimus dorsi"],
+              "secondary_muscles": ["biceps", "rear delts"],
+              "difficulty": 2
+            },
+            {
+              "name": "Shoulder Press",
+              "movement": "vertical_press",
+              "primary_muscles": ["anterior deltoids", "lateral deltoids"],
+              "secondary_muscles": ["triceps", "upper chest"],
+              "difficulty": 2
+            },
+            {
+              "name": "Leg Press",
+              "movement": "leg_press",
+              "primary_muscles": ["quadriceps", "glutes"],
+              "secondary_muscles": ["hamstrings", "adductors", "calves"],
+              "difficulty": 2
+            },
+            {
+              "name": "Leg Extension",
+              "movement": "knee_extension",
+              "primary_muscles": ["quadriceps"],
+              "secondary_muscles": ["hip flexors"],
+              "difficulty": 1
+            },
+            {
+              "name": "Leg Curl",
+              "movement": "knee_flexion",
+              "primary_muscles": ["hamstrings"],
+              "secondary_muscles": ["gastrocnemius"],
+              "difficulty": 1
+            }
+          ]
+        },
+        {
+          "line": "Cardio",
+          "type": "cardio",
+          "machines": [
+            {
+              "name": "Arc Trainer",
+              "movement": "elliptical_variant",
+              "primary_muscles": ["quadriceps", "glutes"],
+              "secondary_muscles": ["hamstrings", "calves", "deltoids"],
+              "difficulty": 3
+            },
+            {
+              "name": "Treadmill",
+              "movement": "treadmill",
+              "primary_muscles": ["quadriceps", "glutes", "calves"],
+              "secondary_muscles": ["hamstrings", "core"],
+              "difficulty": 3
+            },
+            {
+              "name": "Bike",
+              "movement": "upright_bike",
+              "primary_muscles": ["quadriceps"],
+              "secondary_muscles": ["glutes", "hamstrings", "calves"],
+              "difficulty": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Rogue Fitness",
+      "lines": [
+        {
+          "line": "Strength Equipment",
+          "type": "free_weight_and_racks",
+          "machines": [
+            {
+              "name": "Power Rack",
+              "movement": "multi",
+              "primary_muscles": ["varies"],
+              "secondary_muscles": ["varies"],
+              "difficulty": 4
+            },
+            {
+              "name": "Squat Rack",
+              "movement": "squat",
+              "primary_muscles": ["quadriceps", "glutes"],
+              "secondary_muscles": ["hamstrings", "adductors", "erector spinae", "core"],
+              "difficulty": 4
+            },
+            {
+              "name": "Smith Machine",
+              "movement": "guided_squat_press",
+              "primary_muscles": ["quadriceps", "pectorals", "deltoids"],
+              "secondary_muscles": ["glutes", "triceps", "hamstrings"],
+              "difficulty": 3
+            },
+            {
+              "name": "Leg Press (select models)",
+              "movement": "leg_press",
+              "primary_muscles": ["quadriceps", "glutes"],
+              "secondary_muscles": ["hamstrings", "adductors", "calves"],
+              "difficulty": 2
+            }
+          ]
+        },
+        {
+          "line": "Conditioning",
+          "type": "cardio",
+          "machines": [
+            {
+              "name": "Echo Bike",
+              "movement": "air_bike",
+              "primary_muscles": ["quadriceps", "deltoids"],
+              "secondary_muscles": ["glutes", "hamstrings", "triceps", "biceps", "core"],
+              "difficulty": 4
+            },
+            {
+              "name": "Rower",
+              "movement": "rower",
+              "primary_muscles": ["lats", "quadriceps", "glutes"],
+              "secondary_muscles": ["hamstrings", "mid back", "biceps", "core"],
+              "difficulty": 4
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

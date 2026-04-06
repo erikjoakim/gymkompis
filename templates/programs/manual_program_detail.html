@@ -6,7 +6,7 @@
 <div class="page-header">
     <div>
         <h1>{{ draft.name }}</h1>
-        <p>Build the structure of your plan, then open each day to add warmups and exercises.</p>
+        <p>Choose the weekdays in your plan, save the draft details, and then open each day to add warmups and exercises.</p>
     </div>
     <div class="actions">
         <a class="button-link" href="{% url 'manual_program_list' %}">All drafts</a>
@@ -18,46 +18,80 @@
     </div>
 </div>
 
-<div class="grid-two">
-    <section class="card">
-        <h2>Plan details</h2>
-        <form method="post" class="stack">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="save_draft">
-            {{ form.as_p }}
-            <button type="submit">Save draft details</button>
-        </form>
-    </section>
-
-    <section class="card">
-        <h2>Add a day</h2>
-        <form method="post" class="stack">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="add_day">
-            {{ day_form.as_p }}
-            <button type="submit">Add day</button>
-        </form>
-    </section>
-</div>
+<section class="card manual-plan-details-card">
+    <h2>Plan details</h2>
+    <form method="post" class="stack">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save_draft">
+        {% for field in form %}
+            {% if field.name == "selected_days" %}
+                <div class="field-group{% if field.errors %} has-error{% endif %}">
+                    <label>{{ field.label }}</label>
+                    <div class="manual-day-checkbox-grid">
+                        {% for checkbox in field %}
+                            <label class="manual-day-checkbox">
+                                {{ checkbox.tag }}
+                                <span>{{ checkbox.choice_label }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                    {% if field.help_text %}<p class="help-text">{{ field.help_text }}</p>{% endif %}
+                    {% if field.errors %}
+                        <ul class="field-errors">
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="field-group{% if field.errors %} has-error{% endif %}">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.errors %}
+                        <ul class="field-errors">
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% endfor %}
+        <button type="submit">Save draft details</button>
+    </form>
+</section>
 
 <section class="card">
     <h2>Days in this plan</h2>
-    {% if days %}
+    {% if day_panels %}
         <div class="stack">
-            {% for day in days %}
-                <article class="exercise-card">
+            {% for panel in day_panels %}
+                <article class="exercise-card manual-day-panel">
                     <div class="page-header compact-header">
                         <div>
-                            <h3>{{ day.day_label }} - {{ day.name }}</h3>
-                            <p><strong>Type:</strong> {{ day.get_day_type_display }}</p>
-                            {% if day.notes %}<p>{{ day.notes }}</p>{% endif %}
+                            <h3>{{ panel.day.day_label }} - {{ panel.day.name }}</h3>
+                            <p><strong>Type:</strong> {{ panel.day.get_day_type_display }}</p>
+                            {% if panel.day.notes %}<p><strong>Notes:</strong> {{ panel.day.notes }}</p>{% endif %}
+                            {% if panel.exercise_summaries %}
+                                <div class="manual-day-exercise-summary">
+                                    <strong>Current exercises</strong>
+                                    <ul class="plain-list">
+                                        {% for exercise in panel.exercise_summaries %}
+                                            <li>{{ exercise.name }} · {{ exercise.modality }} · {{ exercise.category }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% else %}
+                                <p class="help-text">No exercises added yet.</p>
+                            {% endif %}
                         </div>
                         <div class="actions">
-                            <a class="button-link" href="{% url 'manual_program_day_detail' draft.id day.id %}">Edit exercises</a>
+                            <a class="button-link" href="{% url 'manual_program_day_detail' draft.id panel.day.id %}">Edit exercises</a>
                             <form method="post" class="inline-form">
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="delete_day">
-                                <input type="hidden" name="day_id" value="{{ day.id }}">
+                                <input type="hidden" name="day_id" value="{{ panel.day.id }}">
                                 <button type="submit" class="ghost-link">Delete day</button>
                             </form>
                         </div>

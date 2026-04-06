@@ -5,6 +5,7 @@ from statistics import mean
 from django.db.models import Q
 from django.utils import timezone
 
+from programs.library import resolve_canonical_exercise
 from programs.models import Exercise
 
 from .models import WorkoutSession
@@ -124,7 +125,8 @@ def _lookup_library_exercise(exercise_key: str | None, name: str | None):
         query |= Q(name__iexact=name)
     if not query:
         return None
-    return Exercise.objects.filter(is_active=True).filter(query).first()
+    exercise = Exercise.objects.filter(is_active=True).filter(query).first()
+    return resolve_canonical_exercise(exercise)
 
 
 def _exercise_metadata(exercise_data: dict) -> dict:

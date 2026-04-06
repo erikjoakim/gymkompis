@@ -19,13 +19,34 @@ class ProgramGenerateForm(forms.Form):
 
 
 class ManualProgramDraftForm(forms.ModelForm):
+    selected_days = forms.MultipleChoiceField(
+        choices=DAY_KEY_CHOICES,
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+        label="Days in this plan",
+    )
+
     class Meta:
         model = ManualProgramDraft
-        fields = ("name", "goal_summary", "duration_weeks", "weight_unit", "program_notes")
+        fields = ("name", "goal_summary", "duration_weeks", "weight_unit", "program_notes", "selected_days")
         widgets = {
             "goal_summary": forms.Textarea(attrs={"rows": 3}),
             "program_notes": forms.Textarea(attrs={"rows": 4}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.order_fields(["name", "goal_summary", "duration_weeks", "weight_unit", "selected_days", "program_notes"])
+        if self.instance and self.instance.pk and not self.is_bound:
+            self.fields["selected_days"].initial = list(
+                self.instance.days.order_by("day_key").values_list("day_key", flat=True)
+            )
+
+    def clean_selected_days(self):
+        selected_days = self.cleaned_data.get("selected_days") or []
+        if not selected_days:
+            raise forms.ValidationError("Select at least one day for this plan.")
+        return selected_days
 
 
 class ManualProgramDayForm(forms.ModelForm):
@@ -39,10 +60,30 @@ class ManualProgramDayForm(forms.ModelForm):
         }
 
 
+class ManualDayCopyForm(forms.Form):
+    target_day_ids = forms.MultipleChoiceField(
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+        label="Copy this setup to",
+    )
+
+    def __init__(self, *args, available_days=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["target_day_ids"].choices = [
+            (str(day.id), f"{day.day_label} - {day.name}") for day in (available_days or [])
+        ]
+
+    def clean_target_day_ids(self):
+        target_day_ids = self.cleaned_data.get("target_day_ids") or []
+        if not target_day_ids:
+            raise forms.ValidationError("Select at least one day to copy to.")
+        return target_day_ids
+
+
 class ExerciseLibraryFilterForm(forms.Form):
     query = forms.CharField(required=False, label="Search")
     modality = forms.ChoiceField(required=False)
-    category = forms.ChoiceField(required=False)
+    brand = forms.ChoiceField(required=False)
     library_role = forms.ChoiceField(
         required=False,
         choices=[("", "Any role"), *Exercise.LibraryRole.choices],
@@ -50,10 +91,85 @@ class ExerciseLibraryFilterForm(forms.Form):
     )
     supports_time = forms.BooleanField(required=False, label="Time-based")
 
-    def __init__(self, *args, modality_choices=None, category_choices=None, **kwargs):
+    def __init__(self, *args, modality_choices=None, brand_choices=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["modality"].choices = [("", "Any modality"), *(modality_choices or [])]
-        self.fields["category"].choices = [("", "Any category"), *(category_choices or [])]
+        self.fields["brand"].choices = [("", "Any brand"), *(brand_choices or [])]
+
+
+class LibraryImportAdminForm(forms.Form):
+    overwrite = forms.BooleanField(required=False, initial=True, label="Overwrite existing records")
+    ai_instructions = forms.BooleanField(required=False, label="Use AI draft instructions during import")
+
+
+class LibraryEnrichAdminForm(forms.Form):
+    limit = forms.IntegerField(min_value=1, max_value=1000, initial=50, label="Records to process")
+    overwrite = forms.BooleanField(required=False, label="Recompute existing values too")
+    use_ai = forms.BooleanField(required=False, label="Use AI fallback for unresolved metadata")
+
+
+class LibraryAdminFilterForm(forms.Form):
+    query = forms.CharField(required=False, label="Search")
+    brand = forms.ChoiceField(required=False, label="Brand")
+    only_incomplete = forms.BooleanField(required=False, initial=True, label="Only incomplete")
+    limit = forms.IntegerField(min_value=1, max_value=200, initial=25, label="Rows")
+
+    def __init__(self, *args, brand_choices=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["brand"].choices = [("", "Any brand"), *(brand_choices or [])]
+
+
+class LibraryExerciseReviewForm(forms.Form):
+    brand = forms.CharField(required=False)
+    line = forms.CharField(required=False)
+    modality = forms.ChoiceField(choices=Exercise.Modality.choices)
+    equipment = forms.CharField(required=False)
+    category = forms.CharField(required=False)
+    movement_pattern = forms.CharField(required=False, label="Movement")
+    primary_muscles = forms.CharField(required=False, help_text="Comma-separated")
+    secondary_muscles = forms.CharField(required=False, help_text="Comma-separated")
+    stabilizers = forms.CharField(required=False, help_text="Comma-separated")
+    supports_reps = forms.BooleanField(required=False)
+    supports_time = forms.BooleanField(required=False)
+    is_static = forms.BooleanField(required=False)
+    instructions = forms.CharField(required=False, widget=forms.Textarea(attrs={"rows": 4}))
+
+    @staticmethod
+    def list_to_text(values):
+        if isinstance(values, (list, tuple)):
+            return ", ".join(str(item) for item in values if item)
+        return values or ""
+
+    @classmethod
+    def initial_from_exercise(cls, exercise, suggested_values=None):
+        suggested_values = suggested_values or {}
+        return {
+            "brand": suggested_values.get("brand", exercise.brand),
+            "line": suggested_values.get("line", exercise.line),
+            "modality": suggested_values.get("modality", exercise.modality),
+            "equipment": suggested_values.get("equipment", exercise.equipment),
+            "category": suggested_values.get("category", exercise.category),
+            "movement_pattern": suggested_values.get("movement_pattern", exercise.movement_pattern),
+            "primary_muscles": cls.list_to_text(suggested_values.get("primary_muscles", exercise.primary_muscles)),
+            "secondary_muscles": cls.list_to_text(suggested_values.get("secondary_muscles", exercise.secondary_muscles)),
+            "stabilizers": cls.list_to_text(suggested_values.get("stabilizers", exercise.stabilizers)),
+            "supports_reps": suggested_values.get("supports_reps", exercise.supports_reps),
+            "supports_time": suggested_values.get("supports_time", exercise.supports_time),
+            "is_static": suggested_values.get("is_static", exercise.is_static),
+            "instructions": suggested_values.get("instructions", exercise.instructions),
+        }
+
+    @staticmethod
+    def parse_text_list(value):
+        return [item.strip() for item in (value or "").split(",") if item.strip()]
+
+
+class ExerciseImagePromptForm(forms.Form):
+    exercise_id = forms.IntegerField(widget=forms.HiddenInput())
+    prompt = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 8}),
+        label="Image prompt",
+    )
 
 
 class AddExerciseToDayForm(forms.Form):

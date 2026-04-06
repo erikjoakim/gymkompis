@@ -8,6 +8,44 @@
                 {{ day_form.as_p }}
                 <button type="submit">Save day</button>
             </form>
+            {% if copy_target_days %}
+                <div class="manual-day-copy-panel">
+                    <h3>Copy day</h3>
+                    <p class="help-text">This replaces the selected days' details and exercises with the setup from {{ day.day_label }}.</p>
+                    <form
+                        method="post"
+                        class="stack"
+                        hx-post="{% url 'manual_program_day_detail' draft.id day.id %}"
+                        hx-target="#manual-day-shell"
+                        hx-swap="innerHTML"
+                    >
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="copy_day">
+                        {% for key, value in active_filter_fields %}
+                            <input type="hidden" name="{{ key }}" value="{{ value }}">
+                        {% endfor %}
+                        {% if expanded_entry_id %}
+                            <input type="hidden" name="expanded" value="{{ expanded_entry_id }}">
+                        {% endif %}
+                        <div class="manual-day-checkbox-grid">
+                            {% for checkbox in copy_form.target_day_ids %}
+                                <label class="manual-day-checkbox">
+                                    {{ checkbox.tag }}
+                                    <span>{{ checkbox.choice_label }}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                        {% if copy_form.target_day_ids.errors %}
+                            <ul class="field-errors">
+                                {% for error in copy_form.target_day_ids.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        <button type="submit">Copy to selected days</button>
+                    </form>
+                </div>
+            {% endif %}
         </section>
         <section id="manual-day-setup-card" class="card" style="overflow:auto;min-height:0;max-height:24rem;">
             <h2>Current day setup</h2>
@@ -158,16 +196,15 @@
         </section>
     </div>
 
-    <section class="card builder-filter-card">
+    <section id="manual-day-search-panel" class="card builder-filter-card">
         <h2>Search exercise library</h2>
         <form
             method="get"
             class="builder-filter-form"
             hx-get="{% url 'manual_program_day_detail' draft.id day.id %}"
             hx-target="#manual-day-shell"
-            hx-swap="innerHTML"
+            hx-swap="innerHTML show:#manual-day-search-panel:top"
             hx-push-url="true"
-            hx-trigger="change, keyup changed delay:300ms from:input[name='query']"
         >
             <div style="display:flex;flex-wrap:nowrap;gap:0.85rem;align-items:end;width:100%;">
                 <div class="builder-filter-item builder-filter-search" style="min-width:0;flex:2 1 0;">
@@ -179,8 +216,8 @@
                     {{ filter_form.modality }}
                 </div>
                 <div class="builder-filter-item" style="min-width:0;flex:1 1 0;">
-                    {{ filter_form.category.label_tag }}
-                    {{ filter_form.category }}
+                    {{ filter_form.brand.label_tag }}
+                    {{ filter_form.brand }}
                 </div>
                 <div class="builder-filter-item" style="min-width:0;flex:1 1 0;">
                     {{ filter_form.library_role.label_tag }}
@@ -188,6 +225,9 @@
                 </div>
                 <div class="builder-filter-item builder-checkbox" style="display:flex;align-items:center;white-space:nowrap;flex:0 0 auto;">
                     <label style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0;">{{ filter_form.supports_time }} Time-based</label>
+                </div>
+                <div class="builder-filter-actions">
+                    <button type="submit">Search</button>
                 </div>
             </div>
             {% if expanded_entry_id %}
@@ -203,54 +243,68 @@
                 <p class="help-text">Exercises already selected for this day are excluded.</p>
             </div>
         </div>
-        {% if exercise_results %}
+        {% if exercise_result_groups %}
             <div class="builder-search-results stack">
-                {% for exercise in exercise_results %}
-                    <article class="builder-result-row">
-                        <div class="builder-row-main">
-                            {% if exercise.display_image_url %}
-                                <img src="{{ exercise.display_image_url }}" alt="{{ exercise.name }}" class="exercise-thumb builder-thumb-small">
-                            {% endif %}
-                            <div>
-                                <h3>{{ exercise.name }}</h3>
-                                <p><strong>{{ exercise.category }}</strong> &middot; {{ exercise.equipment }}</p>
-                                <p>{{ exercise.instructions }}</p>
-                                <p class="help-text">{{ exercise.movement_pattern }}{% if exercise.supports_time %} &middot; supports time{% endif %}{% if exercise.supports_reps %} &middot; supports reps{% endif %}</p>
-                            </div>
+                {% for group in exercise_result_groups %}
+                    <details class="builder-category-group" open>
+                        <summary>
+                            <span>{{ group.category }}</span>
+                            <span class="help-text">{{ group.exercises|length }} exercise{{ group.exercises|length|pluralize }}</span>
+                        </summary>
+                        <div class="builder-category-results stack">
+                            {% for exercise in group.exercises %}
+                                <article class="builder-result-row">
+                                    <div class="builder-row-main">
+                                        {% if exercise.display_image_url %}
+                                            <img src="{{ exercise.display_image_url }}" alt="{{ exercise.name }}" class="exercise-thumb builder-thumb-small">
+                                        {% endif %}
+                                        <div>
+                                            <h3>{{ exercise.name }}</h3>
+                                            <p>
+                                                <strong>{{ group.category }}</strong>
+                                                {% if exercise.brand %} &middot; {{ exercise.brand }}{% endif %}
+                                                {% if exercise.line %} &middot; {{ exercise.line }}{% elif exercise.equipment %} &middot; {{ exercise.equipment }}{% endif %}
+                                            </p>
+                                            <p>{{ exercise.instructions }}</p>
+                                            <p class="help-text">{{ exercise.movement_pattern }}{% if exercise.supports_time %} &middot; supports time{% endif %}{% if exercise.supports_reps %} &middot; supports reps{% endif %}</p>
+                                        </div>
+                                    </div>
+                                    <div class="builder-row-actions builder-row-actions-inline" style="display:flex;gap:0.6rem;flex-wrap:nowrap;align-items:start;">
+                                        <form
+                                            method="post"
+                                            hx-post="{% url 'manual_program_day_detail' draft.id day.id %}"
+                                            hx-target="#manual-day-shell"
+                                            hx-swap="innerHTML"
+                                        >
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="add_exercise">
+                                            <input type="hidden" name="add-exercise_id" value="{{ exercise.id }}">
+                                            <input type="hidden" name="add-block_type" value="warmup">
+                                            {% for key, value in active_filter_fields %}
+                                                <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                            {% endfor %}
+                                            <button type="submit">Add warmup</button>
+                                        </form>
+                                        <form
+                                            method="post"
+                                            hx-post="{% url 'manual_program_day_detail' draft.id day.id %}"
+                                            hx-target="#manual-day-shell"
+                                            hx-swap="innerHTML"
+                                        >
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="add_exercise">
+                                            <input type="hidden" name="add-exercise_id" value="{{ exercise.id }}">
+                                            <input type="hidden" name="add-block_type" value="main">
+                                            {% for key, value in active_filter_fields %}
+                                                <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                            {% endfor %}
+                                            <button type="submit">Add main</button>
+                                        </form>
+                                    </div>
+                                </article>
+                            {% endfor %}
                         </div>
-                        <div class="builder-row-actions builder-row-actions-inline" style="display:flex;gap:0.6rem;flex-wrap:nowrap;align-items:start;">
-                            <form
-                                method="post"
-                                hx-post="{% url 'manual_program_day_detail' draft.id day.id %}"
-                                hx-target="#manual-day-shell"
-                                hx-swap="innerHTML"
-                            >
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="add_exercise">
-                                <input type="hidden" name="add-exercise_id" value="{{ exercise.id }}">
-                                <input type="hidden" name="add-block_type" value="warmup">
-                                {% for key, value in active_filter_fields %}
-                                    <input type="hidden" name="{{ key }}" value="{{ value }}">
-                                {% endfor %}
-                                <button type="submit">Add warmup</button>
-                            </form>
-                            <form
-                                method="post"
-                                hx-post="{% url 'manual_program_day_detail' draft.id day.id %}"
-                                hx-target="#manual-day-shell"
-                                hx-swap="innerHTML"
-                            >
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="add_exercise">
-                                <input type="hidden" name="add-exercise_id" value="{{ exercise.id }}">
-                                <input type="hidden" name="add-block_type" value="main">
-                                {% for key, value in active_filter_fields %}
-                                    <input type="hidden" name="{{ key }}" value="{{ value }}">
-                                {% endfor %}
-                                <button type="submit">Add main</button>
-                            </form>
-                        </div>
-                    </article>
+                    </details>
                 {% endfor %}
             </div>
         {% else %}

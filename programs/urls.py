@@ -3,6 +3,8 @@ from django.urls import path
 from .views import (
     current_program_view,
     generate_program_view,
+    library_admin_view,
+    library_admin_images_view,
     manual_program_create_view,
     manual_program_day_detail_view,
     manual_program_detail_view,
@@ -16,6 +18,8 @@ from .views import (
 urlpatterns = [
     path("current/", current_program_view, name="current_program"),
     path("history/", program_history_view, name="program_history"),
+    path("library-admin/", library_admin_view, name="library_admin"),
+    path("library-admin/images/", library_admin_images_view, name="library_admin_images"),
     path("generate/", generate_program_view, name="generate_program"),
     path("manual/", manual_program_list_view, name="manual_program_list"),
     path("manual/create/", manual_program_create_view, name="manual_program_create"),

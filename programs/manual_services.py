@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.db import transaction
 from django.utils import timezone
 
-from .models import DAY_KEY_CHOICES, Exercise, ManualProgramDraft, ManualProgramExercise, TrainingProgram
+from .models import DAY_KEY_CHOICES, Exercise, ManualProgramDay, ManualProgramDraft, ManualProgramExercise, TrainingProgram
 from .schemas import validate_current_program
 
 
@@ -39,6 +39,46 @@ def create_manual_exercise_for_day(day, exercise: Exercise, block_type: str | No
         target_effort_rpe=Decimal("6.0") if selected_block_type == ManualProgramExercise.BlockType.WARMUP else Decimal("7.0"),
     )
     return entry
+
+
+@transaction.atomic
+def copy_manual_day(source_day: ManualProgramDay, target_days: list[ManualProgramDay]) -> list[ManualProgramDay]:
+    target_days = list(target_days)
+    if not target_days:
+        return []
+
+    source_entries = list(source_day.manual_exercises.select_related("exercise").all())
+    for target_day in target_days:
+        if target_day.draft_id != source_day.draft_id:
+            raise ValueError("Manual days can only be copied within the same draft.")
+        if target_day.pk == source_day.pk:
+            raise ValueError("A day cannot be copied onto itself.")
+
+        target_day.name = source_day.name
+        target_day.day_type = source_day.day_type
+        target_day.notes = source_day.notes
+        target_day.save(update_fields=["name", "day_type", "notes"])
+        target_day.manual_exercises.all().delete()
+        ManualProgramExercise.objects.bulk_create(
+            [
+                ManualProgramExercise(
+                    day=target_day,
+                    exercise=entry.exercise,
+                    block_type=entry.block_type,
+                    order=entry.order,
+                    prescription_type=entry.prescription_type,
+                    sets_count=entry.sets_count,
+                    target_reps=entry.target_reps,
+                    target_seconds=entry.target_seconds,
+                    load_guidance=entry.load_guidance,
+                    target_effort_rpe=entry.target_effort_rpe,
+                    rest_seconds_override=entry.rest_seconds_override,
+                    notes=entry.notes,
+                )
+                for entry in source_entries
+            ]
+        )
+    return target_days
 
 
 def _serialize_manual_exercise(entry: ManualProgramExercise) -> dict:

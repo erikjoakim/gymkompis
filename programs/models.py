@@ -55,7 +55,17 @@ class Exercise(models.Model):
     external_id = models.CharField(max_length=64, unique=True)
     source_dataset = models.CharField(max_length=32, blank=True)
     name = models.CharField(max_length=160)
+    brand = models.CharField(max_length=80, blank=True)
+    line = models.CharField(max_length=120, blank=True)
     aliases = models.JSONField(default=list, blank=True)
+    raw_catalog_data = models.JSONField(default=dict, blank=True)
+    canonical_exercise = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="merged_variants",
+    )
     modality = models.CharField(max_length=24, choices=Modality.choices, default=Modality.OTHER)
     library_role = models.CharField(max_length=16, choices=LibraryRole.choices, default=LibraryRole.MAIN)
     equipment = models.CharField(max_length=160, blank=True)

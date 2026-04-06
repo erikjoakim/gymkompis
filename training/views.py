@@ -16,6 +16,7 @@ from .services import (
     session_display_exercise,
     submit_exercise_set,
     swap_session_exercise,
+    sync_session_display_fields,
 )
 from .substitutions import suggest_substitutions
 
@@ -122,6 +123,7 @@ def train_day_view(request, day_key):
     exercise_state = {"pending": [], "completed": []}
     if day.get("type") == "training":
         session = get_or_create_session(request.user, program, day)
+        session = sync_session_display_fields(session, day)
         exercise_state = _build_pending_exercise_forms(session, request.user)
 
     return render(

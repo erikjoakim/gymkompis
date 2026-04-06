@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Exercise Images | Library Admin | GymKompis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Exercise Image Generator</h1>
+        <p>Search the exercise library, select one exercise, edit the generated prompt, and review the preview before saving it.</p>
+    </div>
+    <div class="library-admin-header-actions">
+        <a class="button-link" href="{% url 'library_admin' %}">Back to library admin</a>
+        <a class="button-link" href="{% url 'dashboard' %}">Dashboard</a>
+    </div>
+</div>
+
+<section id="library-image-search-panel" class="card builder-filter-card">
+    <h2>Search exercise library</h2>
+    <form method="get" class="builder-filter-form">
+        <div style="display:flex;flex-wrap:nowrap;gap:0.85rem;align-items:end;width:100%;">
+            <div class="builder-filter-item builder-filter-search" style="min-width:0;flex:2 1 0;">
+                {{ filter_form.query.label_tag }}
+                {{ filter_form.query }}
+            </div>
+            <div class="builder-filter-item" style="min-width:0;flex:1 1 0;">
+                {{ filter_form.modality.label_tag }}
+                {{ filter_form.modality }}
+            </div>
+            <div class="builder-filter-item" style="min-width:0;flex:1 1 0;">
+                {{ filter_form.brand.label_tag }}
+                {{ filter_form.brand }}
+            </div>
+            <div class="builder-filter-item" style="min-width:0;flex:1 1 0;">
+                {{ filter_form.library_role.label_tag }}
+                {{ filter_form.library_role }}
+            </div>
+            <div class="builder-filter-item builder-checkbox" style="display:flex;align-items:center;white-space:nowrap;flex:0 0 auto;">
+                <label style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0;">{{ filter_form.supports_time }} Time-based</label>
+            </div>
+            <div class="builder-filter-actions">
+                {% if selected_exercise %}
+                    <input type="hidden" name="selected" value="{{ selected_exercise.id }}">
+                {% endif %}
+                <button type="submit">Search</button>
+            </div>
+        </div>
+    </form>
+</section>
+
+<div class="library-image-layout">
+    <section class="card">
+        <div class="page-header compact-header">
+            <div>
+                <h2>Search results</h2>
+                <p class="help-text">Choose one exercise to generate an instruction image for.</p>
+            </div>
+        </div>
+        {% if exercise_result_groups %}
+            <div class="builder-search-results stack">
+                {% for group in exercise_result_groups %}
+                    <details class="builder-category-group" open>
+                        <summary>
+                            <span>{{ group.category }}</span>
+                            <span class="help-text">{{ group.exercises|length }} exercise{{ group.exercises|length|pluralize }}</span>
+                        </summary>
+                        <div class="builder-category-results stack">
+                            {% for exercise in group.exercises %}
+                                <article class="builder-result-row">
+                                    <div class="builder-row-main">
+                                        <div>
+                                            <h3>{{ exercise.name }}</h3>
+                                            <p>
+                                                <strong>{{ exercise.category|default:"Uncategorized" }}</strong>
+                                                {% if exercise.brand %} &middot; {{ exercise.brand }}{% endif %}
+                                                {% if exercise.line %} &middot; {{ exercise.line }}{% endif %}
+                                            </p>
+                                            <p>{{ exercise.instructions|default:"No instructions yet." }}</p>
+                                            <p class="help-text">{{ exercise.movement_pattern|default:"No movement pattern" }} &middot; {{ exercise.get_modality_display }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="builder-row-actions builder-row-actions-inline">
+                                        <form method="get">
+                                            {% for key, value in active_filter_fields %}
+                                                <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                            {% endfor %}
+                                            <input type="hidden" name="selected" value="{{ exercise.id }}">
+                                            <button type="submit">{% if selected_exercise and selected_exercise.id == exercise.id %}Selected{% else %}Select{% endif %}</button>
+                                        </form>
+                                    </div>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    </details>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No exercises matched the current search.</p>
+        {% endif %}
+    </section>
+
+    <section class="card">
+        {% if selected_exercise %}
+            <div class="page-header compact-header">
+                <div>
+                    <h2>{{ selected_exercise.name }}</h2>
+                    <p>
+                        <strong>{{ selected_exercise.external_id }}</strong>
+                        {% if selected_exercise.brand %} &middot; {{ selected_exercise.brand }}{% endif %}
+                        {% if selected_exercise.line %} &middot; {{ selected_exercise.line }}{% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <dl class="library-admin-data-list">
+                <div><dt>Category</dt><dd>{{ selected_exercise.category|default:"-" }}</dd></div>
+                <div><dt>Movement</dt><dd>{{ selected_exercise.movement_pattern|default:"-" }}</dd></div>
+                <div><dt>Equipment</dt><dd>{{ selected_exercise.equipment|default:"-" }}</dd></div>
+                <div><dt>Primary muscles</dt><dd>{{ selected_exercise.primary_muscles|join:", "|default:"-" }}</dd></div>
+            </dl>
+
+            <section class="library-image-panel-section">
+                <h3>Prompt</h3>
+                <form method="post" class="stack">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="generate_image_preview">
+                    <input type="hidden" name="selected" value="{{ selected_exercise.id }}">
+                    {% for key, value in active_filter_fields %}
+                        <input type="hidden" name="{{ key }}" value="{{ value }}">
+                    {% endfor %}
+                    {{ prompt_form.as_p }}
+                    <button type="submit">Generate preview</button>
+                </form>
+            </section>
+
+            <section class="library-image-panel-section">
+                <h3>Preview</h3>
+                {% if preview %}
+                    <div class="library-image-preview-frame">
+                        <img src="{{ preview.image_url }}" alt="Preview for {{ selected_exercise.name }}">
+                    </div>
+                    <p class="help-text">Source: {{ preview.image_source }}</p>
+                    <div class="library-image-action-row">
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="save_generated_image">
+                            <input type="hidden" name="exercise_id" value="{{ selected_exercise.id }}">
+                            <input type="hidden" name="selected" value="{{ selected_exercise.id }}">
+                            {% for key, value in active_filter_fields %}
+                                <input type="hidden" name="{{ key }}" value="{{ value }}">
+                            {% endfor %}
+                            <button type="submit">Save to database</button>
+                        </form>
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="ignore_generated_image">
+                            <input type="hidden" name="exercise_id" value="{{ selected_exercise.id }}">
+                            <input type="hidden" name="selected" value="{{ selected_exercise.id }}">
+                            {% for key, value in active_filter_fields %}
+                                <input type="hidden" name="{{ key }}" value="{{ value }}">
+                            {% endfor %}
+                            <button type="submit" class="secondary-button">Ignore preview</button>
+                        </form>
+                    </div>
+                {% elif selected_exercise.display_image_url %}
+                    <div class="library-image-preview-frame">
+                        <img src="{{ selected_exercise.display_image_url }}" alt="Current image for {{ selected_exercise.name }}">
+                    </div>
+                    <p class="help-text">Current saved image shown above. Generate a preview to replace it.</p>
+                {% else %}
+                    <p class="help-text">No preview yet. Generate one from the prompt above.</p>
+                {% endif %}
+            </section>
+        {% else %}
+            <h2>Select an exercise</h2>
+            <p class="help-text">Pick one result from the search list to open the prompt editor and image preview workflow.</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

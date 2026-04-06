@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block title %}Library Admin | GymKompis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Library Admin</h1>
+        <p>Import catalogs, enrich incomplete exercises, and review suggested fixes without using Django admin.</p>
+    </div>
+    <div class="library-admin-header-actions">
+        <a class="button-link" href="{% url 'library_admin_images' %}">Generate exercise images</a>
+        <a class="button-link" href="{% url 'dashboard' %}">Back to dashboard</a>
+    </div>
+</div>
+
+<section class="grid-four">
+    <article class="card">
+        <h2>{{ total_exercises }}</h2>
+        <p>Total exercises</p>
+    </article>
+    <article class="card">
+        <h2>{{ incomplete_exercises }}</h2>
+        <p>Incomplete records</p>
+    </article>
+    <article class="card">
+        <h2>{{ catalog_backed_exercises }}</h2>
+        <p>Catalog-backed records</p>
+    </article>
+    <article class="card">
+        <h2>{{ reports|length }}</h2>
+        <p>Rows in current review queue</p>
+    </article>
+    <article class="card">
+        <h2>{{ duplicate_groups|length }}</h2>
+        <p>Duplicate groups</p>
+    </article>
+</section>
+
+<section class="grid-two">
+    <article class="card">
+        <h2>Import Library</h2>
+        <p class="help-text">Reads the root exercise JSON files plus any brand catalogs in <code>catalogs/</code>.</p>
+        <form method="post" class="stack">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="run_import">
+            <input type="hidden" name="return_query" value="{{ current_query_string }}">
+            {{ import_form.as_p }}
+            <button type="submit">Run import</button>
+        </form>
+    </article>
+    <article class="card">
+        <h2>Enrich Metadata</h2>
+        <p class="help-text">Fills gaps with deterministic rules first, then optional AI fallback for unresolved fields.</p>
+        <form method="post" class="stack">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="run_enrich">
+            <input type="hidden" name="return_query" value="{{ current_query_string }}">
+            {{ enrich_form.as_p }}
+            <button type="submit">Run enrichment</button>
+        </form>
+    </article>
+</section>
+
+<section class="card">
+    <div class="page-header compact-header">
+        <div>
+            <h2>Duplicate Check</h2>
+            <p class="help-text">Likely duplicates share the same normalized name, brand, and line.</p>
+        </div>
+    </div>
+    {% if duplicate_groups %}
+        <div class="stack">
+            {% for group in duplicate_groups %}
+                <article class="library-duplicate-group">
+                    <h3>
+                        {{ group.label }}
+                        {% if group.brand %} &middot; {{ group.brand }}{% endif %}
+                        {% if group.line %} &middot; {{ group.line }}{% endif %}
+                    </h3>
+                    <p class="help-text">{{ group.count }} matching records</p>
+                    <ul class="plain-list">
+                        {% for exercise in group.exercises %}
+                            <li>{{ exercise.external_id }}{% if exercise.category %} &middot; {{ exercise.category }}{% endif %}</li>
+                        {% endfor %}
+                    </ul>
+                    <form method="post" class="stack library-duplicate-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="merge_duplicates">
+                        <input type="hidden" name="return_query" value="{{ current_query_string }}">
+                        {% for exercise in group.exercises %}
+                            <input type="hidden" name="duplicate_ids" value="{{ exercise.id }}">
+                        {% endfor %}
+                        <div>
+                            <label for="canonical-{{ forloop.counter }}">Canonical record</label>
+                            <select id="canonical-{{ forloop.counter }}" name="canonical_exercise_id">
+                                {% for exercise in group.exercises %}
+                                    <option value="{{ exercise.id }}">{{ exercise.external_id }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit">Merge into canonical</button>
+                    </form>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No likely duplicates found for the current filter.</p>
+    {% endif %}
+</section>
+
+<section class="card">
+    <div class="page-header compact-header">
+        <div>
+            <h2>Review Queue</h2>
+            <p class="help-text">Use filters to focus the work queue, then apply suggested updates one record at a time when needed.</p>
+        </div>
+    </div>
+    <form method="get" class="library-admin-filter-form">
+        <div class="library-admin-filter-grid">
+            <div>
+                {{ filter_form.query.label_tag }}
+                {{ filter_form.query }}
+            </div>
+            <div>
+                {{ filter_form.brand.label_tag }}
+                {{ filter_form.brand }}
+            </div>
+            <div>
+                {{ filter_form.limit.label_tag }}
+                {{ filter_form.limit }}
+            </div>
+            <div class="builder-checkbox library-admin-checkbox">
+                <label>{{ filter_form.only_incomplete }} Only incomplete</label>
+            </div>
+            <div class="library-admin-filter-actions">
+                <button type="submit">Refresh queue</button>
+            </div>
+        </div>
+    </form>
+</section>
+
+{% if reports %}
+    <section class="stack">
+        {% for report in reports %}
+            <article class="card library-admin-record">
+                <div class="page-header compact-header">
+                    <div>
+                        <h2>{{ report.exercise.name }}</h2>
+                        <p>
+                            <strong>{{ report.exercise.external_id }}</strong>
+                            {% if report.exercise.brand %} &middot; {{ report.exercise.brand }}{% endif %}
+                            {% if report.exercise.line %} &middot; {{ report.exercise.line }}{% endif %}
+                        </p>
+                        <p class="help-text">Missing: {{ report.gap_labels }}</p>
+                    </div>
+                    <form method="post" class="inline-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="apply_suggestions">
+                        <input type="hidden" name="exercise_id" value="{{ report.exercise.id }}">
+                        <input type="hidden" name="return_query" value="{{ current_query_string }}">
+                        <button type="submit">Apply suggestions</button>
+                    </form>
+                </div>
+
+                <div class="grid-two library-admin-detail-grid">
+                    <section>
+                        <h3>Current Record</h3>
+                        <dl class="library-admin-data-list">
+                            <div><dt>Brand</dt><dd>{{ report.exercise.brand|default:"-" }}</dd></div>
+                            <div><dt>Line</dt><dd>{{ report.exercise.line|default:"-" }}</dd></div>
+                            <div><dt>Modality</dt><dd>{{ report.exercise.modality }}</dd></div>
+                            <div><dt>Equipment</dt><dd>{{ report.exercise.equipment|default:"-" }}</dd></div>
+                            <div><dt>Category</dt><dd>{{ report.exercise.category|default:"-" }}</dd></div>
+                            <div><dt>Movement</dt><dd>{{ report.exercise.movement_pattern|default:"-" }}</dd></div>
+                            <div><dt>Primary muscles</dt><dd>{{ report.exercise.primary_muscles|join:", "|default:"-" }}</dd></div>
+                            <div><dt>Instructions</dt><dd>{{ report.exercise.instructions|default:"-" }}</dd></div>
+                        </dl>
+                    </section>
+                    <section>
+                        <h3>Suggested Fixes</h3>
+                        {% if report.has_suggestions %}
+                            <dl class="library-admin-suggestion-list">
+                                {% for item in report.suggestions %}
+                                    <div>
+                                        <dt>{{ item.field }}</dt>
+                                        <dd>
+                                            <strong>Now:</strong> {{ item.current_display }}<br>
+                                            <strong>Suggested:</strong> {{ item.suggested_display }}
+                                        </dd>
+                                    </div>
+                                {% endfor %}
+                            </dl>
+                        {% else %}
+                            <p class="help-text">No deterministic suggestions available for this record.</p>
+                        {% endif %}
+                    </section>
+                </div>
+
+                <section class="library-admin-edit-panel">
+                    <h3>Edit Review Values</h3>
+                    <form method="post" class="stack">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="save_review">
+                        <input type="hidden" name="exercise_id" value="{{ report.exercise.id }}">
+                        <input type="hidden" name="return_query" value="{{ current_query_string }}">
+                        {{ report.review_form.as_p }}
+                        <button type="submit">Save review changes</button>
+                    </form>
+                </section>
+            </article>
+        {% endfor %}
+    </section>
+{% else %}
+    <section class="card">
+        <p>No exercises match the current review filter.</p>
+    </section>
+{% endif %}
+{% endblock %}

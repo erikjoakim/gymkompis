@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from programs.models import Exercise
 from programs.models import TrainingProgram
+from programs.library import resolve_canonical_exercise
 from programs.structure import get_day_all_exercises
 
 from .models import WorkoutSession
@@ -41,9 +42,10 @@ def _lookup_library_exercise(exercise_key: str | None, name: str | None):
     if exercise_key:
         exercise = Exercise.objects.filter(external_id__iexact=exercise_key.replace("_", "-"), is_active=True).first()
         if exercise:
-            return exercise
+            return resolve_canonical_exercise(exercise)
     if name:
-        return Exercise.objects.filter(name__iexact=name, is_active=True).first()
+        exercise = Exercise.objects.filter(name__iexact=name, is_active=True, canonical_exercise__isnull=True).first()
+        return resolve_canonical_exercise(exercise)
     return None
 
 
@@ -151,6 +153,45 @@ def get_or_create_session(user, program: TrainingProgram, day: dict) -> WorkoutS
     return session
 
 
+def sync_session_display_fields(session: WorkoutSession, day: dict) -> WorkoutSession:
+    day_exercises = {
+        exercise.get("exercise_key"): exercise
+        for exercise in get_day_all_exercises(day)
+    }
+    changed = False
+    data = deepcopy(session.session_json)
+
+    for session_exercise in data.get("exercises", []):
+        original_key = session_exercise.get("original_exercise_key") or session_exercise.get("exercise_key")
+        planned_exercise = day_exercises.get(original_key) or day_exercises.get(session_exercise.get("exercise_key"))
+
+        if planned_exercise:
+            for source_key, target_key in (
+                ("video_url", "video_url"),
+                ("image_url", "image_url"),
+                ("instructions", "instructions"),
+                ("focus", "focus"),
+                ("movement_pattern", "movement_pattern"),
+                ("category", "category"),
+                ("primary_muscles", "primary_muscles"),
+            ):
+                if not session_exercise.get(target_key) and planned_exercise.get(source_key):
+                    session_exercise[target_key] = deepcopy(planned_exercise.get(source_key))
+                    changed = True
+
+        display_exercise = session_display_exercise(session_exercise)
+        for key in ("video_url", "image_url", "instructions", "movement_pattern", "category", "primary_muscles"):
+            value = display_exercise.get(key)
+            if value and session_exercise.get(key) != value:
+                session_exercise[key] = deepcopy(value)
+                changed = True
+
+    if changed:
+        session.session_json = data
+        session.save(update_fields=["session_json", "updated_at"])
+    return session
+
+
 def _latest_completed_set_end(data: dict, exclude_exercise_key: str | None = None, exclude_set_number: int | None = None):
     latest_end = None
     for exercise in data.get("exercises", []):
@@ -231,6 +272,7 @@ def swap_session_exercise(session_id: int, user, current_exercise_key: str, repl
     session = WorkoutSession.objects.select_for_update().get(pk=session_id, user=user)
     data = deepcopy(session.session_json)
     replacement = Exercise.objects.filter(external_id__iexact=replacement_external_id, is_active=True).first()
+    replacement = resolve_canonical_exercise(replacement)
     if replacement is None:
         raise ValueError("Replacement exercise not found.")
 

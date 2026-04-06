@@ -18,6 +18,9 @@
                     <a href="{% url 'current_program' %}">Program</a>
                     <a href="{% url 'train_index' %}">Train</a>
                     <a href="{% url 'request_period_evaluation' %}">Evaluate</a>
+                    {% if request.user.is_staff %}
+                        <a href="{% url 'library_admin' %}">Library Admin</a>
+                    {% endif %}
                     <a href="{% url 'profile' %}">Profile</a>
                     <a href="{% url 'subscription' %}">Subscription</a>
                     <form method="post" action="{% url 'logout' %}" class="inline-form">
