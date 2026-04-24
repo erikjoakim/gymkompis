@@ -32,6 +32,7 @@ class ExerciseSubmissionForm(forms.Form):
         self.exercise = exercise
         self.progression = progression or {}
         self.target_set_number = int(target_set_number) if target_set_number else None
+        self.planned_sets = sorted(exercise.get("set_plan", []), key=lambda item: int(item["set_number"]))
         self.saved_actual_sets = {
             int(item["set_number"]): item
             for item in (saved_actual_sets or [])
@@ -40,7 +41,8 @@ class ExerciseSubmissionForm(forms.Form):
         suggested_weight = self.progression.get("suggested_weight")
         uses_weight_input = exercise_uses_weight_input(self.exercise)
         self.fields["exercise_notes"].initial = initial_exercise_notes
-        for planned_set in exercise.get("set_plan", []):
+        self.current_set_number = self._determine_current_set_number()
+        for planned_set in self.planned_sets:
             set_number = planned_set["set_number"]
             prescription_type = infer_prescription_type(planned_set)
             saved_set = self.saved_actual_sets.get(set_number, {})
@@ -62,7 +64,11 @@ class ExerciseSubmissionForm(forms.Form):
                         min_value=Decimal("0"),
                         decimal_places=2,
                         max_digits=8,
-                        initial=saved_set.get("weight", suggested_weight),
+                        initial=self._weight_initial_for_set(
+                            set_number,
+                            saved_set=saved_set,
+                            suggested_weight=suggested_weight,
+                        ),
                     )
             self.fields[f"set_{set_number}_rpe"] = forms.FloatField(
                 required=False,
@@ -117,10 +123,32 @@ class ExerciseSubmissionForm(forms.Form):
             self.add_error(field_name, error_text)
         return cleaned_data
 
+    def _determine_current_set_number(self):
+        for planned_set in self.planned_sets:
+            saved_set = self.saved_actual_sets.get(int(planned_set["set_number"]), {})
+            if not saved_set.get("completed"):
+                return int(planned_set["set_number"])
+        return int(self.planned_sets[-1]["set_number"]) if self.planned_sets else None
+
+    def _last_completed_weight_before(self, set_number: int):
+        for previous_set_number in range(int(set_number) - 1, 0, -1):
+            saved_set = self.saved_actual_sets.get(previous_set_number, {})
+            if saved_set.get("completed") and saved_set.get("weight") is not None:
+                return saved_set.get("weight")
+        return None
+
+    def _weight_initial_for_set(self, set_number: int, *, saved_set: dict, suggested_weight):
+        if saved_set.get("weight") is not None:
+            return saved_set.get("weight")
+        previous_weight = self._last_completed_weight_before(set_number)
+        if previous_weight is not None:
+            return previous_weight
+        return suggested_weight
+
     def actual_sets(self):
         rows = []
         uses_weight_input = exercise_uses_weight_input(self.exercise)
-        for planned_set in self.exercise.get("set_plan", []):
+        for planned_set in self.planned_sets:
             set_number = planned_set["set_number"]
             prescription_type = infer_prescription_type(planned_set)
             reps = self.cleaned_data.get(f"set_{set_number}_reps") if prescription_type == "reps" else None
@@ -159,7 +187,7 @@ class ExerciseSubmissionForm(forms.Form):
     def set_rows(self):
         rows = []
         uses_weight_input = exercise_uses_weight_input(self.exercise)
-        for planned_set in self.exercise.get("set_plan", []):
+        for planned_set in self.planned_sets:
             set_number = planned_set["set_number"]
             prescription_type = infer_prescription_type(planned_set)
             guidance_display = (
@@ -178,14 +206,24 @@ class ExerciseSubmissionForm(forms.Form):
                     "notes": self[f"set_{set_number}_notes"],
                     "guidance_display": guidance_display,
                     "saved": set_number in self.saved_actual_sets and self.saved_actual_sets[set_number].get("completed"),
+                    "saved_actual_set": self.saved_actual_sets.get(set_number),
                     "started_at": self[f"set_{set_number}_started_at"],
                     "ended_at": self[f"set_{set_number}_ended_at"],
                     "duration_seconds": self[f"set_{set_number}_duration_seconds"],
                     "saved_duration_seconds": self.saved_actual_sets.get(set_number, {}).get("duration_seconds"),
                     "saved_rest_before_seconds": self.saved_actual_sets.get(set_number, {}).get("rest_before_seconds"),
+                    "is_current": self.current_set_number == set_number,
                 }
             )
         return rows
+
+    @property
+    def current_set_row(self):
+        return next((row for row in self.set_rows if row["is_current"]), None)
+
+    @property
+    def completed_set_rows(self):
+        return [row for row in self.set_rows if row["saved"]]
 
     def set_timing_for_target(self):
         if not self.target_set_number:

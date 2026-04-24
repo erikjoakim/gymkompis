@@ -20,6 +20,10 @@
                 <button type="submit">Restore this program</button>
             </form>
         {% endif %}
+        <form method="post" action="{% url 'clone_program_to_draft' program.id %}" class="inline-form">
+            {% csrf_token %}
+            <button type="submit">Open In Builder</button>
+        </form>
     </div>
 </div>
 

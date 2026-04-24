@@ -42,3 +42,81 @@ def build_program_generation_input(prompt_text: str, profile_context: dict, hist
         },
     }
     return json.dumps(payload, ensure_ascii=False)
+
+
+def build_program_completion_instructions() -> str:
+    return (
+        "You are GymKompis, an assistant that completes partially-built gym programs. "
+        "Return strict JSON only with no markdown, no prose, and no code fences. "
+        "Return a complete program object that follows the requested schema exactly. "
+        "Preserve the existing draft as much as possible and only substantially change the requested target days. "
+        "Keep non-target days aligned with the incoming draft. "
+        "Every exercise must include instructions, rest_seconds, and set_plan. "
+        "Use realistic, beginner-safe, gym-appropriate programming."
+    )
+
+
+def build_program_completion_input(
+    *,
+    draft_snapshot: dict,
+    target_day_keys: list[str],
+    locked_day_keys: list[str] | None = None,
+    locked_exercise_map: dict | None = None,
+    profile_context: dict,
+    history_summary: dict | None,
+) -> str:
+    payload = {
+        "task": "Complete selected days inside an existing editable training program draft",
+        "target_day_keys": target_day_keys,
+        "locked_day_keys": locked_day_keys or [],
+        "locked_exercises_by_day": locked_exercise_map or {},
+        "profile_context": profile_context,
+        "history_summary": history_summary,
+        "current_draft": draft_snapshot,
+        "requirements": {
+            "preserve_non_target_days": True,
+            "preserve_locked_days": True,
+            "preserve_locked_exercises": True,
+            "return_full_program_json": True,
+            "keep_top_level_metadata_consistent": True,
+        },
+    }
+    return json.dumps(payload, ensure_ascii=False)
+
+
+def build_program_evaluation_instructions() -> str:
+    return (
+        "You are GymKompis, an assistant that evaluates editable gym program drafts. "
+        "Return strict JSON only with no markdown, no prose, and no code fences. "
+        "Do not rewrite the program. Only evaluate it. "
+        "Return an object with summary, findings, and suggested_actions. "
+        "Each finding should include severity, type, target, message, and suggested_fix."
+    )
+
+
+def build_program_evaluation_input(*, draft_snapshot: dict, profile_context: dict, history_summary: dict | None) -> str:
+    payload = {
+        "task": "Evaluate an editable training program draft without mutating it",
+        "profile_context": profile_context,
+        "history_summary": history_summary,
+        "current_draft": draft_snapshot,
+        "required_output": {
+            "summary": "string",
+            "findings": [
+                {
+                    "severity": "high|medium|low",
+                    "type": "string",
+                    "target": "draft or day key",
+                    "message": "string",
+                    "suggested_fix": "string",
+                }
+            ],
+            "suggested_actions": [
+                {
+                    "action_type": "string",
+                    "reason": "string",
+                }
+            ],
+        },
+    }
+    return json.dumps(payload, ensure_ascii=False)

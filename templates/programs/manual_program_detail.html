@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}{{ draft.name }} | Manual Builder{% endblock %}
+{% block title %}{{ draft.name }} | Program Builder{% endblock %}
 
 {% block content %}
 <div class="page-header">
     <div>
         <h1>{{ draft.name }}</h1>
-        <p>Choose the weekdays in your plan, save the draft details, and then open each day to add warmups and exercises.</p>
+        <p>Build manually, let AI help on selected days, and publish only when the draft looks right.</p>
     </div>
     <div class="actions">
         <a class="button-link" href="{% url 'manual_program_list' %}">All drafts</a>
@@ -17,6 +17,120 @@
         </form>
     </div>
 </div>
+
+<section class="card manual-plan-details-card">
+    <h2>AI assistant</h2>
+    <p class="help-text">Use AI on this same draft instead of switching builders. Selected-day completion replaces only the chosen day cards.</p>
+    <form method="post" class="stack">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="complete_selected_days">
+        <div class="manual-day-checkbox-grid">
+            {% for panel in day_panels %}
+                <label class="manual-day-checkbox">
+                    <input type="checkbox" name="selected_day_keys" value="{{ panel.day.day_key }}" {% if panel.day.ai_locked %}disabled{% endif %}>
+                    <span>{{ panel.day.day_label }}{% if panel.day.ai_locked %} (Locked){% endif %}</span>
+                </label>
+            {% endfor %}
+        </div>
+        <div class="actions">
+            <button type="submit">AI complete selected days</button>
+        </div>
+    </form>
+    <form method="post" class="inline-form" style="margin-top:0.75rem;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="complete_incomplete_days">
+        <button type="submit">AI complete incomplete days</button>
+    </form>
+    <form method="post" class="inline-form" style="margin-top:0.75rem;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="evaluate_draft">
+        <button type="submit">AI evaluate draft</button>
+    </form>
+    {% if draft.last_ai_action %}
+        <p class="help-text">Last AI action: {{ draft.last_ai_action }}</p>
+    {% endif %}
+    {% if latest_ai_evaluation.summary %}
+        <div class="manual-day-exercise-summary" style="margin-top:1rem;">
+            <strong>Latest AI evaluation</strong>
+            <p>{{ latest_ai_evaluation.summary }}</p>
+            {% if latest_ai_evaluation.findings %}
+                <ul class="plain-list">
+                    {% for finding in latest_ai_evaluation.findings %}
+                        <li><strong>{{ finding.severity|title }}:</strong> {{ finding.message }}{% if finding.suggested_fix %} Suggested fix: {{ finding.suggested_fix }}{% endif %}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            {% if latest_ai_evaluation.suggested_actions %}
+                <div class="stack" style="margin-top:0.75rem;">
+                    <strong>Suggested actions</strong>
+                    {% for suggestion in latest_ai_evaluation.suggested_actions %}
+                        <form method="post" class="inline-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="apply_evaluation_action">
+                            <input type="hidden" name="action_index" value="{{ forloop.counter0 }}">
+                            <button type="submit">Apply {{ suggestion.action_type|cut:"_"|title }}</button>
+                            {% if suggestion.target_day %}
+                                <span class="help-text">{{ suggestion.target_day|title }}</span>
+                            {% endif %}
+                            {% if suggestion.reason %}
+                                <span class="help-text">{{ suggestion.reason }}</span>
+                            {% endif %}
+                        </form>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+</section>
+
+<section class="card manual-plan-details-card">
+    <h2>Revision history</h2>
+    {% if revision_panels %}
+        <div class="stack">
+            {% for panel in revision_panels %}
+                {% with revision=panel.revision diff=panel.diff %}
+                <article class="exercise-card manual-day-panel">
+                    <div class="page-header compact-header">
+                        <div>
+                            <h3>Revision {{ revision.revision_number }}</h3>
+                            <p><strong>{{ revision.get_source_display }}</strong> &middot; {{ revision.action_type }} &middot; {{ revision.created_at|date:"Y-m-d H:i" }}</p>
+                            {% if revision.summary %}<p>{{ revision.summary }}</p>{% endif %}
+                            {% if diff and diff.has_changes %}
+                                {% if diff.top_level_changes %}
+                                    <p class="help-text">Top-level changes: {{ diff.top_level_changes|join:", " }}</p>
+                                {% endif %}
+                                {% if diff.added_days %}
+                                    <p class="help-text">Added days: {{ diff.added_days|join:", " }}</p>
+                                {% endif %}
+                                {% if diff.removed_days %}
+                                    <p class="help-text">Removed days: {{ diff.removed_days|join:", " }}</p>
+                                {% endif %}
+                                {% if diff.changed_days %}
+                                    <ul class="plain-list">
+                                        {% for changed_day in diff.changed_days %}
+                                            <li>{{ changed_day.day_label }}: {{ changed_day.changes|join:", " }}. Before {{ changed_day.before.warmups }} warmup / {{ changed_day.before.mains }} main, now {{ changed_day.after.warmups }} warmup / {{ changed_day.after.mains }} main.</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            {% else %}
+                                <p class="help-text">Matches the current draft.</p>
+                            {% endif %}
+                        </div>
+                        <form method="post" class="inline-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="restore_revision">
+                            <input type="hidden" name="revision_id" value="{{ revision.id }}">
+                            <button type="submit">Restore</button>
+                        </form>
+                    </div>
+                </article>
+                {% endwith %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="help-text">No revisions recorded yet.</p>
+    {% endif %}
+</section>
 
 <section class="card manual-plan-details-card">
     <h2>Plan details</h2>
@@ -72,6 +186,10 @@
                         <div>
                             <h3>{{ panel.day.day_label }} - {{ panel.day.name }}</h3>
                             <p><strong>Type:</strong> {{ panel.day.get_day_type_display }}</p>
+                            <p><strong>AI:</strong> {{ panel.day.ai_locked|yesno:"Locked,Unlocked" }}</p>
+                            {% if panel.day.day_key in incomplete_day_keys %}
+                                <p class="help-text">Incomplete: no main exercises yet.</p>
+                            {% endif %}
                             {% if panel.day.notes %}<p><strong>Notes:</strong> {{ panel.day.notes }}</p>{% endif %}
                             {% if panel.exercise_summaries %}
                                 <div class="manual-day-exercise-summary">
@@ -88,6 +206,12 @@
                         </div>
                         <div class="actions">
                             <a class="button-link" href="{% url 'manual_program_day_detail' draft.id panel.day.id %}">Edit exercises</a>
+                            <form method="post" class="inline-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="toggle_day_lock">
+                                <input type="hidden" name="day_id" value="{{ panel.day.id }}">
+                                <button type="submit" class="ghost-link">{% if panel.day.ai_locked %}Unlock AI{% else %}Lock AI{% endif %}</button>
+                            </form>
                             <form method="post" class="inline-form">
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="delete_day">

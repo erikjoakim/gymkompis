@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .views import (
+    clone_program_to_draft_view,
     current_program_view,
     generate_program_view,
     library_admin_view,
@@ -29,6 +30,7 @@ urlpatterns = [
         manual_program_day_detail_view,
         name="manual_program_day_detail",
     ),
+    path("<int:program_id>/clone-to-draft/", clone_program_to_draft_view, name="clone_program_to_draft"),
     path("<int:program_id>/restore/", restore_program_view, name="restore_program"),
     path("<int:program_id>/", program_detail_view, name="program_detail"),
 ]

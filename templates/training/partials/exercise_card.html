@@ -10,9 +10,8 @@
     {% if exercise.exercise_group == "warmup" %}
         <p><strong>Section:</strong> Warmup</p>
     {% endif %}
-    <p><strong>Instructions:</strong> {{ exercise.instructions }}</p>
     {% if exercise.video_url %}
-        <p><a href="{{ exercise.video_url }}" target="_blank" rel="noopener">Open demo video</a></p>
+        <p><a href="{{ exercise.video_url }}" target="_blank" rel="noopener">How to do it</a></p>
     {% endif %}
     {% if progression %}
         <div class="exercise-guidance-panel">
@@ -30,8 +29,8 @@
                         <div>
                             <strong>{{ option.name }}</strong>
                             <p class="help-text">{{ option.modality }}. {{ option.reason }}.</p>
-                            {% if option.instructions %}
-                                <p>{{ option.instructions }}</p>
+                            {% if option.video_url %}
+                                <p><a href="{{ option.video_url }}" target="_blank" rel="noopener">How to do it</a></p>
                             {% endif %}
                         </div>
                         <form
@@ -62,69 +61,147 @@
         class="stack"
     >
         {% csrf_token %}
-        <table class="set-table">
-            <thead>
-                <tr>
-                    <th>Set</th>
-                    <th>Target</th>
-                    <th>Load</th>
-                    <th>Timer</th>
-                    <th>Actual result</th>
-                    <th>Weight</th>
-                    <th>Effort / RPE</th>
-                    <th>Notes</th>
-                    <th>Controls</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in form.set_rows %}
-                    <tr class="set-timer-row" data-set-number="{{ row.set_number }}">
-                        <td data-label="Set">
-                            <strong>Set {{ row.planned.set_number }}</strong>
-                            <div class="help-text mobile-inline-detail">{{ exercise.name }}</div>
-                        </td>
-                        <td data-label="Target">{{ row.planned|set_target_display }}</td>
-                        <td data-label="Load">{{ row.guidance_display }}</td>
-                        <td data-label="Timer">
-                            <div class="set-timer-stack">
-                                <span class="set-timer-display" data-default-label="{% if row.saved_duration_seconds %}{{ row.saved_duration_seconds }} sec{% else %}Not timed{% endif %}">
-                                    {% if row.saved_duration_seconds %}{{ row.saved_duration_seconds }} sec{% else %}Not timed{% endif %}
-                                </span>
-                                {% if row.saved_rest_before_seconds %}
-                                    <span class="help-text">Rest before: {{ row.saved_rest_before_seconds }} sec</span>
+        {% with current_row=form.current_set_row completed_rows=form.completed_set_rows %}
+            {% if form.errors %}
+                <div class="form-error-summary" role="alert">
+                    <strong>This set could not be saved.</strong>
+                    <p>Please fix the highlighted fields below.</p>
+                    {% if form.non_field_errors %}
+                        <ul class="field-errors">
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% if completed_rows %}
+                <section class="completed-sets-panel">
+                    <div class="completed-sets-header">
+                        <strong>Completed sets</strong>
+                        <span class="help-text">{{ completed_rows|length }} of {{ form.set_rows|length }} saved</span>
+                    </div>
+                    <div class="completed-sets-grid">
+                        {% for row in completed_rows %}
+                            <article class="completed-set-chip">
+                                <strong>Set {{ row.set_number }}</strong>
+                                <span>{{ row.saved_actual_set|actual_set_display }}</span>
+                                {% if row.saved_actual_set.weight or row.saved_actual_set.weight == 0 %}
+                                    <span>{{ row.saved_actual_set.weight }} {{ session.session_json.weight_unit|default:"kg" }}</span>
+                                {% endif %}
+                                {% if row.saved_actual_set.effort_rpe %}
+                                    <span>RPE {{ row.saved_actual_set.effort_rpe }}</span>
+                                {% endif %}
+                                {% if row.saved_duration_seconds %}
+                                    <span>{{ row.saved_duration_seconds }} sec</span>
+                                {% endif %}
+                            </article>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+
+            {% if current_row %}
+                <section class="current-set-panel" data-set-number="{{ current_row.set_number }}">
+                    <div class="current-set-header">
+                        <div>
+                            <div class="section-label current-set-label">Current set</div>
+                            <h3>Set {{ current_row.set_number }} of {{ form.set_rows|length }}</h3>
+                            <p class="help-text">Target {{ current_row.planned|set_target_display }}{% if current_row.guidance_display != "-" %} | Load {{ current_row.guidance_display }}{% endif %}</p>
+                        </div>
+                        <div class="current-set-badge">
+                            {% if completed_rows %}
+                                Next up
+                            {% else %}
+                                First set
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="current-set-timer-box">
+                        <div class="set-timer-stack">
+                            <span class="set-timer-display" data-default-label="{% if current_row.saved_duration_seconds %}{{ current_row.saved_duration_seconds }} sec{% else %}Not timed{% endif %}">
+                                {% if current_row.saved_duration_seconds %}{{ current_row.saved_duration_seconds }} sec{% else %}Not timed{% endif %}
+                            </span>
+                            {% if current_row.saved_rest_before_seconds %}
+                                <span class="help-text">Rest before: {{ current_row.saved_rest_before_seconds }} sec</span>
+                            {% endif %}
+                        </div>
+                        <div class="set-control-buttons">
+                            <button type="button" class="set-start-button" data-set-number="{{ current_row.set_number }}">
+                                {% if current_row.saved %}Restart timer{% else %}Start timer{% endif %}
+                            </button>
+                            <button type="button" class="set-stop-button" data-set-number="{{ current_row.set_number }}">Stop timer</button>
+                        </div>
+                        {{ current_row.started_at }}
+                        {{ current_row.ended_at }}
+                        {{ current_row.duration_seconds }}
+                    </div>
+
+                    <div class="current-set-grid">
+                        <div class="field-group{% if current_row.actual_value.errors %} has-error{% endif %}">
+                            <label for="{{ current_row.actual_value.id_for_label }}">
+                                {% if current_row.show_weight or current_row.planned.prescription_type == "reps" %}Actual reps{% else %}Actual seconds{% endif %}
+                            </label>
+                            {{ current_row.actual_value }}
+                            {% if current_row.actual_value.errors %}
+                                <ul class="field-errors">
+                                    {% for error in current_row.actual_value.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+
+                        {% if current_row.show_weight %}
+                            <div class="field-group{% if current_row.weight.errors %} has-error{% endif %}">
+                                <label for="{{ current_row.weight.id_for_label }}">Weight ({{ session.session_json.weight_unit|default:"kg" }})</label>
+                                {{ current_row.weight }}
+                                <p class="help-text">Prefilled from your last saved set when available.</p>
+                                {% if current_row.weight.errors %}
+                                    <ul class="field-errors">
+                                        {% for error in current_row.weight.errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
                                 {% endif %}
                             </div>
-                            {{ row.started_at }}
-                            {{ row.ended_at }}
-                            {{ row.duration_seconds }}
-                        </td>
-                        <td data-label="{% if row.show_weight or row.planned.prescription_type == 'reps' %}Reps{% else %}Seconds{% endif %}">{{ row.actual_value }}</td>
-                        <td data-label="Weight">{% if row.show_weight %}{{ row.weight }}{% else %}-{% endif %}</td>
-                        <td data-label="Effort / RPE">{{ row.rpe }}</td>
-                        <td data-label="Notes">{{ row.notes }}</td>
-                        <td>
-                            <div class="set-control-buttons set-edge-controls">
-                                <button type="button" class="set-start-button" data-set-number="{{ row.set_number }}">
-                                    {% if row.saved %}Restart{% else %}Start set{% endif %}
-                                </button>
-                                <button type="button" class="set-stop-button" data-set-number="{{ row.set_number }}">Stop set</button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr class="set-save-row">
-                        <td colspan="4"></td>
-                        <td colspan="4" class="set-save-cell">
-                            <button type="submit" name="save_set_number" value="{{ row.set_number }}" class="set-save-button" data-set-number="{{ row.set_number }}">
-                                {% if row.saved %}Update set{% else %}Save set{% endif %}
-                            </button>
-                        </td>
-                        <td></td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                        {% endif %}
+
+                        <div class="field-group{% if current_row.rpe.errors %} has-error{% endif %}">
+                            <label for="{{ current_row.rpe.id_for_label }}">Effort / RPE</label>
+                            {{ current_row.rpe }}
+                            {% if current_row.rpe.errors %}
+                                <ul class="field-errors">
+                                    {% for error in current_row.rpe.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+
+                        <div class="field-group current-set-notes{% if current_row.notes.errors %} has-error{% endif %}">
+                            <label for="{{ current_row.notes.id_for_label }}">Set notes</label>
+                            {{ current_row.notes }}
+                            {% if current_row.notes.errors %}
+                                <ul class="field-errors">
+                                    {% for error in current_row.notes.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <button type="submit" name="save_set_number" value="{{ current_row.set_number }}" class="set-save-button" data-set-number="{{ current_row.set_number }}">
+                        {% if current_row.saved %}Update set{% else %}Save set{% endif %}
+                    </button>
+                </section>
+            {% endif %}
+        {% endwith %}
+
         <p class="help-text">Each set is saved individually. The card disappears when all planned sets are saved.</p>
-        <p class="help-text">You can override the suggested load before saving.</p>
         {{ form.exercise_notes.label_tag }}
         {{ form.exercise_notes }}
     </form>
@@ -138,7 +215,7 @@
 
         if (!window.gymkompisSyncRunningState) {
             window.gymkompisSyncRunningState = function () {
-                const allRows = Array.from(document.querySelectorAll(".set-timer-row"));
+                const allRows = Array.from(document.querySelectorAll(".current-set-panel"));
                 const runningRows = allRows.filter((row) => row.classList.contains("is-running"));
                 const activeRow = runningRows.length ? runningRows[0] : null;
 
@@ -228,7 +305,7 @@
             renderTimer();
 
             startButton.addEventListener("click", function () {
-                const activeRow = Array.from(document.querySelectorAll(".set-timer-row")).find(
+                const activeRow = Array.from(document.querySelectorAll(".current-set-panel")).find(
                     (candidate) => candidate !== row && candidate.classList.contains("is-running")
                 );
                 if (activeRow) {
@@ -259,7 +336,7 @@
                 renderTimer();
             });
 
-            const saveButton = row.querySelector(".set-save-button");
+            const saveButton = form.querySelector(`.set-save-button[data-set-number="${row.dataset.setNumber}"]`);
             if (saveButton) {
                 saveButton.addEventListener("click", function () {
                     if (!startedAtField.value) {
@@ -279,7 +356,7 @@
             }
         }
 
-        form.querySelectorAll(".set-timer-row").forEach(syncRow);
+        form.querySelectorAll(".current-set-panel").forEach(syncRow);
         window.gymkompisSyncRunningState();
     })();
 </script>

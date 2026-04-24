@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
-{% block title %}Manual Plans | GymKompis{% endblock %}
+{% block title %}Program Builder | GymKompis{% endblock %}
 
 {% block content %}
 <div class="page-header">
     <div>
-        <h1>Manual plan builder</h1>
-        <p>Build your own program from the exercise library and publish it as an active plan.</p>
+        <h1>Program builder</h1>
+        <p>Open manual, AI-seeded, and hybrid drafts in one shared workflow.</p>
     </div>
-    <a class="button-link" href="{% url 'manual_program_create' %}">Create manual draft</a>
+    <a class="button-link" href="{% url 'manual_program_create' %}">Create empty draft</a>
 </div>
 
 {% if drafts %}
@@ -27,8 +27,8 @@
     </div>
 {% else %}
     <div class="card">
-        <p>No manual drafts yet.</p>
-        <a href="{% url 'manual_program_create' %}">Create your first manual plan</a>
+        <p>No program drafts yet.</p>
+        <a href="{% url 'manual_program_create' %}">Create your first draft</a>
     </div>
 {% endif %}
 {% endblock %}

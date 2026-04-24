@@ -14,8 +14,20 @@ from accounts.models import User
 
 from .image_generation import build_exercise_image_prompt, generate_and_attach_exercise_image
 from .library import enrich_exercise_metadata, import_exercise_library
+from .draft_services import create_program_draft_exercise_for_day, publish_program_draft
 from .manual_services import copy_manual_day, create_manual_exercise_for_day, publish_manual_program
-from .models import Exercise, ManualProgramDay, ManualProgramDraft, ManualProgramExercise, ProgramGenerationRequest, TrainingProgram
+from .models import (
+    Exercise,
+    ManualProgramDay,
+    ManualProgramDraft,
+    ManualProgramExercise,
+    ProgramDraft,
+    ProgramDraftDay,
+    ProgramDraftExercise,
+    ProgramDraftRevision,
+    ProgramGenerationRequest,
+    TrainingProgram,
+)
 from .schemas import clone_sample_program
 from .services import generate_program_for_user, restore_program_for_user
 
@@ -1635,3 +1647,322 @@ class ManualProgramBuilderTests(TestCase):
             {"query": "Cable Lat Pull-Down"},
         )
         self.assertNotContains(response, "Cable Lat Pull Down")
+
+
+@override_settings(OPENAI_MOCK_RESPONSES=True, OPENAI_API_KEY="")
+class UnifiedProgramDraftTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(email="drafts@example.com", password="password123")
+        self.client.force_login(self.user)
+        self.row = Exercise.objects.create(
+            external_id="fw_10001",
+            name="Test Row",
+            modality=Exercise.Modality.DUMBBELL,
+            category="Back",
+            movement_pattern="Horizontal pull",
+            equipment="Dumbbell",
+            supports_reps=True,
+            supports_time=False,
+            instructions="Row with a stable torso and controlled elbow path.",
+            instructions_status=Exercise.InstructionStatus.SEEDED,
+        )
+
+    def test_generate_program_view_creates_ai_seeded_draft(self):
+        response = self.client.post(
+            reverse("generate_program"),
+            {"prompt_text": "Build me a balanced beginner plan."},
+            follow=True,
+        )
+
+        draft = ProgramDraft.objects.get(user=self.user)
+        self.assertEqual(draft.source, ProgramDraft.Source.AI_SEEDED)
+        self.assertRedirects(response, reverse("manual_program_detail", args=[draft.id]))
+        self.assertContains(response, "AI-seeded program draft is ready")
+
+    def test_program_draft_can_publish_with_unified_publish_service(self):
+        draft = ProgramDraft.objects.create(
+            user=self.user,
+            name="Unified Draft",
+            goal_summary="Build strength.",
+            duration_weeks=6,
+            weight_unit="kg",
+            source=ProgramDraft.Source.MANUAL,
+        )
+        day = ProgramDraftDay.objects.create(
+            draft=draft,
+            day_key="monday",
+            name="Full Body",
+            day_type="training",
+        )
+        entry = create_program_draft_exercise_for_day(day, self.row, block_type=ProgramDraftExercise.BlockType.MAIN)
+        entry.target_reps = "6-8"
+        entry.save(update_fields=["target_reps"])
+
+        program = publish_program_draft(draft)
+
+        self.assertEqual(program.current_program["program_name"], "Unified Draft")
+        self.assertEqual(program.current_program["days"][0]["exercises"][0]["name"], "Test Row")
+        draft.refresh_from_db()
+        self.assertEqual(draft.published_program, program)
+
+    def test_manual_program_detail_can_complete_incomplete_days_with_ai(self):
+        draft = ProgramDraft.objects.create(
+            user=self.user,
+            name="Hybrid Draft",
+            goal_summary="Complete the missing days.",
+            duration_weeks=8,
+            weight_unit="kg",
+            source=ProgramDraft.Source.MANUAL,
+        )
+        monday = ProgramDraftDay.objects.create(
+            draft=draft,
+            day_key="monday",
+            name="Upper",
+            day_type="training",
+        )
+        ProgramDraftDay.objects.create(
+            draft=draft,
+            day_key="wednesday",
+            name="Lower",
+            day_type="training",
+        )
+        create_program_draft_exercise_for_day(monday, self.row, block_type=ProgramDraftExercise.BlockType.MAIN)
+
+        response = self.client.post(
+            reverse("manual_program_detail", args=[draft.id]),
+            {"action": "complete_incomplete_days"},
+            follow=True,
+        )
+
+        draft.refresh_from_db()
+        wednesday = draft.days.get(day_key="wednesday")
+        self.assertRedirects(response, reverse("manual_program_detail", args=[draft.id]))
+        self.assertContains(response, "AI completed 1 incomplete day")
+        self.assertTrue(
+            wednesday.draft_exercises.filter(block_type=ProgramDraftExercise.BlockType.MAIN).exists()
+        )
+        self.assertEqual(draft.source, ProgramDraft.Source.HYBRID)
+
+    def test_manual_program_detail_can_store_ai_evaluation(self):
+        draft = ProgramDraft.objects.create(
+            user=self.user,
+            name="Evaluation Draft",
+            goal_summary="Review me.",
+            duration_weeks=8,
+            weight_unit="kg",
+            source=ProgramDraft.Source.MANUAL,
+        )
+        ProgramDraftDay.objects.create(
+            draft=draft,
+            day_key="monday",
+            name="Upper",
+            day_type="training",
+        )
+
+        response = self.client.post(
+            reverse("manual_program_detail", args=[draft.id]),
+            {"action": "evaluate_draft"},
+            follow=True,
+        )
+
+        draft.refresh_from_db()
+        self.assertRedirects(response, reverse("manual_program_detail", args=[draft.id]))
+        self.assertContains(response, "AI reviewed the draft")
+        self.assertIn("findings", draft.latest_ai_evaluation)
+
+    def test_manual_program_detail_can_apply_evaluation_suggested_action(self):
+        draft = ProgramDraft.objects.create(
+            user=self.user,
+            name="Suggestion Draft",
+            goal_summary="Needs AI action.",
+            duration_weeks=8,
+            weight_unit="kg",
+            source=ProgramDraft.Source.MANUAL,
+            latest_ai_evaluation={
+                "summary": "Needs one completed day.",
+                "findings": [],
+                "suggested_actions": [
+                    {
+                        "action_type": "complete_day",
+                        "target_day": "wednesday",
+                        "reason": "Fill Wednesday.",
+                    }
+                ],
+            },
+        )
+        ProgramDraftDay.objects.create(draft=draft, day_key="wednesday", name="Wednesday", day_type="training")
+
+        response = self.client.post(
+            reverse("manual_program_detail", args=[draft.id]),
+            {"action": "apply_evaluation_action", "action_index": "0"},
+            follow=True,
+        )
+
+        draft.refresh_from_db()
+        self.assertRedirects(response, reverse("manual_program_detail", args=[draft.id]))
+        self.assertContains(response, "Applied the AI suggestion")
+        self.assertTrue(
+            draft.days.get(day_key="wednesday").draft_exercises.filter(block_type=ProgramDraftExercise.BlockType.MAIN).exists()
+        )
+
+    def test_program_detail_can_clone_published_program_into_builder(self):
+        program = generate_program_for_user(self.user, "Create a straightforward training plan.")
+
+        response = self.client.post(
+            reverse("clone_program_to_draft", args=[program.id]),
+            follow=True,
+        )
+
+        draft = ProgramDraft.objects.exclude(request_prompt="").order_by("-id").first()
+        self.assertIsNotNone(draft)
+        self.assertRedirects(response, reverse("manual_program_detail", args=[draft.id]))
+        self.assertContains(response, "Created an editable draft from this published program")
+        self.assertEqual(draft.name, program.name)
+        self.assertTrue(draft.days.exists())
+
+    def test_manual_program_detail_can_restore_revision(self):
+        draft = ProgramDraft.objects.create(
+            user=self.user,
+            name="Revision Draft",
+            goal_summary="Before change",
+            duration_weeks=6,
+            weight_unit="kg",
+            source=ProgramDraft.Source.MANUAL,
+        )
+        ProgramDraftDay.objects.create(draft=draft, day_key="monday", name="Monday", day_type="training")
+        revision = ProgramDraftRevision.objects.create(
+            draft=draft,
+            revision_number=1,
+            created_by_user=self.user,
+            source=ProgramDraftRevision.Source.MANUAL,
+            action_type="seed",
+            summary="Initial snapshot",
+            draft_snapshot_json={
+                "name": "Restored Draft",
+                "goal_summary": "Original state",
+                "duration_weeks": 8,
+                "weight_unit": "kg",
+                "program_notes": "",
+                "status": "draft",
+                "source": "manual",
+                "request_prompt": "",
+                "ai_context_notes": "",
+                "last_ai_action": "",
+                "days": [
+                    {
+                        "day_key": "wednesday",
+                        "name": "Wednesday",
+                        "day_type": "training",
+                        "notes": "",
+                        "ai_locked": False,
+                        "entries": [],
+                    }
+                ],
+            },
+        )
+
+        response = self.client.post(
+            reverse("manual_program_detail", args=[draft.id]),
+            {"action": "restore_revision", "revision_id": revision.id},
+            follow=True,
+        )
+
+        draft.refresh_from_db()
+        self.assertRedirects(response, reverse("manual_program_detail", args=[draft.id]))
+        self.assertContains(response, "Restored revision 1")
+        self.assertEqual(draft.name, "Restored Draft")
+        self.assertTrue(draft.days.filter(day_key="wednesday").exists())
+
+    def test_manual_program_detail_shows_revision_diff_summary(self):
+        draft = ProgramDraft.objects.create(
+            user=self.user,
+            name="Diff Draft",
+            goal_summary="Current state",
+            duration_weeks=6,
+            weight_unit="kg",
+            source=ProgramDraft.Source.MANUAL,
+        )
+        ProgramDraftDay.objects.create(draft=draft, day_key="monday", name="Monday Current", day_type="training")
+        ProgramDraftRevision.objects.create(
+            draft=draft,
+            revision_number=1,
+            created_by_user=self.user,
+            source=ProgramDraftRevision.Source.MANUAL,
+            action_type="snapshot",
+            summary="Earlier state",
+            draft_snapshot_json={
+                "name": "Diff Draft",
+                "goal_summary": "Earlier state",
+                "duration_weeks": 6,
+                "weight_unit": "kg",
+                "program_notes": "",
+                "status": "draft",
+                "source": "manual",
+                "request_prompt": "",
+                "ai_context_notes": "",
+                "last_ai_action": "",
+                "days": [
+                    {
+                        "day_key": "monday",
+                        "name": "Monday Earlier",
+                        "day_type": "training",
+                        "notes": "",
+                        "ai_locked": False,
+                        "entries": [],
+                    }
+                ],
+            },
+        )
+
+        response = self.client.get(reverse("manual_program_detail", args=[draft.id]))
+
+        self.assertContains(response, "Top-level changes")
+        self.assertContains(response, "Monday")
+
+    def test_ai_completion_skips_locked_days_and_preserves_locked_exercises(self):
+        draft = ProgramDraft.objects.create(
+            user=self.user,
+            name="Locked Draft",
+            goal_summary="Protect manual work.",
+            duration_weeks=8,
+            weight_unit="kg",
+            source=ProgramDraft.Source.MANUAL,
+        )
+        monday = ProgramDraftDay.objects.create(
+            draft=draft,
+            day_key="monday",
+            name="Monday",
+            day_type="training",
+            ai_locked=True,
+        )
+        wednesday = ProgramDraftDay.objects.create(
+            draft=draft,
+            day_key="wednesday",
+            name="Wednesday",
+            day_type="training",
+        )
+        locked_entry = create_program_draft_exercise_for_day(monday, self.row, block_type=ProgramDraftExercise.BlockType.MAIN)
+        locked_entry.ai_locked = True
+        locked_entry.target_reps = "5"
+        locked_entry.save(update_fields=["ai_locked", "target_reps"])
+
+        response = self.client.post(
+            reverse("manual_program_detail", args=[draft.id]),
+            {"action": "complete_selected_days", "selected_day_keys": ["monday"]},
+            follow=True,
+        )
+
+        self.assertContains(response, "Unlock Monday before asking AI to rewrite those days")
+
+        response = self.client.post(
+            reverse("manual_program_detail", args=[draft.id]),
+            {"action": "complete_incomplete_days"},
+            follow=True,
+        )
+
+        monday.refresh_from_db()
+        wednesday.refresh_from_db()
+        self.assertRedirects(response, reverse("manual_program_detail", args=[draft.id]))
+        self.assertTrue(monday.draft_exercises.filter(pk=locked_entry.pk).exists())
+        self.assertFalse(monday.draft_exercises.exclude(pk=locked_entry.pk).exists())
+        self.assertTrue(wednesday.draft_exercises.filter(block_type=ProgramDraftExercise.BlockType.MAIN).exists())

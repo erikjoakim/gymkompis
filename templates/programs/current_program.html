@@ -9,8 +9,8 @@
     </div>
     <div class="actions">
         <a class="button-link" href="{% url 'program_history' %}">Program history</a>
-        <a class="button-link" href="{% url 'generate_program' %}">Generate with AI</a>
-        <a class="button-link" href="{% url 'manual_program_list' %}">Build manually</a>
+        <a class="button-link" href="{% url 'generate_program' %}">Start with AI</a>
+        <a class="button-link" href="{% url 'manual_program_list' %}">Open builder</a>
     </div>
 </div>
 {% if program %}
@@ -18,20 +18,26 @@
         <h2>{{ program.name }}</h2>
         <p>Version {{ program.version_number }}</p>
         <p><strong>Source:</strong> {{ program.get_source_display }}</p>
-        <a href="{% url 'program_detail' program.id %}">Open details</a>
+        <div class="actions">
+            <a href="{% url 'program_detail' program.id %}">Open details</a>
+            <form method="post" action="{% url 'clone_program_to_draft' program.id %}" class="inline-form">
+                {% csrf_token %}
+                <button type="submit">Open in builder</button>
+            </form>
+        </div>
     </div>
 {% else %}
     <div class="card">
         <p>No active program found.</p>
         <div class="actions">
             <a href="{% url 'generate_program' %}">Generate one now</a>
-            <a href="{% url 'manual_program_create' %}">Build one manually</a>
+            <a href="{% url 'manual_program_create' %}">Create an empty draft</a>
         </div>
     </div>
 {% endif %}
 {% if recent_manual_draft %}
     <div class="card">
-        <h2>Latest manual draft</h2>
+        <h2>Latest builder draft</h2>
         <p>{{ recent_manual_draft.name }}</p>
         <a href="{% url 'manual_program_detail' recent_manual_draft.id %}">Continue editing</a>
     </div>

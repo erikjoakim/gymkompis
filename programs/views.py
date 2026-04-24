@@ -24,6 +24,23 @@ from .forms import (
     ProgramGenerateForm,
     UserExerciseSubmissionForm,
 )
+from .draft_services import (
+    apply_evaluation_suggested_action,
+    compare_draft_snapshot_to_current,
+    DAY_ORDER,
+    complete_program_draft_with_ai,
+    clone_training_program_to_draft,
+    create_draft_revision,
+    copy_program_draft_day,
+    create_empty_program_draft,
+    create_program_draft_exercise_for_day,
+    evaluate_program_draft_with_ai,
+    incomplete_day_keys_for_draft,
+    publish_program_draft,
+    restore_draft_revision,
+    seed_program_draft_with_ai,
+    sync_program_draft_days,
+)
 from .image_generation import (
     attach_preview_image_to_exercise,
     build_exercise_image_preview,
@@ -43,10 +60,21 @@ from .library import (
     suggested_exercise_updates,
     visible_exercise_queryset,
 )
-from .manual_services import DAY_ORDER, copy_manual_day, create_manual_exercise_for_day, publish_manual_program
-from .models import DAY_KEY_CHOICES, Exercise, ManualProgramDay, ManualProgramDraft, ManualProgramExercise, TrainingProgram
+from .manual_services import copy_manual_day
+from .models import (
+    DAY_KEY_CHOICES,
+    Exercise,
+    ManualProgramDay,
+    ManualProgramDraft,
+    ManualProgramExercise,
+    ProgramDraft,
+    ProgramDraftDay,
+    ProgramDraftExercise,
+    ProgramDraftRevision,
+    TrainingProgram,
+)
 from .prompt_examples import load_program_prompt_examples
-from .services import build_program_profile_context, generate_program_for_user, restore_program_for_user
+from .services import build_program_profile_context, restore_program_for_user
 from .structure import get_day_blocks
 
 
@@ -125,8 +153,8 @@ def _exercise_search_filter(query: str, *, include_external_id: bool = False) ->
     return filter_query
 
 
-def _entry_summary(entry: ManualProgramExercise) -> str:
-    if entry.prescription_type == ManualProgramExercise.PrescriptionType.TIME:
+def _entry_summary(entry: ProgramDraftExercise) -> str:
+    if entry.prescription_type == ProgramDraftExercise.PrescriptionType.TIME:
         return f"{entry.sets_count} x {entry.target_seconds or '-'} sec"
     return f"{entry.sets_count} x {entry.target_reps or '-'}"
 
@@ -146,24 +174,74 @@ def _default_manual_day_name(day_key: str) -> str:
     return dict(DAY_KEY_CHOICES).get(day_key, day_key.title())
 
 
-def _sync_manual_draft_days(draft: ManualProgramDraft, selected_day_keys: list[str]) -> None:
-    selected_day_keys = list(dict.fromkeys(selected_day_keys))
-    existing_days = {day.day_key: day for day in draft.days.all()}
+def _upgrade_legacy_manual_draft(legacy_draft: ManualProgramDraft) -> ProgramDraft:
+    existing = ProgramDraft.objects.filter(
+        user=legacy_draft.user,
+        name=legacy_draft.name,
+        created_at=legacy_draft.created_at,
+    ).first()
+    if existing:
+        return existing
 
-    for day_key in list(existing_days):
-        if day_key not in selected_day_keys:
-            existing_days[day_key].delete()
-
-    for day_key in selected_day_keys:
-        if day_key in existing_days:
-            continue
-        ManualProgramDay.objects.create(
+    draft = ProgramDraft.objects.create(
+        user=legacy_draft.user,
+        name=legacy_draft.name,
+        goal_summary=legacy_draft.goal_summary,
+        duration_weeks=legacy_draft.duration_weeks,
+        weight_unit=legacy_draft.weight_unit,
+        program_notes=legacy_draft.program_notes,
+        source=ProgramDraft.Source.MANUAL,
+        status=ProgramDraft.Status.PUBLISHED if legacy_draft.published_program_id else ProgramDraft.Status.DRAFT,
+        published_at=legacy_draft.published_at,
+        published_program=legacy_draft.published_program,
+    )
+    day_map = {}
+    for legacy_day in legacy_draft.days.order_by("day_key", "id"):
+        day_map[legacy_day.id] = ProgramDraftDay.objects.create(
             draft=draft,
-            day_key=day_key,
-            name=_default_manual_day_name(day_key),
-            day_type="training",
-            notes="",
+            day_key=legacy_day.day_key,
+            name=legacy_day.name,
+            day_type=legacy_day.day_type,
+            notes=legacy_day.notes,
         )
+    for legacy_entry in ManualProgramExercise.objects.filter(day__draft=legacy_draft).select_related("exercise").order_by("block_type", "order", "id"):
+        new_entry = create_program_draft_exercise_for_day(
+            day_map[legacy_entry.day_id],
+            legacy_entry.exercise,
+            legacy_entry.block_type,
+        )
+        new_entry.order = legacy_entry.order
+        new_entry.prescription_type = legacy_entry.prescription_type
+        new_entry.sets_count = legacy_entry.sets_count
+        new_entry.target_reps = legacy_entry.target_reps
+        new_entry.target_seconds = legacy_entry.target_seconds
+        new_entry.load_guidance = legacy_entry.load_guidance
+        new_entry.target_effort_rpe = legacy_entry.target_effort_rpe
+        new_entry.rest_seconds_override = legacy_entry.rest_seconds_override
+        new_entry.notes = legacy_entry.notes
+        new_entry.save()
+    return draft
+
+
+def _get_program_draft_for_user(user, draft_id: int) -> ProgramDraft:
+    draft = ProgramDraft.objects.filter(pk=draft_id, user=user).first()
+    if draft:
+        return draft
+    legacy_draft = get_object_or_404(ManualProgramDraft, pk=draft_id, user=user)
+    return _upgrade_legacy_manual_draft(legacy_draft)
+
+
+def _get_program_draft_day_for_user(user, draft_id: int, day_id: int) -> tuple[ProgramDraft, ProgramDraftDay]:
+    draft = ProgramDraft.objects.filter(pk=draft_id, user=user).first()
+    if draft:
+        day = get_object_or_404(ProgramDraftDay, pk=day_id, draft=draft)
+        return draft, day
+
+    legacy_draft = get_object_or_404(ManualProgramDraft, pk=draft_id, user=user)
+    legacy_day = get_object_or_404(ManualProgramDay, pk=day_id, draft=legacy_draft)
+    draft = _upgrade_legacy_manual_draft(legacy_draft)
+    day = get_object_or_404(ProgramDraftDay, draft=draft, day_key=legacy_day.day_key)
+    return draft, day
 
 
 def _manual_day_workspace_context(request, day, expanded_entry_id=None, invalid_entry_forms=None, submission_form=None):
@@ -172,7 +250,7 @@ def _manual_day_workspace_context(request, day, expanded_entry_id=None, invalid_
     submission_query = (filter_data.get("query") or "").strip()
     modalities, brands = _exercise_filter_choices(request.user)
     filter_form = ExerciseLibraryFilterForm(filter_data or None, modality_choices=modalities, brand_choices=brands)
-    selected_exercise_ids = list(day.manual_exercises.values_list("exercise_id", flat=True))
+    selected_exercise_ids = list(day.draft_exercises.exclude(exercise_id=None).values_list("exercise_id", flat=True))
     exercise_queryset = visible_exercise_queryset(request.user).exclude(id__in=selected_exercise_ids).order_by("name")
     if filter_form.is_valid():
         query = filter_form.cleaned_data.get("query")
@@ -193,7 +271,7 @@ def _manual_day_workspace_context(request, day, expanded_entry_id=None, invalid_
         if filter_form.cleaned_data.get("supports_time"):
             exercise_queryset = exercise_queryset.filter(supports_time=True)
 
-    entries = list(day.manual_exercises.select_related("exercise").all())
+    entries = list(day.draft_exercises.select_related("exercise").all())
     warmup_entries = []
     main_entries = []
     for entry in entries:
@@ -203,7 +281,7 @@ def _manual_day_workspace_context(request, day, expanded_entry_id=None, invalid_
             "is_expanded": str(entry.id) == str(expanded_entry_id),
             "summary": _entry_summary(entry),
         }
-        if entry.block_type == ManualProgramExercise.BlockType.WARMUP:
+        if entry.block_type == ProgramDraftExercise.BlockType.WARMUP:
             warmup_entries.append(item)
         else:
             main_entries.append(item)
@@ -472,7 +550,7 @@ def current_program_view(request):
         .order_by("-created_at")
         .first()
     )
-    recent_manual_draft = ManualProgramDraft.objects.filter(user=request.user).order_by("-updated_at").first()
+    recent_manual_draft = ProgramDraft.objects.filter(user=request.user).order_by("-updated_at").first()
     return render(
         request,
         "programs/current_program.html",
@@ -491,12 +569,12 @@ def generate_program_view(request):
     form = ProgramGenerateForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         try:
-            program = generate_program_for_user(request.user, form.cleaned_data["prompt_text"])
+            draft = seed_program_draft_with_ai(request.user, form.cleaned_data["prompt_text"])
         except Exception as exc:
             messages.error(request, f"Program generation failed: {exc}")
         else:
-            messages.success(request, "A new training program has been generated.")
-            return redirect("program_detail", program_id=program.id)
+            messages.success(request, "An AI-seeded program draft is ready for review and editing.")
+            return redirect("manual_program_detail", draft_id=draft.id)
 
     profile_context = build_program_profile_context(request.user)
     profile_data_used = [
@@ -553,8 +631,26 @@ def restore_program_view(request, program_id):
 
 
 @login_required
+def clone_program_to_draft_view(request, program_id):
+    program = get_object_or_404(TrainingProgram, pk=program_id, user=request.user)
+    if request.method != "POST":
+        return redirect("program_detail", program_id=program.id)
+    try:
+        draft = clone_training_program_to_draft(
+            program,
+            user=request.user,
+            summary=f"Imported from published program version {program.version_number}.",
+        )
+    except Exception as exc:
+        messages.error(request, f"Could not open program in builder: {exc}")
+        return redirect("program_detail", program_id=program.id)
+    messages.success(request, "Created an editable draft from this published program.")
+    return redirect("manual_program_detail", draft_id=draft.id)
+
+
+@login_required
 def manual_program_list_view(request):
-    drafts = ManualProgramDraft.objects.filter(user=request.user).order_by("-updated_at")
+    drafts = ProgramDraft.objects.filter(user=request.user).order_by("-updated_at")
     return render(request, "programs/manual_program_list.html", {"drafts": drafts})
 
 
@@ -563,17 +659,21 @@ def manual_program_create_view(request):
     initial = {"weight_unit": request.user.profile.preferred_weight_unit}
     form = ManualProgramDraftForm(request.POST or None, initial=initial)
     if request.method == "POST" and form.is_valid():
-        draft = form.save(commit=False)
-        draft.user = request.user
-        draft.save()
-        messages.success(request, "Manual program draft created.")
+        draft = create_empty_program_draft(
+            request.user,
+            {
+                **form.cleaned_data,
+                "source": ProgramDraft.Source.MANUAL,
+            },
+        )
+        messages.success(request, "Program draft created.")
         return redirect("manual_program_detail", draft_id=draft.id)
     return render(request, "programs/manual_program_create.html", {"form": form})
 
 
 @login_required
 def manual_program_detail_view(request, draft_id):
-    draft = get_object_or_404(ManualProgramDraft, pk=draft_id, user=request.user)
+    draft = _get_program_draft_for_user(request.user, draft_id)
     form = ManualProgramDraftForm(instance=draft, prefix="draft")
 
     if request.method == "POST":
@@ -583,51 +683,164 @@ def manual_program_detail_view(request, draft_id):
             if form.is_valid():
                 selected_day_keys = form.cleaned_data["selected_days"]
                 form.save()
-                _sync_manual_draft_days(draft, selected_day_keys)
+                sync_program_draft_days(draft, selected_day_keys)
+                create_draft_revision(
+                    draft,
+                    source=ProgramDraftRevision.Source.MANUAL,
+                    action_type="save_draft",
+                    summary="Updated draft details and day selection",
+                    created_by_user=request.user,
+                )
                 messages.success(request, "Draft details updated and days synced.")
                 return redirect("manual_program_detail", draft_id=draft.id)
         if action == "delete_day":
-            day = get_object_or_404(ManualProgramDay, pk=request.POST.get("day_id"), draft=draft)
+            day = get_object_or_404(ProgramDraftDay, pk=request.POST.get("day_id"), draft=draft)
+            deleted_label = day.day_label
             day.delete()
+            create_draft_revision(
+                draft,
+                source=ProgramDraftRevision.Source.MANUAL,
+                action_type="delete_day",
+                summary=f"Removed {deleted_label} from the draft",
+                created_by_user=request.user,
+            )
             messages.success(request, "Day removed from draft.")
+            return redirect("manual_program_detail", draft_id=draft.id)
+        if action == "toggle_day_lock":
+            day = get_object_or_404(ProgramDraftDay, pk=request.POST.get("day_id"), draft=draft)
+            day.ai_locked = not day.ai_locked
+            day.save(update_fields=["ai_locked"])
+            create_draft_revision(
+                draft,
+                source=ProgramDraftRevision.Source.MANUAL,
+                action_type="toggle_day_lock",
+                summary=f"{'Locked' if day.ai_locked else 'Unlocked'} {day.day_label} for AI",
+                created_by_user=request.user,
+            )
+            messages.success(request, f"{day.day_label} {'locked' if day.ai_locked else 'unlocked'} for AI.")
+            return redirect("manual_program_detail", draft_id=draft.id)
+        if action == "complete_selected_days":
+            selected_day_keys = request.POST.getlist("selected_day_keys")
+            try:
+                ai_run = complete_program_draft_with_ai(
+                    draft,
+                    action_type="complete_selected_days",
+                    target_day_keys=selected_day_keys,
+                )
+            except Exception as exc:
+                messages.error(request, f"AI day completion failed: {exc}")
+            else:
+                completed_count = len(ai_run.validated_payload.get("target_days", [])) if ai_run.validated_payload else 0
+                messages.success(request, f"AI refreshed {completed_count} day{'s' if completed_count != 1 else ''} in the draft.")
+            return redirect("manual_program_detail", draft_id=draft.id)
+        if action == "complete_incomplete_days":
+            target_day_keys = incomplete_day_keys_for_draft(draft)
+            if not target_day_keys:
+                messages.info(request, "There are no incomplete training days to fill right now.")
+                return redirect("manual_program_detail", draft_id=draft.id)
+            try:
+                ai_run = complete_program_draft_with_ai(
+                    draft,
+                    action_type="complete_missing_days",
+                    target_day_keys=target_day_keys,
+                )
+            except Exception as exc:
+                messages.error(request, f"AI completion failed: {exc}")
+            else:
+                completed_count = len(ai_run.validated_payload.get("target_days", [])) if ai_run.validated_payload else 0
+                messages.success(request, f"AI completed {completed_count} incomplete day{'s' if completed_count != 1 else ''}.")
+            return redirect("manual_program_detail", draft_id=draft.id)
+        if action == "evaluate_draft":
+            try:
+                evaluate_program_draft_with_ai(draft)
+            except Exception as exc:
+                messages.error(request, f"AI evaluation failed: {exc}")
+            else:
+                messages.success(request, "AI reviewed the draft and added findings below.")
+            return redirect("manual_program_detail", draft_id=draft.id)
+        if action == "apply_evaluation_action":
+            try:
+                action_index = int(request.POST.get("action_index", "-1"))
+            except ValueError:
+                action_index = -1
+            suggested_actions = list((draft.latest_ai_evaluation or {}).get("suggested_actions") or [])
+            if action_index < 0 or action_index >= len(suggested_actions):
+                messages.error(request, "That AI suggestion is no longer available.")
+                return redirect("manual_program_detail", draft_id=draft.id)
+            try:
+                ai_run = apply_evaluation_suggested_action(draft, suggested_actions[action_index])
+            except Exception as exc:
+                messages.error(request, f"Could not apply AI suggestion: {exc}")
+            else:
+                if ai_run is None:
+                    messages.success(request, "Applied the AI suggestion.")
+                else:
+                    completed_count = len(ai_run.validated_payload.get("target_days", [])) if ai_run.validated_payload else 0
+                    messages.success(request, f"Applied the AI suggestion and updated {completed_count} day{'s' if completed_count != 1 else ''}.")
+            return redirect("manual_program_detail", draft_id=draft.id)
+        if action == "restore_revision":
+            revision = get_object_or_404(ProgramDraftRevision, pk=request.POST.get("revision_id"), draft=draft)
+            try:
+                restore_draft_revision(revision, created_by_user=request.user)
+            except Exception as exc:
+                messages.error(request, f"Could not restore revision: {exc}")
+            else:
+                messages.success(request, f"Restored revision {revision.revision_number}.")
             return redirect("manual_program_detail", draft_id=draft.id)
         if action == "publish":
             try:
-                program = publish_manual_program(draft)
+                program = publish_program_draft(draft)
             except Exception as exc:
-                messages.error(request, f"Could not publish manual plan: {exc}")
+                messages.error(request, f"Could not publish draft: {exc}")
             else:
-                messages.success(request, "Manual plan published and activated.")
+                messages.success(request, "Draft published and activated.")
                 return redirect("program_detail", program_id=program.id)
 
-    days = sorted(draft.days.prefetch_related("manual_exercises__exercise").all(), key=lambda day: DAY_ORDER.get(day.day_key, 99))
+    days = sorted(draft.days.prefetch_related("draft_exercises__exercise").all(), key=lambda day: DAY_ORDER.get(day.day_key, 99))
     day_panels = []
     for day in days:
         exercise_summaries = [
             {
-                "name": entry.exercise.name,
-                "modality": entry.exercise.get_modality_display(),
-                "category": entry.exercise.category or "Uncategorized",
+                "name": entry.display_name,
+                "modality": entry.get_snapshot_modality_display() if not entry.exercise_id else entry.exercise.get_modality_display(),
+                "category": entry.display_category or "Uncategorized",
             }
-            for entry in day.manual_exercises.select_related("exercise").all()
+            for entry in day.draft_exercises.select_related("exercise").all()
         ]
         day_panels.append(
             {
                 "day": day,
                 "exercise_summaries": exercise_summaries,
+                "main_count": day.draft_exercises.filter(block_type=ProgramDraftExercise.BlockType.MAIN).count(),
+                "warmup_count": day.draft_exercises.filter(block_type=ProgramDraftExercise.BlockType.WARMUP).count(),
             }
         )
+    incomplete_day_keys = set(incomplete_day_keys_for_draft(draft))
+    recent_revisions = list(draft.revisions.select_related("created_by_user").all()[:8])
+    revision_panels = [
+        {
+            "revision": revision,
+            "diff": compare_draft_snapshot_to_current(revision.draft_snapshot_json or {}, draft),
+        }
+        for revision in recent_revisions
+    ]
     return render(
         request,
         "programs/manual_program_detail.html",
-        {"draft": draft, "form": form, "day_panels": day_panels},
+        {
+            "draft": draft,
+            "form": form,
+            "day_panels": day_panels,
+            "incomplete_day_keys": incomplete_day_keys,
+            "latest_ai_evaluation": draft.latest_ai_evaluation or {},
+            "revision_panels": revision_panels,
+        },
     )
 
 
 @login_required
 def manual_program_day_detail_view(request, draft_id, day_id):
-    draft = get_object_or_404(ManualProgramDraft, pk=draft_id, user=request.user)
-    day = get_object_or_404(ManualProgramDay, pk=day_id, draft=draft)
+    draft, day = _get_program_draft_day_for_user(request.user, draft_id, day_id)
     day_form = ManualProgramDayForm(instance=day, prefix="day")
     copy_form, copy_target_days = _build_manual_day_copy_form(day)
     invalid_entry_forms = {}
@@ -640,15 +853,53 @@ def manual_program_day_detail_view(request, draft_id, day_id):
             day_form = ManualProgramDayForm(request.POST, instance=day, prefix="day")
             if day_form.is_valid():
                 day_form.save()
+                create_draft_revision(
+                    draft,
+                    source=ProgramDraftRevision.Source.MANUAL,
+                    action_type="save_day",
+                    summary=f"Updated {day.day_label} details",
+                    created_by_user=request.user,
+                )
                 messages.success(request, "Day details updated.")
                 return redirect("manual_program_day_detail", draft_id=draft.id, day_id=day.id)
         if action == "copy_day":
+            legacy_target_ids = [item for item in request.POST.getlist("copy-target_day_ids") if item.isdigit()]
+            legacy_draft = None
             copy_form, copy_target_days = _build_manual_day_copy_form(day, data=request.POST)
+            if (
+                not copy_form.is_valid()
+                and not ProgramDraft.objects.filter(pk=draft_id, user=request.user).exists()
+            ):
+                legacy_draft = ManualProgramDraft.objects.filter(pk=draft_id, user=request.user).first()
+                if legacy_draft:
+                    translated_ids = []
+                    for legacy_target in ManualProgramDay.objects.filter(
+                        draft=legacy_draft,
+                        pk__in=legacy_target_ids,
+                    ):
+                        translated_day = draft.days.filter(day_key=legacy_target.day_key).first()
+                        if translated_day:
+                            translated_ids.append(str(translated_day.id))
+                    translated_post = request.POST.copy()
+                    translated_post.setlist("copy-target_day_ids", translated_ids)
+                    copy_form, copy_target_days = _build_manual_day_copy_form(day, data=translated_post)
             if copy_form.is_valid():
                 selected_ids = {int(day_id) for day_id in copy_form.cleaned_data["target_day_ids"]}
                 target_days = [item for item in copy_target_days if item.id in selected_ids]
-                copy_manual_day(day, target_days)
+                copy_program_draft_day(day, target_days)
+                if legacy_draft:
+                    legacy_source_day = ManualProgramDay.objects.filter(pk=day_id, draft=legacy_draft).first()
+                    legacy_target_days = list(ManualProgramDay.objects.filter(pk__in=legacy_target_ids, draft=legacy_draft))
+                    if legacy_source_day and legacy_target_days:
+                        copy_manual_day(legacy_source_day, legacy_target_days)
                 copied_labels = ", ".join(item.day_label for item in target_days)
+                create_draft_revision(
+                    draft,
+                    source=ProgramDraftRevision.Source.MANUAL,
+                    action_type="copy_day",
+                    summary=f"Copied {day.day_label} to {copied_labels}",
+                    created_by_user=request.user,
+                )
                 messages.success(request, f"{day.day_label} copied to {copied_labels}.")
                 workspace_context = _manual_day_workspace_context(request, day, expanded_entry_id=expanded_entry_id)
                 if getattr(request, "htmx", False):
@@ -664,7 +915,14 @@ def manual_program_day_detail_view(request, draft_id, day_id):
             add_form = AddExerciseToDayForm(request.POST, prefix="add")
             if add_form.is_valid():
                 exercise = get_object_or_404(visible_exercise_queryset(request.user), pk=add_form.cleaned_data["exercise_id"])
-                entry = create_manual_exercise_for_day(day, exercise, add_form.cleaned_data["block_type"])
+                entry = create_program_draft_exercise_for_day(day, exercise, add_form.cleaned_data["block_type"])
+                create_draft_revision(
+                    draft,
+                    source=ProgramDraftRevision.Source.MANUAL,
+                    action_type="add_exercise",
+                    summary=f"Added {exercise.name} to {day.day_label}",
+                    created_by_user=request.user,
+                )
                 messages.success(request, f"{exercise.name} added to {day.day_label}.")
                 workspace_context = _manual_day_workspace_context(request, day, expanded_entry_id=entry.id)
                 if getattr(request, "htmx", False):
@@ -676,26 +934,62 @@ def manual_program_day_detail_view(request, draft_id, day_id):
                     expanded_entry_id=entry.id,
                 )
         if action == "update_entry":
-            entry = get_object_or_404(ManualProgramExercise, pk=request.POST.get("entry_id"), day=day)
+            entry = get_object_or_404(ProgramDraftExercise, pk=request.POST.get("entry_id"), day=day)
             entry_form = ManualExerciseConfigForm(request.POST, instance=entry, prefix=f"entry-{entry.id}")
             if entry_form.is_valid():
                 entry_form.save()
-                messages.success(request, f"{entry.exercise.name} updated.")
+                create_draft_revision(
+                    draft,
+                    source=ProgramDraftRevision.Source.MANUAL,
+                    action_type="update_entry",
+                    summary=f"Updated {entry.display_name} on {day.day_label}",
+                    created_by_user=request.user,
+                )
+                messages.success(request, f"{entry.display_name} updated.")
                 workspace_context = _manual_day_workspace_context(request, day)
                 if getattr(request, "htmx", False):
                     return _manual_day_render(request, draft, day, day_form, copy_form, copy_target_days, workspace_context)
                 return _manual_day_redirect(draft, day, workspace_context["active_filter_fields"])
-            messages.error(request, f"Please correct the settings for {entry.exercise.name}.")
+            messages.error(request, f"Please correct the settings for {entry.display_name}.")
             invalid_entry_forms[entry.id] = entry_form
             expanded_entry_id = entry.id
         if action == "delete_entry":
-            entry = get_object_or_404(ManualProgramExercise, pk=request.POST.get("entry_id"), day=day)
+            entry = get_object_or_404(ProgramDraftExercise, pk=request.POST.get("entry_id"), day=day)
+            removed_name = entry.display_name
             entry.delete()
+            create_draft_revision(
+                draft,
+                source=ProgramDraftRevision.Source.MANUAL,
+                action_type="delete_entry",
+                summary=f"Removed {removed_name} from {day.day_label}",
+                created_by_user=request.user,
+            )
             messages.success(request, "Exercise removed from day.")
             workspace_context = _manual_day_workspace_context(request, day)
             if getattr(request, "htmx", False):
                 return _manual_day_render(request, draft, day, day_form, copy_form, copy_target_days, workspace_context)
             return _manual_day_redirect(draft, day, workspace_context["active_filter_fields"])
+        if action == "toggle_entry_lock":
+            entry = get_object_or_404(ProgramDraftExercise, pk=request.POST.get("entry_id"), day=day)
+            entry.ai_locked = not entry.ai_locked
+            entry.save(update_fields=["ai_locked"])
+            create_draft_revision(
+                draft,
+                source=ProgramDraftRevision.Source.MANUAL,
+                action_type="toggle_entry_lock",
+                summary=f"{'Locked' if entry.ai_locked else 'Unlocked'} {entry.display_name} for AI",
+                created_by_user=request.user,
+            )
+            messages.success(request, f"{entry.display_name} {'locked' if entry.ai_locked else 'unlocked'} for AI.")
+            workspace_context = _manual_day_workspace_context(request, day, expanded_entry_id=expanded_entry_id)
+            if getattr(request, "htmx", False):
+                return _manual_day_render(request, draft, day, day_form, copy_form, copy_target_days, workspace_context)
+            return _manual_day_redirect(
+                draft,
+                day,
+                workspace_context["active_filter_fields"],
+                expanded_entry_id=expanded_entry_id,
+            )
         if action == "generate_ai_exercise_suggestion":
             submission_query = (request.POST.get("query") or "").strip()
             if not submission_query:

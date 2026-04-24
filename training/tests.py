@@ -280,6 +280,37 @@ class WorkoutSessionTests(TestCase):
         self.assertEqual(actual_set["reps"], 15)
         self.assertIsNone(actual_set["weight"])
 
+    def test_next_set_prefills_weight_from_last_completed_set_only(self):
+        exercise = {
+            "exercise_key": "chest_press_machine",
+            "name": "Chest Press (Machine)",
+            "modality": "machine",
+            "set_plan": [
+                {"set_number": 1, "prescription_type": "reps", "target_reps": "10"},
+                {"set_number": 2, "prescription_type": "reps", "target_reps": "10"},
+                {"set_number": 3, "prescription_type": "reps", "target_reps": "10"},
+            ],
+        }
+        form = ExerciseSubmissionForm(
+            exercise=exercise,
+            progression={"suggested_weight": 42.5},
+            saved_actual_sets=[
+                {
+                    "set_number": 1,
+                    "completed": True,
+                    "reps": 10,
+                    "weight": 40,
+                    "effort_rpe": 7,
+                }
+            ],
+        )
+
+        self.assertEqual(form.current_set_number, 2)
+        self.assertEqual(form.current_set_row["set_number"], 2)
+        self.assertEqual(form.fields["set_2_weight"].initial, 40)
+        self.assertIsNone(form.fields["set_2_reps"].initial)
+        self.assertEqual(len(form.completed_set_rows), 1)
+
     def test_workout_detail_uses_existing_evaluation_link(self):
         session = get_or_create_session(self.user, self.program, self.day)
         evaluation = WorkoutEvaluation.objects.create(
@@ -315,6 +346,8 @@ class WorkoutSessionTests(TestCase):
         self.assertContains(response, 'class="stack training-day-stack"', html=False)
         self.assertContains(response, 'class="card training-exercise-card"', html=False)
         self.assertContains(response, 'class="card training-finish-card"', html=False)
+        self.assertContains(response, 'class="current-set-panel"', html=False)
+        self.assertNotContains(response, "<strong>Instructions:</strong>", html=False)
 
     def test_swap_session_exercise_updates_current_slot_only_for_today(self):
         session = get_or_create_session(self.user, self.program, self.day)

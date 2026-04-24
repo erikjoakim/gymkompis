@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import DAY_KEY_CHOICES, DAY_TYPE_CHOICES, Exercise, ManualProgramDay, ManualProgramDraft, ManualProgramExercise
+from .models import DAY_KEY_CHOICES, DAY_TYPE_CHOICES, Exercise, ProgramDraft, ProgramDraftDay, ProgramDraftExercise
 
 
 class ProgramGenerateForm(forms.Form):
@@ -27,7 +27,7 @@ class ManualProgramDraftForm(forms.ModelForm):
     )
 
     class Meta:
-        model = ManualProgramDraft
+        model = ProgramDraft
         fields = ("name", "goal_summary", "duration_weeks", "weight_unit", "program_notes", "selected_days")
         widgets = {
             "goal_summary": forms.Textarea(attrs={"rows": 3}),
@@ -51,7 +51,7 @@ class ManualProgramDraftForm(forms.ModelForm):
 
 class ManualProgramDayForm(forms.ModelForm):
     class Meta:
-        model = ManualProgramDay
+        model = ProgramDraftDay
         fields = ("day_key", "name", "day_type", "notes")
         widgets = {
             "day_key": forms.Select(choices=DAY_KEY_CHOICES),
@@ -252,12 +252,12 @@ class UserExerciseSubmissionForm(forms.Form):
 
 class AddExerciseToDayForm(forms.Form):
     exercise_id = forms.IntegerField(widget=forms.HiddenInput())
-    block_type = forms.ChoiceField(choices=ManualProgramExercise.BlockType.choices, widget=forms.HiddenInput())
+    block_type = forms.ChoiceField(choices=ProgramDraftExercise.BlockType.choices, widget=forms.HiddenInput())
 
 
 class ManualExerciseConfigForm(forms.ModelForm):
     class Meta:
-        model = ManualProgramExercise
+        model = ProgramDraftExercise
         fields = (
             "block_type",
             "order",
@@ -289,12 +289,12 @@ class ManualExerciseConfigForm(forms.ModelForm):
         target_reps = cleaned_data.get("target_reps")
         target_seconds = cleaned_data.get("target_seconds")
         exercise = getattr(self.instance, "exercise", None)
-        if prescription_type == ManualProgramExercise.PrescriptionType.REPS and not target_reps:
+        if prescription_type == ProgramDraftExercise.PrescriptionType.REPS and not target_reps:
             self.add_error("target_reps", "Enter a rep target for rep-based work.")
-        if prescription_type == ManualProgramExercise.PrescriptionType.TIME and not target_seconds:
+        if prescription_type == ProgramDraftExercise.PrescriptionType.TIME and not target_seconds:
             self.add_error("target_seconds", "Enter a time target in seconds for time-based work.")
-        if exercise and prescription_type == ManualProgramExercise.PrescriptionType.REPS and not exercise.supports_reps:
+        if exercise and prescription_type == ProgramDraftExercise.PrescriptionType.REPS and not exercise.supports_reps:
             self.add_error("prescription_type", "This exercise is configured for time-based work.")
-        if exercise and prescription_type == ManualProgramExercise.PrescriptionType.TIME and not exercise.supports_time:
+        if exercise and prescription_type == ProgramDraftExercise.PrescriptionType.TIME and not exercise.supports_time:
             self.add_error("prescription_type", "This exercise is configured for rep-based work.")
         return cleaned_data

@@ -58,11 +58,28 @@
                             <div class="builder-selected-summary">
                                 <div class="builder-row-main">
                                     <div>
-                                        <h3>{{ item.entry.order }}. {{ item.entry.exercise.name }}</h3>
-                                        <p><strong>Warmup</strong> &middot; {{ item.entry.exercise.category }} &middot; {{ item.summary }}</p>
+                                        <h3>{{ item.entry.order }}. {{ item.entry.display_name }}</h3>
+                                        <p><strong>Warmup</strong> &middot; {{ item.entry.display_category|default:"Uncategorized" }} &middot; {{ item.summary }}</p>
                                     </div>
                                 </div>
                                 <div class="builder-row-actions" style="display:flex;gap:0.6rem;flex-wrap:nowrap;align-items:center;">
+                                    <form
+                                        method="post"
+                                        hx-post="{% url 'manual_program_day_detail' draft.id day.id %}"
+                                        hx-target="#manual-day-shell"
+                                        hx-swap="innerHTML"
+                                    >
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="toggle_entry_lock">
+                                        <input type="hidden" name="entry_id" value="{{ item.entry.id }}">
+                                        {% for key, value in active_filter_fields %}
+                                            <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                        {% endfor %}
+                                        {% if expanded_entry_id %}
+                                            <input type="hidden" name="expanded" value="{{ expanded_entry_id }}">
+                                        {% endif %}
+                                        <button type="submit" style="padding:0.5rem 0.9rem;">{% if item.entry.ai_locked %}Unlock AI{% else %}Lock AI{% endif %}</button>
+                                    </form>
                                     {% if not item.is_expanded %}
                                         <form
                                             method="get"
@@ -96,7 +113,10 @@
                             </div>
                             {% if item.is_expanded %}
                                 <div class="builder-selected-form">
-                                    <p>{{ item.entry.exercise.instructions }}</p>
+                                    {% if item.entry.ai_locked %}
+                                        <p class="help-text">This exercise is locked for AI and will be preserved during AI-assisted rewrites.</p>
+                                    {% endif %}
+                                    <p>{{ item.entry.display_instructions|default:"No instructions yet." }}</p>
                                     <form
                                         method="post"
                                         class="stack"
@@ -130,11 +150,28 @@
                             <div class="builder-selected-summary">
                                 <div class="builder-row-main">
                                     <div>
-                                        <h3>{{ item.entry.order }}. {{ item.entry.exercise.name }}</h3>
-                                        <p><strong>Main</strong> &middot; {{ item.entry.exercise.category }} &middot; {{ item.summary }}</p>
+                                        <h3>{{ item.entry.order }}. {{ item.entry.display_name }}</h3>
+                                        <p><strong>Main</strong> &middot; {{ item.entry.display_category|default:"Uncategorized" }} &middot; {{ item.summary }}</p>
                                     </div>
                                 </div>
                                 <div class="builder-row-actions" style="display:flex;gap:0.6rem;flex-wrap:nowrap;align-items:center;">
+                                    <form
+                                        method="post"
+                                        hx-post="{% url 'manual_program_day_detail' draft.id day.id %}"
+                                        hx-target="#manual-day-shell"
+                                        hx-swap="innerHTML"
+                                    >
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="toggle_entry_lock">
+                                        <input type="hidden" name="entry_id" value="{{ item.entry.id }}">
+                                        {% for key, value in active_filter_fields %}
+                                            <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                        {% endfor %}
+                                        {% if expanded_entry_id %}
+                                            <input type="hidden" name="expanded" value="{{ expanded_entry_id }}">
+                                        {% endif %}
+                                        <button type="submit" style="padding:0.5rem 0.9rem;">{% if item.entry.ai_locked %}Unlock AI{% else %}Lock AI{% endif %}</button>
+                                    </form>
                                     {% if not item.is_expanded %}
                                         <form
                                             method="get"
@@ -168,7 +205,10 @@
                             </div>
                             {% if item.is_expanded %}
                                 <div class="builder-selected-form">
-                                    <p>{{ item.entry.exercise.instructions }}</p>
+                                    {% if item.entry.ai_locked %}
+                                        <p class="help-text">This exercise is locked for AI and will be preserved during AI-assisted rewrites.</p>
+                                    {% endif %}
+                                    <p>{{ item.entry.display_instructions|default:"No instructions yet." }}</p>
                                     <form
                                         method="post"
                                         class="stack"

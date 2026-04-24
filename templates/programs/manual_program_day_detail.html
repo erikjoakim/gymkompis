@@ -6,9 +6,9 @@
 <div class="page-header">
     <div>
         <h1>{{ day.day_label }} - {{ day.name }}</h1>
-        <p>Build this day by filtering the library on the left and organizing the selected exercises on the right.</p>
+        <p>Build this day manually, then return to the draft overview any time you want AI to evaluate or fill selected days.</p>
     </div>
-    <a class="button-link" href="{% url 'manual_program_detail' draft.id %}">Back to draft</a>
+    <a class="button-link" href="{% url 'manual_program_detail' draft.id %}">Back to builder</a>
 </div>
 
 <div
