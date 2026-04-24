@@ -1,27 +1,23 @@
 {% load gymkompis_extras %}
-{% if completed_exercises %}
-    <div class="section-label">Done</div>
-    <div class="stack completed-exercise-stack">
-        {% for item in completed_exercises %}
-            <article class="completed-exercise-row">
-                <div>
-                    <strong>{{ item.exercise.order }}. {{ item.exercise.name }}</strong>
-                    <span class="help-text"> {{ item.group_label }}</span>
-                    {% if item.is_substituted and item.original_name %}
-                        <span class="help-text"> · swapped from {{ item.original_name }}</span>
-                    {% endif %}
-                </div>
-                <span class="completed-badge">{{ item.completed_label }}</span>
-            </article>
-        {% endfor %}
-    </div>
-{% endif %}
-
 {% for item in exercise_forms %}
     {% ifchanged item.exercise_group %}
         <div class="section-label">{{ item.group_label }}</div>
     {% endifchanged %}
-    {% include "training/partials/exercise_card.html" with exercise=item.exercise form=item.form progression=item.progression substitutions=item.substitutions %}
+    {% if item.is_current %}
+        {% include "training/partials/exercise_card.html" with exercise=item.exercise form=item.form progression=item.progression substitutions=item.substitutions %}
+    {% else %}
+        <article class="folded-exercise-row{% if item.status == 'completed' %} is-completed{% elif item.is_started %} is-started{% endif %}">
+            <a href="{% url 'train_day' session.planned_day_key %}?exercise={{ item.exercise.exercise_key }}#exercise-list" class="folded-exercise-link">
+                <span>
+                    <strong>{{ item.exercise.order }}. {{ item.exercise.name }}</strong>
+                    {% if item.is_substituted and item.original_name %}
+                        <span class="help-text"> swapped from {{ item.original_name }}</span>
+                    {% endif %}
+                </span>
+                <span class="folded-exercise-badge">{{ item.status_label }}</span>
+            </a>
+        </article>
+    {% endif %}
 {% empty %}
     <div class="card">
         <h2>All exercises saved</h2>

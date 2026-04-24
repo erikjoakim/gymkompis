@@ -349,6 +349,60 @@ class WorkoutSessionTests(TestCase):
         self.assertContains(response, 'class="current-set-panel"', html=False)
         self.assertNotContains(response, "<strong>Instructions:</strong>", html=False)
 
+    def test_train_day_folds_all_non_current_exercises_and_allows_selection(self):
+        session = get_or_create_session(self.user, self.program, self.day)
+        first_exercise = session.session_json["exercises"][0]
+        second_exercise = session.session_json["exercises"][1]
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse("train_day", args=[self.day["day_key"]]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f"<h2>{first_exercise['order']}. {first_exercise['name']}</h2>", html=True)
+        self.assertContains(response, "folded-exercise-row", html=False)
+        self.assertContains(response, "Not done", html=False)
+
+        response = self.client.get(
+            reverse("train_day", args=[self.day["day_key"]]),
+            {"exercise": second_exercise["exercise_key"]},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f"<h2>{second_exercise['order']}. {second_exercise['name']}</h2>", html=True)
+        self.assertContains(response, f"?exercise={first_exercise['exercise_key']}#exercise-list", html=False)
+
+    def test_completed_exercise_above_current_is_folded_with_done_badge(self):
+        session = get_or_create_session(self.user, self.program, self.day)
+        completed_exercise = session.session_json["exercises"][0]
+        next_exercise = session.session_json["exercises"][1]
+        for planned_set in completed_exercise["planned"]["set_plan"]:
+            set_number = planned_set["set_number"]
+            prescription_type = planned_set.get("prescription_type", "reps")
+            session = submit_exercise_set(
+                session.id,
+                self.user,
+                completed_exercise["exercise_key"],
+                {
+                    "set_number": set_number,
+                    "prescription_type": prescription_type,
+                    "completed": True,
+                    "reps": 10 if prescription_type == "reps" else None,
+                    "seconds": 60 if prescription_type == "time" else None,
+                    "weight": 40 if prescription_type == "reps" else None,
+                    "effort_rpe": 7,
+                    "notes": "",
+                },
+                "",
+            )
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse("train_day", args=[self.day["day_key"]]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'class="folded-exercise-row is-completed"', html=False)
+        self.assertContains(response, "Done", html=False)
+        self.assertContains(response, f"<h2>{next_exercise['order']}. {next_exercise['name']}</h2>", html=True)
+
     def test_swap_session_exercise_updates_current_slot_only_for_today(self):
         session = get_or_create_session(self.user, self.program, self.day)
         target_exercise = self.day["exercises"][0]

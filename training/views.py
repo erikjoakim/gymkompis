@@ -28,41 +28,74 @@ def _session_exercise_map(session: WorkoutSession):
     }
 
 
-def _build_pending_exercise_forms(session: WorkoutSession, user, bound_form=None, bound_exercise_key=None):
+def _exercise_status_label(session_exercise: dict) -> str:
+    if session_exercise.get("status") == "completed":
+        return "Done"
+    if session_exercise.get("actual_sets"):
+        return "In progress"
+    return "Not done"
+
+
+def _is_completed_exercise(session: WorkoutSession, exercise_key: str) -> bool:
+    session_exercise = _session_exercise_map(session).get(exercise_key)
+    return bool(session_exercise and session_exercise.get("status") == "completed")
+
+
+def _build_pending_exercise_forms(
+    session: WorkoutSession,
+    user,
+    active_exercise_key=None,
+    bound_form=None,
+    bound_exercise_key=None,
+):
     session_exercises = _session_exercise_map(session)
-    pending_exercises = [
-        session_display_exercise(exercise)
-        for exercise in session.session_json.get("exercises", [])
-        if exercise.get("status", "pending") != "completed"
-    ]
+    session_exercise_rows = session.session_json.get("exercises", [])
+    display_exercises = [session_display_exercise(exercise) for exercise in session_exercise_rows]
     active_keys = {exercise.get("exercise_key") for exercise in session.session_json.get("exercises", []) if exercise.get("exercise_key")}
+    valid_keys = {exercise.get("exercise_key") for exercise in display_exercises if exercise.get("exercise_key")}
+    if bound_exercise_key:
+        active_exercise_key = bound_exercise_key
+    if active_exercise_key not in valid_keys:
+        active_exercise_key = next(
+            (
+                exercise.get("exercise_key")
+                for exercise in session_exercise_rows
+                if exercise.get("status", "pending") != "completed"
+            ),
+            None,
+        )
     progression_map = build_progression_recommendations(
         user,
-        pending_exercises,
+        display_exercises,
         weight_unit=session.session_json.get("weight_unit", "kg"),
         current_session_id=session.id,
     )
     exercise_forms = []
     completed_exercises = []
-    for exercise in pending_exercises:
+    for exercise in display_exercises:
+        session_exercise = session_exercises.get(exercise["exercise_key"], {})
+        is_current = exercise["exercise_key"] == active_exercise_key
         progression = progression_map.get(exercise["exercise_key"], {})
-        substitutions = suggest_substitutions(
-            user,
-            exercise,
-            excluded_keys=active_keys - {exercise.get("exercise_key")},
-        )
-        form = (
-            bound_form
-            if bound_exercise_key == exercise["exercise_key"]
-            else ExerciseSubmissionForm(
-                exercise=exercise,
-                progression=progression,
-                saved_actual_sets=session_exercises.get(exercise["exercise_key"], {}).get("actual_sets", []),
-                initial_exercise_notes=session_exercises.get(exercise["exercise_key"], {}).get("exercise_notes", ""),
+        substitutions = []
+        form = None
+        if is_current:
+            substitutions = suggest_substitutions(
+                user,
+                exercise,
+                excluded_keys=active_keys - {exercise.get("exercise_key")},
             )
-        )
-        if bound_exercise_key == exercise["exercise_key"] and hasattr(form, "progression"):
-            form.progression = progression
+            form = (
+                bound_form
+                if bound_exercise_key == exercise["exercise_key"]
+                else ExerciseSubmissionForm(
+                    exercise=exercise,
+                    progression=progression,
+                    saved_actual_sets=session_exercise.get("actual_sets", []),
+                    initial_exercise_notes=session_exercise.get("exercise_notes", ""),
+                )
+            )
+            if bound_exercise_key == exercise["exercise_key"] and hasattr(form, "progression"):
+                form.progression = progression
         exercise_forms.append(
             {
                 "exercise": exercise,
@@ -71,10 +104,16 @@ def _build_pending_exercise_forms(session: WorkoutSession, user, bound_form=None
                 "exercise_group": exercise.get("exercise_group", "main"),
                 "group_label": "Warmup" if exercise.get("exercise_group") == "warmup" else "Main Work",
                 "substitutions": substitutions,
+                "is_current": is_current,
+                "status": session_exercise.get("status", "pending"),
+                "status_label": _exercise_status_label(session_exercise),
+                "is_started": bool(session_exercise.get("actual_sets")),
+                "is_substituted": exercise.get("is_substituted"),
+                "original_name": exercise.get("original_name"),
             }
         )
 
-    for exercise in session.session_json.get("exercises", []):
+    for exercise in session_exercise_rows:
         if exercise.get("status") != "completed":
             continue
         display_exercise = session_display_exercise(exercise)
@@ -124,7 +163,11 @@ def train_day_view(request, day_key):
     if day.get("type") == "training":
         session = get_or_create_session(request.user, program, day)
         session = sync_session_display_fields(session, day)
-        exercise_state = _build_pending_exercise_forms(session, request.user)
+        exercise_state = _build_pending_exercise_forms(
+            session,
+            request.user,
+            active_exercise_key=request.GET.get("exercise"),
+        )
 
     return render(
         request,
@@ -172,7 +215,12 @@ def submit_exercise_view(request, session_id, exercise_key):
             exercise_notes=form.cleaned_data["exercise_notes"],
         )
         if getattr(request, "htmx", False):
-            exercise_state = _build_pending_exercise_forms(session, request.user)
+            active_exercise_key = None if _is_completed_exercise(session, exercise_key) else exercise_key
+            exercise_state = _build_pending_exercise_forms(
+                session,
+                request.user,
+                active_exercise_key=active_exercise_key,
+            )
             return render(
                 request,
                 "training/partials/exercise_list.html",

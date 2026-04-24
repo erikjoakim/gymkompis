@@ -461,6 +461,59 @@ select {
     text-transform: uppercase;
 }
 
+.folded-exercise-row {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: #fffdf9;
+}
+
+.folded-exercise-row.is-completed {
+    border-color: #b9d3c2;
+    background: #eef6f1;
+}
+
+.folded-exercise-row.is-started {
+    border-color: #d9c58f;
+    background: #fff8e6;
+}
+
+.folded-exercise-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.65rem 0.9rem;
+    color: var(--text);
+    text-decoration: none;
+}
+
+.folded-exercise-link:hover,
+.folded-exercise-link:focus {
+    background: rgba(46, 107, 86, 0.08);
+}
+
+.folded-exercise-badge {
+    flex: 0 0 auto;
+    border-radius: 999px;
+    padding: 0.28rem 0.7rem;
+    background: #e8dfcd;
+    color: var(--text);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.folded-exercise-row.is-completed .folded-exercise-badge {
+    background: #2e6b56;
+    color: #fff;
+}
+
+.folded-exercise-row.is-started .folded-exercise-badge {
+    background: #80651c;
+    color: #fff;
+}
+
 .prompt-example-list {
     display: grid;
     gap: 0.75rem;
