@@ -107,6 +107,9 @@ def _serialize_manual_exercise(entry: ManualProgramExercise) -> dict:
         "image_url": exercise.display_image_url or None,
         "video_url": exercise.default_video_url or None,
         "rest_seconds": entry.rest_seconds_override if entry.rest_seconds_override is not None else 60,
+        "is_static": exercise.is_static,
+        "supports_time": exercise.supports_time,
+        "supports_reps": exercise.supports_reps,
         "notes": entry.notes,
         "set_plan": set_plan,
     }

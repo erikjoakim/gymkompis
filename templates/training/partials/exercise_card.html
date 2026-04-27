@@ -1,5 +1,5 @@
 {% load gymkompis_extras %}
-<article class="card training-exercise-card">
+<article class="card training-exercise-card" data-active-exercise-key="{{ exercise.exercise_key }}">
     <h2>{{ exercise.order }}. {{ exercise.name }}</h2>
     {% if exercise.image_url %}
         <p><img src="{{ exercise.image_url }}" alt="{{ exercise.name }}" class="exercise-thumb"></p>
@@ -76,16 +76,33 @@
                 </div>
             {% endif %}
 
+            {% if exercise.is_static %}
+                <section class="static-hold-summary" aria-label="Static hold plan">
+                    <div>
+                        <span class="section-label">Hold plan</span>
+                        <strong>{{ form.period_count }} period{{ form.period_count|pluralize }}</strong>
+                    </div>
+                    <div>
+                        <span>Hold</span>
+                        <strong>{{ form.static_hold_seconds|default:"-" }} sec</strong>
+                    </div>
+                    <div>
+                        <span>Rest</span>
+                        <strong>{{ form.static_rest_seconds|default:"0" }} sec</strong>
+                    </div>
+                </section>
+            {% endif %}
+
             {% if completed_rows %}
                 <section class="completed-sets-panel">
                     <div class="completed-sets-header">
-                        <strong>Completed sets</strong>
+                        <strong>Completed {% if exercise.is_static %}periods{% else %}sets{% endif %}</strong>
                         <span class="help-text">{{ completed_rows|length }} of {{ form.set_rows|length }} saved</span>
                     </div>
                     <div class="completed-sets-grid">
                         {% for row in completed_rows %}
                             <article class="completed-set-chip">
-                                <strong>Set {{ row.set_number }}</strong>
+                                <strong>{% if exercise.is_static %}Period{% else %}Set{% endif %} {{ row.set_number }}</strong>
                                 <span>{{ row.saved_actual_set|actual_set_display }}</span>
                                 {% if row.saved_actual_set.weight or row.saved_actual_set.weight == 0 %}
                                     <span>{{ row.saved_actual_set.weight }} {{ session.session_json.weight_unit|default:"kg" }}</span>
@@ -103,12 +120,22 @@
             {% endif %}
 
             {% if current_row %}
-                <section class="current-set-panel" data-set-number="{{ current_row.set_number }}">
+                <section
+                    class="current-set-panel{% if exercise.is_static %} is-static-hold{% endif %}"
+                    data-set-number="{{ current_row.set_number }}"
+                    data-static-timer="{% if exercise.is_static %}true{% else %}false{% endif %}"
+                    data-hold-seconds="{{ form.static_hold_seconds|default:'0' }}"
+                    data-rest-seconds="{{ form.static_rest_seconds|default:'0' }}"
+                >
                     <div class="current-set-header">
                         <div>
-                            <div class="section-label current-set-label">Current set</div>
-                            <h3>Set {{ current_row.set_number }} of {{ form.set_rows|length }}</h3>
-                            <p class="help-text">Target {{ current_row.planned|set_target_display }}{% if current_row.guidance_display != "-" %} | Load {{ current_row.guidance_display }}{% endif %}</p>
+                            <div class="section-label current-set-label">Current {% if exercise.is_static %}period{% else %}set{% endif %}</div>
+                            <h3>{% if exercise.is_static %}Period{% else %}Set{% endif %} {{ current_row.set_number }} of {{ form.set_rows|length }}</h3>
+                            {% if exercise.is_static %}
+                                <p class="help-text">Run the hold timer, rest, then save the period.</p>
+                            {% else %}
+                                <p class="help-text">Target {{ current_row.planned|set_target_display }}{% if current_row.guidance_display != "-" %} | Load {{ current_row.guidance_display }}{% endif %}</p>
+                            {% endif %}
                         </div>
                         <div class="current-set-badge">
                             {% if completed_rows %}
@@ -127,46 +154,66 @@
                             {% if current_row.saved_rest_before_seconds %}
                                 <span class="help-text">Rest before: {{ current_row.saved_rest_before_seconds }} sec</span>
                             {% endif %}
+                            {% if exercise.is_static %}
+                                <span class="help-text static-timer-phase">Ready</span>
+                            {% endif %}
                         </div>
                         <div class="set-control-buttons">
                             <button type="button" class="set-start-button" data-set-number="{{ current_row.set_number }}">
-                                {% if current_row.saved %}Restart timer{% else %}Start timer{% endif %}
+                                {% if exercise.is_static %}Start hold{% elif current_row.saved %}Restart timer{% else %}Start timer{% endif %}
                             </button>
                             <button type="button" class="set-stop-button" data-set-number="{{ current_row.set_number }}">Stop timer</button>
                         </div>
                         {{ current_row.started_at }}
+                        {{ current_row.activated_at }}
                         {{ current_row.ended_at }}
                         {{ current_row.duration_seconds }}
                     </div>
 
                     <div class="current-set-grid">
-                        <div class="field-group{% if current_row.actual_value.errors %} has-error{% endif %}">
-                            <label for="{{ current_row.actual_value.id_for_label }}">
-                                {% if current_row.show_weight or current_row.planned.prescription_type == "reps" %}Actual reps{% else %}Actual seconds{% endif %}
-                            </label>
-                            {{ current_row.actual_value }}
-                            {% if current_row.actual_value.errors %}
-                                <ul class="field-errors">
-                                    {% for error in current_row.actual_value.errors %}
-                                        <li>{{ error }}</li>
-                                    {% endfor %}
-                                </ul>
-                            {% endif %}
-                        </div>
-
-                        {% if current_row.show_weight %}
-                            <div class="field-group{% if current_row.weight.errors %} has-error{% endif %}">
-                                <label for="{{ current_row.weight.id_for_label }}">Weight ({{ session.session_json.weight_unit|default:"kg" }})</label>
-                                {{ current_row.weight }}
-                                <p class="help-text">Prefilled from your last saved set when available.</p>
-                                {% if current_row.weight.errors %}
+                        {% if exercise.is_static %}
+                            <div class="field-group static-period-actual{% if current_row.actual_value.errors %} has-error{% endif %}">
+                                <label for="{{ current_row.actual_value.id_for_label }}">Hold seconds</label>
+                                {{ current_row.actual_value }}
+                                {% if current_row.actual_value.errors %}
                                     <ul class="field-errors">
-                                        {% for error in current_row.weight.errors %}
+                                        {% for error in current_row.actual_value.errors %}
                                             <li>{{ error }}</li>
                                         {% endfor %}
                                     </ul>
                                 {% endif %}
                             </div>
+                        {% else %}
+                            <div class="field-group{% if current_row.actual_value.errors %} has-error{% endif %}">
+                                <label for="{{ current_row.actual_value.id_for_label }}">
+                                    {% if current_row.show_weight or current_row.planned.prescription_type == "reps" %}Actual reps{% else %}Actual seconds{% endif %}
+                                </label>
+                                {{ current_row.actual_value }}
+                                {% if current_row.actual_value.errors %}
+                                    <ul class="field-errors">
+                                        {% for error in current_row.actual_value.errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+
+                        {% if not exercise.is_static %}
+                            {% if current_row.show_weight %}
+                                <div class="field-group{% if current_row.weight.errors %} has-error{% endif %}">
+                                    <label for="{{ current_row.weight.id_for_label }}">Weight ({{ session.session_json.weight_unit|default:"kg" }})</label>
+                                    {{ current_row.weight }}
+                                    <p class="help-text">Prefilled from your last saved set when available.</p>
+                                    {% if current_row.weight.errors %}
+                                        <ul class="field-errors">
+                                            {% for error in current_row.weight.errors %}
+                                                <li>{{ error }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
                         {% endif %}
 
                         <div class="field-group{% if current_row.rpe.errors %} has-error{% endif %}">
@@ -195,13 +242,13 @@
                     </div>
 
                     <button type="submit" name="save_set_number" value="{{ current_row.set_number }}" class="set-save-button" data-set-number="{{ current_row.set_number }}">
-                        {% if current_row.saved %}Update set{% else %}Save set{% endif %}
+                        {% if exercise.is_static %}{% if current_row.saved %}Update period{% else %}Save period{% endif %}{% elif current_row.saved %}Update set{% else %}Save set{% endif %}
                     </button>
                 </section>
             {% endif %}
         {% endwith %}
 
-        <p class="help-text">Each set is saved individually. The card disappears when all planned sets are saved.</p>
+        <p class="help-text">Each {% if exercise.is_static %}period{% else %}set{% endif %} is saved individually. The card disappears when all planned {% if exercise.is_static %}periods are{% else %}sets are{% endif %} saved.</p>
         {{ form.exercise_notes.label_tag }}
         {{ form.exercise_notes }}
     </form>
@@ -245,22 +292,215 @@
             return `${minutes}:${String(remainder).padStart(2, "0")}`;
         }
 
+        if (!window.gymkompisPrimeTimerSound) {
+            window.gymkompisPrimeTimerSound = function () {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) {
+                    return null;
+                }
+                const context = window.gymkompisTimerAudioContext || new AudioContext();
+                window.gymkompisTimerAudioContext = context;
+                if (context.state === "suspended") {
+                    context.resume();
+                }
+                return context;
+            };
+        }
+
+        if (!window.gymkompisPlayTimerSound) {
+            window.gymkompisPlayTimerSound = function () {
+                const context = window.gymkompisPrimeTimerSound();
+                if (!context) {
+                    return;
+                }
+                const oscillator = context.createOscillator();
+                const gain = context.createGain();
+                oscillator.type = "sine";
+                oscillator.frequency.setValueAtTime(880, context.currentTime);
+                gain.gain.setValueAtTime(0.001, context.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.22, context.currentTime + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.45);
+                oscillator.connect(gain);
+                gain.connect(context.destination);
+                oscillator.start();
+                oscillator.stop(context.currentTime + 0.48);
+            };
+        }
+
         function syncRow(row) {
             const timerDisplay = row.querySelector(".set-timer-display");
             const startedAtField = row.querySelector('input[name$="_started_at"]');
+            const activatedAtField = row.querySelector('input[name$="_activated_at"]');
             const endedAtField = row.querySelector('input[name$="_ended_at"]');
             const durationField = row.querySelector('input[name$="_duration_seconds"]');
             const stopButton = row.querySelector(".set-stop-button");
             const startButton = row.querySelector(".set-start-button");
+            const staticMode = row.dataset.staticTimer === "true";
+            const holdSeconds = Math.max(0, parseInt(row.dataset.holdSeconds || "0", 10));
+            const restSeconds = Math.max(0, parseInt(row.dataset.restSeconds || "0", 10));
+            const phaseLabel = row.querySelector(".static-timer-phase");
+            const actualSecondsField = row.querySelector(`input[name="set_${row.dataset.setNumber}_seconds"]`);
             const defaultLabel = timerDisplay?.dataset.defaultLabel || "Not timed";
 
-            if (!timerDisplay || !startedAtField || !endedAtField || !durationField || !stopButton || !startButton) {
+            if (!timerDisplay || !startedAtField || !activatedAtField || !endedAtField || !durationField || !stopButton || !startButton) {
                 return;
+            }
+
+            if (!activatedAtField.value) {
+                activatedAtField.value = new Date().toISOString();
             }
 
             if (row._timerInterval) {
                 window.clearInterval(row._timerInterval);
                 row._timerInterval = null;
+            }
+
+            if (staticMode) {
+                if (actualSecondsField && !actualSecondsField.value && holdSeconds > 0) {
+                    actualSecondsField.value = String(holdSeconds);
+                }
+
+                function setStaticButtons(isRunning) {
+                    stopButton.disabled = !isRunning;
+                    startButton.disabled = isRunning;
+                    startButton.classList.toggle("is-active", isRunning);
+                    stopButton.classList.toggle("is-active", isRunning);
+                    row.classList.toggle("is-running", isRunning);
+                    window.gymkompisSyncRunningState();
+                }
+
+                function stopStaticInterval() {
+                    if (row._timerInterval) {
+                        window.clearInterval(row._timerInterval);
+                        row._timerInterval = null;
+                    }
+                }
+
+                function completeHold() {
+                    stopStaticInterval();
+                    const now = new Date();
+                    endedAtField.value = now.toISOString();
+                    durationField.value = String(holdSeconds);
+                    if (actualSecondsField) {
+                        actualSecondsField.value = String(holdSeconds);
+                    }
+                    window.gymkompisPlayTimerSound();
+                    if (restSeconds > 0) {
+                        row._staticPhase = "rest";
+                        row._staticEndsAt = Date.now() + restSeconds * 1000;
+                        phaseLabel.textContent = "Rest";
+                        row._timerInterval = window.setInterval(renderStaticTimer, 250);
+                        renderStaticTimer();
+                    } else {
+                        row._staticPhase = "done";
+                        timerDisplay.textContent = "Hold complete";
+                        phaseLabel.textContent = "Hold complete";
+                        setStaticButtons(false);
+                    }
+                }
+
+                function completeRest() {
+                    stopStaticInterval();
+                    row._staticPhase = "done";
+                    timerDisplay.textContent = "Rest complete";
+                    phaseLabel.textContent = "Rest complete";
+                    window.gymkompisPlayTimerSound();
+                    setStaticButtons(false);
+                }
+
+                function renderStaticTimer() {
+                    if (row._staticPhase === "hold") {
+                        const remaining = Math.ceil((row._staticEndsAt - Date.now()) / 1000);
+                        if (remaining <= 0) {
+                            completeHold();
+                            return;
+                        }
+                        const elapsed = Math.max(0, holdSeconds - remaining);
+                        durationField.value = String(elapsed);
+                        timerDisplay.textContent = `Hold ${formatSeconds(remaining)}`;
+                        phaseLabel.textContent = "Hold";
+                        setStaticButtons(true);
+                    } else if (row._staticPhase === "rest") {
+                        const remaining = Math.ceil((row._staticEndsAt - Date.now()) / 1000);
+                        if (remaining <= 0) {
+                            completeRest();
+                            return;
+                        }
+                        timerDisplay.textContent = `Rest ${formatSeconds(remaining)}`;
+                        phaseLabel.textContent = "Rest";
+                        setStaticButtons(true);
+                    } else if (durationField.value) {
+                        timerDisplay.textContent = `${formatSeconds(durationField.value)} held`;
+                        phaseLabel.textContent = "Ready";
+                        setStaticButtons(false);
+                    } else {
+                        timerDisplay.textContent = defaultLabel;
+                        phaseLabel.textContent = "Ready";
+                        setStaticButtons(false);
+                    }
+                }
+
+                function stopStaticTimer() {
+                    if (row._staticPhase === "hold") {
+                        const elapsed = Math.min(
+                            holdSeconds,
+                            Math.max(0, Math.round((Date.now() - row._staticStartedAt) / 1000))
+                        );
+                        endedAtField.value = new Date().toISOString();
+                        durationField.value = String(elapsed);
+                        if (actualSecondsField) {
+                            actualSecondsField.value = String(elapsed);
+                        }
+                        timerDisplay.textContent = `${formatSeconds(elapsed)} held`;
+                        phaseLabel.textContent = "Hold stopped";
+                    } else if (row._staticPhase === "rest") {
+                        timerDisplay.textContent = "Rest stopped";
+                        phaseLabel.textContent = "Rest stopped";
+                    }
+                    row._staticPhase = "stopped";
+                    stopStaticInterval();
+                    setStaticButtons(false);
+                }
+
+                startButton.addEventListener("click", function () {
+                    const activeRow = Array.from(document.querySelectorAll(".current-set-panel")).find(
+                        (candidate) => candidate !== row && candidate.classList.contains("is-running")
+                    );
+                    if (activeRow || holdSeconds <= 0) {
+                        return;
+                    }
+                    window.gymkompisPrimeTimerSound();
+                    const now = new Date();
+                    startedAtField.value = now.toISOString();
+                    endedAtField.value = "";
+                    durationField.value = "0";
+                    if (actualSecondsField) {
+                        actualSecondsField.value = String(holdSeconds);
+                    }
+                    row._staticPhase = "hold";
+                    row._staticStartedAt = Date.now();
+                    row._staticEndsAt = row._staticStartedAt + holdSeconds * 1000;
+                    stopStaticInterval();
+                    row._timerInterval = window.setInterval(renderStaticTimer, 250);
+                    renderStaticTimer();
+                });
+
+                stopButton.addEventListener("click", stopStaticTimer);
+
+                const saveButton = form.querySelector(`.set-save-button[data-set-number="${row.dataset.setNumber}"]`);
+                if (saveButton) {
+                    saveButton.addEventListener("click", function () {
+                        if (row._staticPhase === "hold" || row._staticPhase === "rest") {
+                            stopStaticTimer();
+                        }
+                        if (actualSecondsField && !actualSecondsField.value && holdSeconds > 0) {
+                            actualSecondsField.value = String(holdSeconds);
+                        }
+                    });
+                }
+
+                renderStaticTimer();
+                return;
             }
 
             function runningSeconds() {

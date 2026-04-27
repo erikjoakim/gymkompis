@@ -453,6 +453,13 @@ def _serialize_program_draft_exercise(entry: ProgramDraftExercise, *, validate_o
         "image_url": entry.display_image_url or None,
         "video_url": entry.display_video_url or None,
         "rest_seconds": _rest_seconds_for_entry(entry),
+        "is_static": (
+            bool(entry.exercise.is_static)
+            if entry.exercise_id
+            else entry.prescription_type == ProgramDraftExercise.PrescriptionType.TIME and not entry.supports_reps
+        ),
+        "supports_time": entry.supports_time,
+        "supports_reps": entry.supports_reps,
         "notes": entry.notes or "",
         "set_plan": set_plan,
     }

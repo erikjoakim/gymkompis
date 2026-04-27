@@ -16,6 +16,14 @@
         <p>This is a {{ day.type }} day, so there is no exercise logging form.</p>
     </div>
 {% else %}
+    <div class="training-preferences-card">
+        <label class="training-toggle-row" for="keep-screen-awake">
+            <input type="checkbox" id="keep-screen-awake">
+            <span>Keep screen on during exercise</span>
+        </label>
+        <span class="help-text" id="wake-lock-status">Off</span>
+    </div>
+
     <div class="stack training-day-stack" id="exercise-list">
         {% include "training/partials/exercise_list.html" %}
     </div>
@@ -39,5 +47,96 @@
             <button type="submit">Complete workout</button>
         </form>
     </div>
+
+    <script>
+        (function () {
+            const exerciseList = document.getElementById("exercise-list");
+            const keepAwakeToggle = document.getElementById("keep-screen-awake");
+            const wakeStatus = document.getElementById("wake-lock-status");
+            let wakeLock = null;
+
+            function scrollToTrainingTarget(mode) {
+                if (!exerciseList) {
+                    return;
+                }
+                const target = mode === "set"
+                    ? exerciseList.querySelector(".current-set-panel")
+                    : exerciseList.querySelector(".training-exercise-card");
+                if (!target) {
+                    return;
+                }
+                const header = document.querySelector(".site-header");
+                const headerOffset = header ? header.getBoundingClientRect().height + 10 : 10;
+                const top = target.getBoundingClientRect().top + window.scrollY - headerOffset;
+                window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+            }
+
+            async function requestWakeLock() {
+                if (!("wakeLock" in navigator)) {
+                    wakeStatus.textContent = "Not supported by this browser";
+                    keepAwakeToggle.checked = false;
+                    localStorage.setItem("gymkompisKeepScreenAwake", "false");
+                    return;
+                }
+                try {
+                    wakeLock = await navigator.wakeLock.request("screen");
+                    wakeStatus.textContent = "On";
+                    wakeLock.addEventListener("release", function () {
+                        wakeLock = null;
+                        if (keepAwakeToggle.checked && document.visibilityState === "visible") {
+                            wakeStatus.textContent = "Paused";
+                        }
+                    });
+                } catch (error) {
+                    wakeStatus.textContent = "Could not keep screen on";
+                    keepAwakeToggle.checked = false;
+                    localStorage.setItem("gymkompisKeepScreenAwake", "false");
+                }
+            }
+
+            async function releaseWakeLock() {
+                if (wakeLock) {
+                    await wakeLock.release();
+                    wakeLock = null;
+                }
+                wakeStatus.textContent = "Off";
+            }
+
+            if (keepAwakeToggle) {
+                keepAwakeToggle.checked = localStorage.getItem("gymkompisKeepScreenAwake") === "true";
+                wakeStatus.textContent = keepAwakeToggle.checked ? "Ready" : "Off";
+                keepAwakeToggle.addEventListener("change", function () {
+                    localStorage.setItem("gymkompisKeepScreenAwake", keepAwakeToggle.checked ? "true" : "false");
+                    if (keepAwakeToggle.checked) {
+                        requestWakeLock();
+                    } else {
+                        releaseWakeLock();
+                    }
+                });
+                document.addEventListener("visibilitychange", function () {
+                    if (keepAwakeToggle.checked && document.visibilityState === "visible" && !wakeLock) {
+                        requestWakeLock();
+                    }
+                });
+            }
+
+            document.body.addEventListener("htmx:afterSwap", function (event) {
+                if (event.target !== exerciseList) {
+                    return;
+                }
+                const marker = exerciseList.querySelector("[data-training-scroll-target]");
+                const mode = marker?.dataset.trainingScrollTarget || "exercise";
+                window.requestAnimationFrame(function () {
+                    scrollToTrainingTarget(mode);
+                });
+            });
+
+            if (window.location.hash === "#exercise-list") {
+                window.requestAnimationFrame(function () {
+                    scrollToTrainingTarget("exercise");
+                });
+            }
+        })();
+    </script>
 {% endif %}
 {% endblock %}

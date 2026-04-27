@@ -178,6 +178,7 @@ def train_day_view(request, day_key):
             "session": session,
             "exercise_forms": exercise_state["pending"],
             "completed_exercises": exercise_state["completed"],
+            "training_scroll_target": "exercise",
         },
     )
 
@@ -216,6 +217,7 @@ def submit_exercise_view(request, session_id, exercise_key):
         )
         if getattr(request, "htmx", False):
             active_exercise_key = None if _is_completed_exercise(session, exercise_key) else exercise_key
+            training_scroll_target = "exercise" if active_exercise_key is None else "set"
             exercise_state = _build_pending_exercise_forms(
                 session,
                 request.user,
@@ -228,6 +230,7 @@ def submit_exercise_view(request, session_id, exercise_key):
                     "exercise_forms": exercise_state["pending"],
                     "completed_exercises": exercise_state["completed"],
                     "session": session,
+                    "training_scroll_target": training_scroll_target,
                 },
             )
         messages.success(request, f"{exercise['name']} set {target_set_number} saved.")
@@ -247,6 +250,7 @@ def submit_exercise_view(request, session_id, exercise_key):
                     "exercise_forms": exercise_state["pending"],
                     "completed_exercises": exercise_state["completed"],
                     "session": session,
+                    "training_scroll_target": "set",
                 },
                 status=400,
             )
@@ -279,6 +283,7 @@ def swap_exercise_view(request, session_id, exercise_key):
                 "exercise_forms": exercise_state["pending"],
                 "completed_exercises": exercise_state["completed"],
                 "session": session,
+                "training_scroll_target": "exercise",
             },
         )
     return redirect("train_day", day_key=session.planned_day_key)

@@ -100,6 +100,9 @@ CURRENT_PROGRAM_SCHEMA = {
                 "image_url": {"type": ["string", "null"], "format": "uri-reference", "maxLength": 500},
                 "video_url": {"type": ["string", "null"], "format": "uri", "maxLength": 500},
                 "rest_seconds": {"type": "integer", "minimum": 0, "maximum": 600},
+                "is_static": {"type": "boolean"},
+                "supports_time": {"type": "boolean"},
+                "supports_reps": {"type": "boolean"},
                 "notes": {"type": "string", "maxLength": 500},
                 "set_plan": {
                     "type": "array",

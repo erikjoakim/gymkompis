@@ -42,6 +42,7 @@ class ExerciseSubmissionForm(forms.Form):
         uses_weight_input = exercise_uses_weight_input(self.exercise)
         self.fields["exercise_notes"].initial = initial_exercise_notes
         self.current_set_number = self._determine_current_set_number()
+        self.is_static_hold = bool(exercise.get("is_static"))
         for planned_set in self.planned_sets:
             set_number = planned_set["set_number"]
             prescription_type = infer_prescription_type(planned_set)
@@ -83,6 +84,11 @@ class ExerciseSubmissionForm(forms.Form):
             self.fields[f"set_{set_number}_started_at"] = forms.CharField(
                 required=False,
                 initial=saved_set.get("started_at", ""),
+                widget=forms.HiddenInput(),
+            )
+            self.fields[f"set_{set_number}_activated_at"] = forms.CharField(
+                required=False,
+                initial=saved_set.get("activated_at", ""),
                 widget=forms.HiddenInput(),
             )
             self.fields[f"set_{set_number}_ended_at"] = forms.CharField(
@@ -208,6 +214,7 @@ class ExerciseSubmissionForm(forms.Form):
                     "saved": set_number in self.saved_actual_sets and self.saved_actual_sets[set_number].get("completed"),
                     "saved_actual_set": self.saved_actual_sets.get(set_number),
                     "started_at": self[f"set_{set_number}_started_at"],
+                    "activated_at": self[f"set_{set_number}_activated_at"],
                     "ended_at": self[f"set_{set_number}_ended_at"],
                     "duration_seconds": self[f"set_{set_number}_duration_seconds"],
                     "saved_duration_seconds": self.saved_actual_sets.get(set_number, {}).get("duration_seconds"),
@@ -216,6 +223,26 @@ class ExerciseSubmissionForm(forms.Form):
                 }
             )
         return rows
+
+    @property
+    def period_count(self):
+        return len(self.planned_sets)
+
+    @property
+    def static_hold_seconds(self):
+        first_time_set = next(
+            (
+                item
+                for item in self.planned_sets
+                if infer_prescription_type(item) == "time" and item.get("target_seconds") is not None
+            ),
+            None,
+        )
+        return first_time_set.get("target_seconds") if first_time_set else None
+
+    @property
+    def static_rest_seconds(self):
+        return self.exercise.get("rest_seconds", 0)
 
     @property
     def current_set_row(self):
@@ -230,6 +257,7 @@ class ExerciseSubmissionForm(forms.Form):
             raise ValueError("No set number selected for submission.")
         return {
             "started_at": self.cleaned_data.get(f"set_{self.target_set_number}_started_at") or "",
+            "activated_at": self.cleaned_data.get(f"set_{self.target_set_number}_activated_at") or "",
             "ended_at": self.cleaned_data.get(f"set_{self.target_set_number}_ended_at") or "",
             "duration_seconds": self.cleaned_data.get(f"set_{self.target_set_number}_duration_seconds"),
         }

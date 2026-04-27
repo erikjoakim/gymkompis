@@ -1,4 +1,5 @@
 {% load gymkompis_extras %}
+<template data-training-scroll-target="{{ training_scroll_target|default:'exercise' }}"></template>
 {% for item in exercise_forms %}
     {% ifchanged item.exercise_group %}
         <div class="section-label">{{ item.group_label }}</div>

@@ -13,6 +13,21 @@ from programs.structure import get_day_all_exercises
 from .models import WorkoutSession
 
 
+STATIC_NAME_HINTS = (
+    "dead bug",
+    "deadbug",
+    "hold",
+    "hollow body",
+    "isometric",
+    "plank",
+    "superman",
+    "wall sit",
+)
+STATIC_MOVEMENT_HINTS = ("isometric", "static", "hold")
+DYNAMIC_NAME_HINTS = ("shoulder tap", "walkout", "mountain climber", "climber")
+DEFAULT_STATIC_HOLD_SECONDS = 30
+
+
 def get_active_program(user):
     return (
         TrainingProgram.objects.filter(user=user, status=TrainingProgram.Status.ACTIVE)
@@ -49,7 +64,74 @@ def _lookup_library_exercise(exercise_key: str | None, name: str | None):
     return None
 
 
+def _set_plan_uses_time(set_plan: list[dict]) -> bool:
+    return bool(set_plan) and all(
+        (item.get("prescription_type") == "time" or item.get("target_seconds") is not None)
+        for item in set_plan
+    )
+
+
+def _looks_like_static_hold(exercise: dict) -> bool:
+    if exercise.get("is_static"):
+        return True
+    set_plan = exercise.get("set_plan") or exercise.get("planned", {}).get("set_plan", [])
+    modality = (exercise.get("modality") or "").lower()
+    if modality == Exercise.Modality.CARDIO:
+        return False
+    name = str(exercise.get("name") or "").lower()
+    if any(hint in name for hint in DYNAMIC_NAME_HINTS):
+        return False
+    movement_text = " ".join(
+        str(exercise.get(key) or "")
+        for key in ("movement_pattern", "category")
+    ).lower()
+    if any(hint in name for hint in STATIC_NAME_HINTS):
+        return True
+    if any(hint in movement_text for hint in STATIC_MOVEMENT_HINTS):
+        return True
+    return _set_plan_uses_time(set_plan) and not exercise.get("supports_reps", True)
+
+
+def _static_hold_seconds_from_set_plan(set_plan: list[dict]) -> int:
+    seconds_values = [
+        int(item.get("target_seconds") or 0)
+        for item in set_plan
+        if item.get("target_seconds")
+    ]
+    return seconds_values[0] if seconds_values else DEFAULT_STATIC_HOLD_SECONDS
+
+
+def _normalize_static_hold_set_plan(set_plan: list[dict]) -> list[dict]:
+    hold_seconds = _static_hold_seconds_from_set_plan(set_plan)
+    normalized = []
+    for index, item in enumerate(set_plan or [], start=1):
+        normalized.append(
+            {
+                "set_number": item.get("set_number") or index,
+                "prescription_type": "time",
+                "target_seconds": int(item.get("target_seconds") or hold_seconds),
+                "target_reps": None,
+                "load_guidance": item.get("load_guidance", ""),
+                "target_effort_rpe": item.get("target_effort_rpe"),
+            }
+        )
+    return normalized or [
+        {
+            "set_number": 1,
+            "prescription_type": "time",
+            "target_seconds": hold_seconds,
+            "target_reps": None,
+            "load_guidance": "",
+            "target_effort_rpe": None,
+        }
+    ]
+
+
 def build_session_exercise_snapshot(exercise: dict) -> dict:
+    is_static = _looks_like_static_hold(exercise)
+    set_plan = deepcopy(exercise["set_plan"])
+    if is_static:
+        set_plan = _normalize_static_hold_set_plan(set_plan)
     return {
         "exercise_key": exercise["exercise_key"],
         "name": exercise["name"],
@@ -63,8 +145,12 @@ def build_session_exercise_snapshot(exercise: dict) -> dict:
         "category": exercise.get("category", ""),
         "primary_muscles": exercise.get("primary_muscles", []),
         "exercise_group": exercise.get("exercise_group", "main"),
+        "rest_seconds": exercise.get("rest_seconds", 0),
+        "is_static": is_static,
+        "supports_time": True if is_static else exercise.get("supports_time", _set_plan_uses_time(exercise.get("set_plan", []))),
+        "supports_reps": False if is_static else exercise.get("supports_reps", not _set_plan_uses_time(exercise.get("set_plan", []))),
         "status": "pending",
-        "planned": {"set_plan": deepcopy(exercise["set_plan"])},
+        "planned": {"set_plan": set_plan},
         "actual_sets": [],
         "exercise_notes": "",
         "submitted_at": None,
@@ -90,6 +176,10 @@ def session_display_exercise(session_exercise: dict) -> dict:
         "category": session_exercise.get("category", ""),
         "primary_muscles": session_exercise.get("primary_muscles", []),
         "exercise_group": session_exercise.get("exercise_group", "main"),
+        "rest_seconds": session_exercise.get("rest_seconds", 0),
+        "is_static": bool(session_exercise.get("is_static")),
+        "supports_time": bool(session_exercise.get("supports_time")),
+        "supports_reps": session_exercise.get("supports_reps"),
         "set_plan": deepcopy(session_exercise.get("planned", {}).get("set_plan", [])),
         "is_substituted": bool(session_exercise.get("is_substituted")),
         "original_exercise_key": session_exercise.get("original_exercise_key"),
@@ -98,10 +188,9 @@ def session_display_exercise(session_exercise: dict) -> dict:
         "substituted_from_name": session_exercise.get("substituted_from_name"),
     }
 
-    if exercise["instructions"] and exercise["video_url"] and exercise["image_url"]:
-        return exercise
-
-    library_exercise = _lookup_library_exercise(exercise["exercise_key"], exercise["name"])
+    library_exercise = None
+    if not (exercise["instructions"] and exercise["video_url"] and exercise["image_url"]):
+        library_exercise = _lookup_library_exercise(exercise["exercise_key"], exercise["name"])
     if library_exercise:
         exercise["image_url"] = exercise["image_url"] or library_exercise.display_image_url
         exercise["video_url"] = exercise["video_url"] or library_exercise.default_video_url
@@ -109,6 +198,20 @@ def session_display_exercise(session_exercise: dict) -> dict:
         exercise["movement_pattern"] = exercise["movement_pattern"] or library_exercise.movement_pattern
         exercise["category"] = exercise["category"] or library_exercise.category
         exercise["primary_muscles"] = exercise["primary_muscles"] or library_exercise.primary_muscles
+        exercise["is_static"] = exercise["is_static"] or library_exercise.is_static
+        exercise["supports_time"] = exercise["supports_time"] or library_exercise.supports_time
+        exercise["supports_reps"] = (
+            library_exercise.supports_reps
+            if exercise["supports_reps"] is None
+            else exercise["supports_reps"]
+        )
+    if exercise["supports_reps"] is None:
+        exercise["supports_reps"] = not _set_plan_uses_time(exercise["set_plan"])
+    exercise["is_static"] = _looks_like_static_hold(exercise)
+    if exercise["is_static"]:
+        exercise["supports_time"] = True
+        exercise["supports_reps"] = False
+        exercise["set_plan"] = _normalize_static_hold_set_plan(exercise["set_plan"])
     return exercise
 
 
@@ -174,15 +277,30 @@ def sync_session_display_fields(session: WorkoutSession, day: dict) -> WorkoutSe
                 ("movement_pattern", "movement_pattern"),
                 ("category", "category"),
                 ("primary_muscles", "primary_muscles"),
+                ("rest_seconds", "rest_seconds"),
+                ("is_static", "is_static"),
+                ("supports_time", "supports_time"),
+                ("supports_reps", "supports_reps"),
             ):
                 if not session_exercise.get(target_key) and planned_exercise.get(source_key):
                     session_exercise[target_key] = deepcopy(planned_exercise.get(source_key))
                     changed = True
 
         display_exercise = session_display_exercise(session_exercise)
-        for key in ("video_url", "image_url", "instructions", "movement_pattern", "category", "primary_muscles"):
+        for key in (
+            "video_url",
+            "image_url",
+            "instructions",
+            "movement_pattern",
+            "category",
+            "primary_muscles",
+            "rest_seconds",
+            "is_static",
+            "supports_time",
+            "supports_reps",
+        ):
             value = display_exercise.get(key)
-            if value and session_exercise.get(key) != value:
+            if value is not None and session_exercise.get(key) != value:
                 session_exercise[key] = deepcopy(value)
                 changed = True
 
@@ -221,8 +339,18 @@ def submit_exercise_set(session_id: int, user, exercise_key: str, actual_set: di
     for exercise in data.get("exercises", []):
         if exercise.get("exercise_key") != exercise_key:
             continue
-        submitted_at = timezone.now().isoformat()
+        submitted_at_time = timezone.now()
+        submitted_at = submitted_at_time.isoformat()
+        existing_actual_set = next(
+            (
+                item
+                for item in exercise.get("actual_sets", [])
+                if item.get("set_number") == actual_set.get("set_number")
+            ),
+            {},
+        )
         started_at = parse_datetime(actual_set.get("started_at") or "")
+        activated_at = parse_datetime(actual_set.get("activated_at") or "")
         ended_at = parse_datetime(actual_set.get("ended_at") or "")
         duration_seconds = actual_set.get("duration_seconds")
         if started_at and ended_at and duration_seconds in (None, ""):
@@ -233,9 +361,10 @@ def submit_exercise_set(session_id: int, user, exercise_key: str, actual_set: di
             exclude_exercise_key=exercise_key,
             exclude_set_number=actual_set.get("set_number"),
         )
-        rest_before_seconds = None
-        if started_at and latest_previous_end and started_at >= latest_previous_end:
-            rest_before_seconds = max(0, int(round((started_at - latest_previous_end).total_seconds())))
+        rest_before_seconds = existing_actual_set.get("rest_before_seconds") if not started_at else None
+        rest_reference_time = started_at or activated_at or submitted_at_time
+        if rest_before_seconds is None and latest_previous_end and rest_reference_time >= latest_previous_end:
+            rest_before_seconds = max(0, int(round((rest_reference_time - latest_previous_end).total_seconds())))
 
         actual_set["duration_seconds"] = duration_seconds
         actual_set["rest_before_seconds"] = rest_before_seconds
@@ -312,6 +441,9 @@ def swap_session_exercise(session_id: int, user, current_exercise_key: str, repl
         exercise["movement_pattern"] = replacement.movement_pattern
         exercise["category"] = replacement.category
         exercise["primary_muscles"] = replacement.primary_muscles
+        exercise["is_static"] = replacement.is_static
+        exercise["supports_time"] = replacement.supports_time
+        exercise["supports_reps"] = replacement.supports_reps
         exercise["exercise_notes"] = ""
         exercise["submitted_at"] = None
         exercise["status"] = "pending"

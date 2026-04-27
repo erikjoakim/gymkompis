@@ -1,11 +1,12 @@
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone as datetime_timezone
+from unittest.mock import patch
 
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
 from accounts.models import User
-from programs.models import Exercise
+from programs.models import Exercise, TrainingProgram
 from programs.services import generate_program_for_user
 from evaluations.models import WorkoutEvaluation
 
@@ -255,6 +256,61 @@ class WorkoutSessionTests(TestCase):
         self.assertEqual(second_set["duration_seconds"], 35)
         self.assertEqual(second_set["rest_before_seconds"], 90)
 
+    def test_submit_exercise_set_tracks_rest_from_active_set_time_without_timer(self):
+        session = get_or_create_session(self.user, self.program, self.day)
+        exercise_key = self.day["exercises"][0]["exercise_key"]
+        first_submit_at = datetime(2026, 4, 4, 8, 0, 0, tzinfo=datetime_timezone.utc)
+        second_activated_at = first_submit_at + timedelta(seconds=60)
+        second_submit_at = first_submit_at + timedelta(seconds=90)
+
+        session = submit_exercise_set(
+            session.id,
+            self.user,
+            exercise_key,
+            {
+                "set_number": 1,
+                "prescription_type": "reps",
+                "completed": True,
+                "reps": 10,
+                "seconds": None,
+                "weight": 40,
+                "effort_rpe": 7,
+                "notes": "",
+            },
+            "",
+        )
+        data = session.session_json
+        exercise_state = next(item for item in data["exercises"] if item["exercise_key"] == exercise_key)
+        first_set = exercise_state["actual_sets"][0]
+        first_set["submitted_at"] = first_submit_at.isoformat()
+        session.session_json = data
+        session.save(update_fields=["session_json", "updated_at"])
+
+        with patch("training.services.timezone.now", return_value=second_submit_at):
+            session = submit_exercise_set(
+                session.id,
+                self.user,
+                exercise_key,
+                {
+                    "set_number": 2,
+                    "prescription_type": "reps",
+                    "completed": True,
+                    "reps": 10,
+                    "seconds": None,
+                    "weight": 40,
+                    "effort_rpe": 7.5,
+                    "notes": "",
+                    "activated_at": second_activated_at.isoformat(),
+                },
+                "",
+            )
+
+        exercise_state = next(item for item in session.session_json["exercises"] if item["exercise_key"] == exercise_key)
+        first_set = next(item for item in exercise_state["actual_sets"] if item["set_number"] == 1)
+        second_set = next(item for item in exercise_state["actual_sets"] if item["set_number"] == 2)
+        self.assertIsNone(first_set["rest_before_seconds"])
+        self.assertEqual(second_set["rest_before_seconds"], 60)
+
     def test_bodyweight_rep_exercise_does_not_show_weight_input(self):
         exercise = {
             "exercise_key": "bodyweight_squat",
@@ -348,6 +404,73 @@ class WorkoutSessionTests(TestCase):
         self.assertContains(response, 'class="card training-finish-card"', html=False)
         self.assertContains(response, 'class="current-set-panel"', html=False)
         self.assertNotContains(response, "<strong>Instructions:</strong>", html=False)
+
+    def test_stale_static_hold_exercise_uses_period_ui_and_screen_awake_toggle(self):
+        TrainingProgram.objects.filter(user=self.user).update(status=TrainingProgram.Status.ARCHIVED)
+        program = TrainingProgram.objects.create(
+            user=self.user,
+            name="Static Holds",
+            status=TrainingProgram.Status.ACTIVE,
+            current_program={
+                "version": 1,
+                "program_name": "Static Holds",
+                "goal_summary": "Practice core holds.",
+                "duration_weeks": 4,
+                "days_per_week": 1,
+                "weight_unit": "kg",
+                "days": [
+                    {
+                        "day_key": "monday",
+                        "day_label": "Monday",
+                        "name": "Core",
+                        "type": "training",
+                        "notes": "",
+                        "exercises": [
+                            {
+                                "exercise_key": "superman_hold",
+                                "name": "Superman Hold",
+                                "order": 1,
+                                "modality": "bodyweight",
+                                "focus": "Posterior chain",
+                                "instructions": "Hold the raised position with steady breathing.",
+                                "image_url": None,
+                                "video_url": None,
+                                "rest_seconds": 20,
+                                "is_static": False,
+                                "supports_time": False,
+                                "supports_reps": True,
+                                "notes": "",
+                                "set_plan": [
+                                    {"set_number": 1, "prescription_type": "reps", "target_reps": "8-10"},
+                                    {"set_number": 2, "prescription_type": "reps", "target_reps": "8-10"},
+                                    {"set_number": 3, "prescription_type": "reps", "target_reps": "8-10"},
+                                ],
+                            }
+                        ],
+                    }
+                ],
+            },
+        )
+        day = get_program_day(program, "monday")
+        session = get_or_create_session(self.user, program, day)
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse("train_day", args=["monday"]))
+        content = response.content.decode("utf-8")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(session.session_json["exercises"][0]["is_static"])
+        self.assertEqual(session.session_json["exercises"][0]["planned"]["set_plan"][0]["prescription_type"], "time")
+        self.assertEqual(session.session_json["exercises"][0]["planned"]["set_plan"][0]["target_seconds"], 30)
+        self.assertIn("Keep screen on during exercise", content)
+        self.assertIn("Hold plan", content)
+        self.assertIn("3 periods", content)
+        self.assertIn("Hold", content)
+        self.assertIn("Rest", content)
+        self.assertIn("Period 1 of 3", content)
+        self.assertIn("Start hold", content)
+        self.assertNotIn("<h3>Set 1 of 3</h3>", content)
+        self.assertNotIn("Actual reps", content)
 
     def test_train_day_folds_all_non_current_exercises_and_allows_selection(self):
         session = get_or_create_session(self.user, self.program, self.day)
